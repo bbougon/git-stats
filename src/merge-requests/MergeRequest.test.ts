@@ -1,7 +1,7 @@
-import * as crypto from "crypto";
 import { compareAsc, compareDesc, parseISO } from "date-fns";
 import { MergeRequest, MergeRequestRepository, mergeRequestsStats, MergeRequestStats } from "./MergeRequest";
 import { Repository } from "../Repository";
+import { MergeRequestBuilder } from "../__tests__/builder";
 
 describe("Merge requests statistics", () => {
   test("should have merge requests average", async () => {
@@ -65,42 +65,6 @@ describe("Merge requests statistics", () => {
     expect(stats.result()).toEqual({ average: { days: 1.04, hours: 25 }, total: 1 });
   });
 });
-
-class MergeRequestBuilder {
-  private projectId: number;
-  private uuid: crypto.UUID;
-  private _createdAt: Date;
-  private _mergedAt: Date;
-
-  constructor(projectId: number) {
-    this.projectId = projectId;
-    this.uuid = crypto.randomUUID();
-  }
-
-  createdAt = (createdAt: Date): MergeRequestBuilder => {
-    this._createdAt = createdAt;
-    return this;
-  };
-
-  mergedAt = (mergedAt: Date): MergeRequestBuilder => {
-    this._mergedAt = mergedAt;
-    return this;
-  };
-
-  notYetMerged = (): MergeRequestBuilder => {
-    this._mergedAt = undefined;
-    return this;
-  };
-
-  build = (): MergeRequest => {
-    return {
-      createdAt: this._createdAt,
-      mergedAt: this._mergedAt,
-      projectId: this.projectId,
-      uuid: this.uuid,
-    };
-  };
-}
 
 abstract class MemoryRepository<T> implements Repository<T> {
   protected entities: T[] = [];

@@ -1,10 +1,9 @@
-import crypto from "crypto";
 import { differenceInHours } from "date-fns";
 import { Repository } from "../Repository";
 
 export type MergeRequest = {
   projectId: number;
-  uuid: crypto.UUID;
+  id: number;
   createdAt: Date;
   mergedAt: Date;
 };
