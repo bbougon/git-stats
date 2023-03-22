@@ -35,8 +35,8 @@ export class MergeRequestStats {
     );
     return {
       average: {
-        days: hoursSpent / 24 / this.mergeRequests.length,
-        hours: hoursSpent / this.mergeRequests.length,
+        days: parseFloat((hoursSpent / 24 / this.mergeRequests.length).toFixed(2)),
+        hours: parseFloat((hoursSpent / this.mergeRequests.length).toFixed(2)),
       },
       total: this.mergeRequests.length,
     };
