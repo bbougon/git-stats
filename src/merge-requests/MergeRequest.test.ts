@@ -40,7 +40,7 @@ describe("Merge requests statistics", () => {
       repository
     );
 
-    expect(stats.result()).toEqual({ average: 3, total: 3 });
+    expect(stats.result()).toEqual({ average: { days: 3, hours: 72 }, total: 3 });
   });
 });
 

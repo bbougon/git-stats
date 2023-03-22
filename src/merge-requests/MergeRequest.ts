@@ -19,6 +19,8 @@ type MergeRequestsStatsParameters = {
   projectId: number;
 };
 
+type MergeRequestStatsResult = { average: { days: number; hours: number }; total: number };
+
 export class MergeRequestStats {
   private mergeRequests: MergeRequest[];
 
@@ -26,14 +28,16 @@ export class MergeRequestStats {
     this.mergeRequests = mergeRequests;
   }
 
-  result = (): { average: number; total: number } => {
+  result = (): MergeRequestStatsResult => {
+    const hoursSpent = this.mergeRequests.reduce(
+      (accumulator, currentValue) => accumulator + differenceInHours(currentValue.mergedAt, currentValue.createdAt),
+      0
+    );
     return {
-      average:
-        this.mergeRequests.reduce(
-          (accumulator, currentValue) =>
-            accumulator + differenceInHours(currentValue.mergedAt, currentValue.createdAt) / 24,
-          0
-        ) / this.mergeRequests.length,
+      average: {
+        days: hoursSpent / 24 / this.mergeRequests.length,
+        hours: hoursSpent / this.mergeRequests.length,
+      },
       total: this.mergeRequests.length,
     };
   };
