@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A simple tool to usage statistics from a gitlab repository",
   "main": "index.ts",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "test": "jest",
     "test:coverage": "jest --coverage --collectCoverageFrom=\"./src/**\"",
