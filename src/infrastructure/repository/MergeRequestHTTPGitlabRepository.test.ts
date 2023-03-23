@@ -91,7 +91,7 @@ describe("Gitlab Repository", () => {
       {
         status: 200,
         headers: {
-          link: "<http://gitlab/merge_requests?order_by=created_at&page=1>; rel='first', <http://gitlab/merge_requests?order_by=created_at&page=3>; rel='last'",
+          link: "<http://gitlab/merge_requests?order_by=created_at&page=1>; rel='first', <http://gitlab/merge_requests?order_by=created_at&page=1>; rel='last'",
         },
       },
     ]);
@@ -108,5 +108,72 @@ describe("Gitlab Repository", () => {
       "https://gitlab.com/api/v4/projects/1/merge_requests?created_after=2021-11-02T23:00:00.000Z&per_page=100"
     );
     expect(mergeRequests).toEqual([firstMergeRequest, secondMergeRequest]);
+  });
+
+  test("should retrieve merge requests that are in the given period", async () => {
+    const firstMergeRequest = new MergeRequestBuilder(1)
+      .createdAt(parseISO("2021-11-03T12:45:12"))
+      .mergedAt(parseISO("2021-11-04T13:24:12"))
+      .build();
+    const secondMergeRequest = new MergeRequestBuilder(1)
+      .createdAt(parseISO("2021-11-05T12:45:12"))
+      .mergedAt(parseISO("2021-11-09T12:45:12"))
+      .build();
+    fetchMock.mockResponses(
+      [
+        JSON.stringify([toGitlabDTO(firstMergeRequest)]),
+        {
+          status: 200,
+          headers: {
+            link: "<http://gitlab/merge_requests?order_by=created_at&page=2>; rel='next', <http://gitlab/merge_requests?order_by=created_at&page=1>; rel='first', <http://gitlab/merge_requests?order_by=created_at&page=2>; rel='last'",
+          },
+        },
+      ],
+      [
+        JSON.stringify([toGitlabDTO(secondMergeRequest)]),
+        {
+          status: 200,
+          headers: {
+            link: "<http://gitlab/merge_requests?order_by=created_at&page=1>; rel='first', <http://gitlab/merge_requests?order_by=created_at&page=2>; rel='last'",
+          },
+        },
+      ]
+    );
+
+    const mergeRequests = await new MergedRequestHTTPGitlabRepository().getMergeRequestsForPeriod(
+      1,
+      parseISO("2021-11-03T00:00:00"),
+      parseISO("2021-11-04T00:00:00")
+    );
+
+    expect(mergeRequests).toEqual([firstMergeRequest]);
+  });
+
+  test("should retrieve merge requests in the period if there is only one result page", async () => {
+    const firstMergeRequest = new MergeRequestBuilder(1)
+      .createdAt(parseISO("2021-11-03T12:45:12"))
+      .mergedAt(parseISO("2021-11-04T13:24:12"))
+      .build();
+    const secondMergeRequest = new MergeRequestBuilder(1)
+      .createdAt(parseISO("2021-11-05T12:45:12"))
+      .mergedAt(parseISO("2021-11-09T12:45:12"))
+      .build();
+    fetchMock.mockResponses([
+      JSON.stringify([toGitlabDTO(firstMergeRequest), toGitlabDTO(secondMergeRequest)]),
+      {
+        status: 200,
+        headers: {
+          link: "<http://gitlab/merge_requests?order_by=created_at&page=1>; rel='first', <http://gitlab/merge_requests?order_by=created_at&page=1>; rel='last'",
+        },
+      },
+    ]);
+
+    const mergeRequests = await new MergedRequestHTTPGitlabRepository().getMergeRequestsForPeriod(
+      1,
+      parseISO("2021-11-03T00:00:00"),
+      parseISO("2021-11-04T00:00:00")
+    );
+
+    expect(mergeRequests).toEqual([firstMergeRequest]);
   });
 });

@@ -1,7 +1,7 @@
 import { MergeRequest, MergeRequestRepository } from "../../merge-requests/MergeRequest";
 import { Repository } from "../../Repository";
 import * as parseLinkHeader from "parse-link-header";
-import { parseISO } from "date-fns";
+import { compareAsc, compareDesc, parseISO } from "date-fns";
 
 abstract class GitlabRepository<T> implements Repository<T> {
   protected readonly GITLABAPI: string = "https://gitlab.com/api/v4/";
@@ -39,10 +39,16 @@ export class MergedRequestHTTPGitlabRepository
       const payload = await response.json();
       const requests = (payload as MergeRequestDTO[]).map((mr) => fromDTO(mr));
       if (links["'next'"] !== undefined) {
-        return this.paginate(links["'next'"].url, requests).then((mrs) => mrs);
+        return this.paginate(links["'next'"].url, requests).then((mrs) =>
+          mrs.filter((mr) => this.isMergeRequestInExpectedPeriod(mr, fromDate, toDate))
+        );
       }
-      return Promise.resolve(requests);
+      return Promise.resolve(requests.filter((mr) => this.isMergeRequestInExpectedPeriod(mr, fromDate, toDate)));
     });
+  }
+
+  private isMergeRequestInExpectedPeriod(mr: MergeRequest, fromDate: Date, toDate: Date) {
+    return compareAsc(mr.createdAt, fromDate) >= 0 && compareDesc(mr.createdAt, toDate) >= 0;
   }
 
   paginate = (url: string, result: MergeRequest[]): Promise<MergeRequest[]> => {
@@ -51,7 +57,7 @@ export class MergedRequestHTTPGitlabRepository
       const payload = await response.json();
       const mergeRequestDTO = payload as MergeRequestDTO[];
       result.push(...mergeRequestDTO.map((mr) => fromDTO(mr)));
-      if (links["'next'"]) {
+      if (links["'next'"] !== undefined) {
         return this.paginate(links["'next'"].url, result).then((mrs) => mrs);
       }
       return Promise.resolve(result);
