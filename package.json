@@ -5,6 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "test": "jest",
+    "test:coverage": "jest --coverage --collectCoverageFrom=\"./src/**\"",
     "lint": "eslint --fix . --ext .ts,.tsx,.jsx",
     "prettier": "prettier --write src",
     "prepare": "husky install"

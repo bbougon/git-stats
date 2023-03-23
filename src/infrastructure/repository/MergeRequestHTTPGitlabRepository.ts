@@ -32,18 +32,17 @@ export class MergedRequestHTTPGitlabRepository
   implements MergeRequestRepository
 {
   getMergeRequestsForPeriod(projectId: number, fromDate: Date, toDate: Date): Promise<MergeRequest[]> {
-    const promise = fetch(
+    return fetch(
       `${this.GITLABAPI}projects/${projectId}/merge_requests?created_after=${fromDate.toISOString()}&per_page=100`
     ).then(async (response) => {
       const links = parseLinkHeader(response.headers.get("link"));
       const payload = await response.json();
-      const mergeRequests = payload as MergeRequestDTO[];
-      return this.paginate(
-        links["'next'"].url,
-        mergeRequests.map((mr) => fromDTO(mr))
-      ).then((mrs) => mrs);
+      const requests = (payload as MergeRequestDTO[]).map((mr) => fromDTO(mr));
+      if (links["'next'"] !== undefined) {
+        return this.paginate(links["'next'"].url, requests).then((mrs) => mrs);
+      }
+      return Promise.resolve(requests);
     });
-    return promise;
   }
 
   paginate = (url: string, result: MergeRequest[]): Promise<MergeRequest[]> => {
