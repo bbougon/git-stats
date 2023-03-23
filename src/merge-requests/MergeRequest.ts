@@ -12,13 +12,22 @@ export interface MergeRequestRepository extends Repository<MergeRequest> {
   getMergeRequestsForPeriod(projectId: number, fromDate: Date, toDate: Date): Promise<MergeRequest[]>;
 }
 
-type MergeRequestsStatsParameters = {
+export type MergeRequestsStatsParameters = {
   fromDate: Date;
   toDate: Date;
   projectId: number;
 };
 
-type MergeRequestStatsResult = { average: { days: number; hours: number }; total: number };
+type MergeRequestStatsResult = {
+  average: {
+    days: number;
+    hours: number;
+  };
+  total: {
+    closed: number;
+    all: number;
+  };
+};
 
 export class MergeRequestStats {
   private mergeRequests: MergeRequest[];
@@ -28,16 +37,20 @@ export class MergeRequestStats {
   }
 
   result = (): MergeRequestStatsResult => {
-    const hoursSpent = this.mergeRequests.reduce(
+    const mergedMergeRequests = this.mergeRequests.filter((mr) => mr.mergedAt !== null);
+    const hoursSpent = mergedMergeRequests.reduce(
       (accumulator, currentValue) => accumulator + differenceInHours(currentValue.mergedAt, currentValue.createdAt),
       0
     );
     return {
       average: {
-        days: parseFloat((hoursSpent / 24 / this.mergeRequests.length).toFixed(2)),
-        hours: parseFloat((hoursSpent / this.mergeRequests.length).toFixed(2)),
+        days: parseFloat((hoursSpent / 24 / mergedMergeRequests.length).toFixed(2)),
+        hours: parseFloat((hoursSpent / mergedMergeRequests.length).toFixed(2)),
       },
-      total: this.mergeRequests.length,
+      total: {
+        closed: mergedMergeRequests.length,
+        all: this.mergeRequests.length,
+      },
     };
   };
 }

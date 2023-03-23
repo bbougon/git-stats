@@ -23,7 +23,7 @@ export class MergeRequestBuilder {
   };
 
   notYetMerged = (): MergeRequestBuilder => {
-    this._mergedAt = undefined;
+    this._mergedAt = null;
     return this;
   };
 

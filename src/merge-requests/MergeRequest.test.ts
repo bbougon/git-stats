@@ -40,7 +40,7 @@ describe("Merge requests statistics", () => {
       repository
     );
 
-    expect(stats.result()).toEqual({ average: { days: 3, hours: 72 }, total: 3 });
+    expect(stats.result()).toEqual({ average: { days: 3, hours: 72 }, total: { all: 3, closed: 3 } });
   });
 
   it("should have merge request average when merge request is not merged yet", async () => {
@@ -62,7 +62,7 @@ describe("Merge requests statistics", () => {
       repository
     );
 
-    expect(stats.result()).toEqual({ average: { days: 1.04, hours: 25 }, total: 1 });
+    expect(stats.result()).toEqual({ average: { days: 1.04, hours: 25 }, total: { all: 2, closed: 1 } });
   });
 });
 
@@ -80,7 +80,7 @@ class MergeRequestMemoryRepository extends MemoryRepository<MergeRequest> implem
       (mergeRequest) =>
         mergeRequest.projectId == projectId &&
         compareAsc(mergeRequest.createdAt, fromDate) >= 0 &&
-        compareDesc(mergeRequest.mergedAt, toDate) >= 0
+        compareDesc(mergeRequest.createdAt, toDate) >= 0
     );
     return Promise.all(mergeRequests);
   };
