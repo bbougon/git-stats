@@ -3,12 +3,14 @@
   "version": "1.0.0",
   "description": "A simple tool to usage statistics from a gitlab repository",
   "main": "index.ts",
+  "type": "module",
   "scripts": {
     "test": "jest",
     "test:coverage": "jest --coverage --collectCoverageFrom=\"./src/**\"",
     "lint": "eslint --fix . --ext .ts,.tsx,.jsx",
     "prettier": "prettier --write src",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "build": "tsc --build"
   },
   "author": "Bertrand Bougon",
   "license": "MIT",
@@ -27,6 +29,7 @@
   },
   "dependencies": {
     "@types/parse-link-header": "^2.0.0",
+    "commander": "^10.0.0",
     "date-fns": "^2.29.3",
     "parse-link-header": "^2.0.0"
   }
