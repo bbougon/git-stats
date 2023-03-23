@@ -5,9 +5,24 @@ import { MergeRequestBuilder } from "../../__tests__/builder";
 import { MergeRequest } from "../../merge-requests/MergeRequest";
 
 describe("Gitlab Repository", () => {
+  let firstMergeRequest: MergeRequest;
+  let secondMergeRequest: MergeRequest;
+  let thirdMergeRequest: MergeRequest;
   beforeEach(() => {
     enableFetchMocks();
     fetchMock.resetMocks();
+    firstMergeRequest = new MergeRequestBuilder(1)
+      .createdAt(parseISO("2021-11-03T12:45:12"))
+      .mergedAt(parseISO("2021-11-04T13:24:12"))
+      .build();
+    secondMergeRequest = new MergeRequestBuilder(1)
+      .createdAt(parseISO("2021-11-05T12:45:12"))
+      .mergedAt(parseISO("2021-11-09T12:45:12"))
+      .build();
+    thirdMergeRequest = new MergeRequestBuilder(1)
+      .createdAt(parseISO("2021-11-08T12:45:12"))
+      .mergedAt(parseISO("2021-11-13T12:45:12"))
+      .build();
   });
 
   const toGitlabDTO = (mergeRequest: MergeRequest): MergeRequestDTO => {
@@ -20,18 +35,6 @@ describe("Gitlab Repository", () => {
   };
 
   test("should paginate results", async () => {
-    const firstMergeRequest = new MergeRequestBuilder(1)
-      .createdAt(parseISO("2021-11-03T12:45:12"))
-      .mergedAt(parseISO("2021-11-04T13:24:12"))
-      .build();
-    const secondMergeRequest = new MergeRequestBuilder(1)
-      .createdAt(parseISO("2021-11-05T12:45:12"))
-      .mergedAt(parseISO("2021-11-09T12:45:12"))
-      .build();
-    const thirdMergeRequest = new MergeRequestBuilder(1)
-      .createdAt(parseISO("2021-11-08T12:45:12"))
-      .mergedAt(parseISO("2021-11-13T12:45:12"))
-      .build();
     fetchMock.mockResponses(
       [
         JSON.stringify([toGitlabDTO(firstMergeRequest)]),
@@ -78,14 +81,6 @@ describe("Gitlab Repository", () => {
   });
 
   test("should not paginate if only one result page", async () => {
-    const firstMergeRequest = new MergeRequestBuilder(1)
-      .createdAt(parseISO("2021-11-03T12:45:12"))
-      .mergedAt(parseISO("2021-11-04T13:24:12"))
-      .build();
-    const secondMergeRequest = new MergeRequestBuilder(1)
-      .createdAt(parseISO("2021-11-05T12:45:12"))
-      .mergedAt(parseISO("2021-11-09T12:45:12"))
-      .build();
     fetchMock.mockResponses([
       JSON.stringify([toGitlabDTO(firstMergeRequest), toGitlabDTO(secondMergeRequest)]),
       {
@@ -111,14 +106,6 @@ describe("Gitlab Repository", () => {
   });
 
   test("should retrieve merge requests that are in the given period", async () => {
-    const firstMergeRequest = new MergeRequestBuilder(1)
-      .createdAt(parseISO("2021-11-03T12:45:12"))
-      .mergedAt(parseISO("2021-11-04T13:24:12"))
-      .build();
-    const secondMergeRequest = new MergeRequestBuilder(1)
-      .createdAt(parseISO("2021-11-05T12:45:12"))
-      .mergedAt(parseISO("2021-11-09T12:45:12"))
-      .build();
     fetchMock.mockResponses(
       [
         JSON.stringify([toGitlabDTO(firstMergeRequest)]),
@@ -150,14 +137,6 @@ describe("Gitlab Repository", () => {
   });
 
   test("should retrieve merge requests in the period if there is only one result page", async () => {
-    const firstMergeRequest = new MergeRequestBuilder(1)
-      .createdAt(parseISO("2021-11-03T12:45:12"))
-      .mergedAt(parseISO("2021-11-04T13:24:12"))
-      .build();
-    const secondMergeRequest = new MergeRequestBuilder(1)
-      .createdAt(parseISO("2021-11-05T12:45:12"))
-      .mergedAt(parseISO("2021-11-09T12:45:12"))
-      .build();
     fetchMock.mockResponses([
       JSON.stringify([toGitlabDTO(firstMergeRequest), toGitlabDTO(secondMergeRequest)]),
       {
