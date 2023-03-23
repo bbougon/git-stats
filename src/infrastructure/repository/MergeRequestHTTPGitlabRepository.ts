@@ -31,9 +31,16 @@ export class MergedRequestHTTPGitlabRepository
   extends GitlabRepository<MergeRequest>
   implements MergeRequestRepository
 {
+  private _token: string;
+  constructor(token: string) {
+    super();
+    this._token = token;
+  }
+
   getMergeRequestsForPeriod(projectId: number, fromDate: Date, toDate: Date): Promise<MergeRequest[]> {
     return fetch(
-      `${this.GITLABAPI}projects/${projectId}/merge_requests?created_after=${fromDate.toISOString()}&per_page=100`
+      `${this.GITLABAPI}projects/${projectId}/merge_requests?created_after=${fromDate.toISOString()}&per_page=100`,
+      { headers: { "PRIVATE-TOKEN": this._token } }
     ).then(async (response) => {
       const links = parseLinkHeader(response.headers.get("link"));
       const payload = await response.json();
@@ -52,7 +59,7 @@ export class MergedRequestHTTPGitlabRepository
   }
 
   paginate = (url: string, result: MergeRequest[]): Promise<MergeRequest[]> => {
-    return fetch(url).then(async (response) => {
+    return fetch(url, { headers: { "PRIVATE-TOKEN": this._token } }).then(async (response) => {
       const links = parseLinkHeader(response.headers.get("link"));
       const payload = await response.json();
       const mergeRequestDTO = payload as MergeRequestDTO[];
