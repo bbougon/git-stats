@@ -67,13 +67,13 @@ describe("Gitlab Repository", () => {
 
     const mergeRequests = await new MergedRequestHTTPGitlabRepository("my-token").getMergeRequestsForPeriod(
       1,
-      parseISO("2021-11-03T00:00:00"),
-      parseISO("2021-11-10T00:00:00")
+      parseISO("2021-11-03T00:00:00Z"),
+      parseISO("2021-11-10T00:00:00Z")
     );
 
     expect(fetch).toHaveBeenNthCalledWith(
       1,
-      "https://gitlab.com/api/v4/projects/1/merge_requests?created_after=2021-11-02T23:00:00.000Z&per_page=100",
+      "https://gitlab.com/api/v4/projects/1/merge_requests?created_after=2021-11-03T00:00:00.000Z&per_page=100",
       { headers: { "PRIVATE-TOKEN": "my-token" } }
     );
     expect(fetch).toHaveBeenNthCalledWith(2, "http://gitlab/merge_requests?order_by=created_at&page=2", {
@@ -98,14 +98,14 @@ describe("Gitlab Repository", () => {
 
     const mergeRequests = await new MergedRequestHTTPGitlabRepository("my-token").getMergeRequestsForPeriod(
       1,
-      parseISO("2021-11-03T00:00:00"),
-      parseISO("2021-11-10T00:00:00")
+      parseISO("2021-11-03T00:00:00Z"),
+      parseISO("2021-11-10T00:00:00Z")
     );
 
     expect(fetch).toBeCalledTimes(1);
     expect(fetch).toHaveBeenNthCalledWith(
       1,
-      "https://gitlab.com/api/v4/projects/1/merge_requests?created_after=2021-11-02T23:00:00.000Z&per_page=100",
+      "https://gitlab.com/api/v4/projects/1/merge_requests?created_after=2021-11-03T00:00:00.000Z&per_page=100",
       { headers: { "PRIVATE-TOKEN": "my-token" } }
     );
     expect(mergeRequests).toEqual([firstMergeRequest, secondMergeRequest]);
