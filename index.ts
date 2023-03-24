@@ -16,7 +16,6 @@ program.command('mr')
         mergeRequestsStats({fromDate: parseISO(period[0]), projectId: projectId, toDate: parseISO(period[1])}, new MergedRequestHTTPGitlabRepository(token))
             .then((stats) => {
                 console.log(JSON.stringify(stats.result(), null, 2))
-                console.log(JSON.stringify(stats, null, 2))
             })
     });
 

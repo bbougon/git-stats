@@ -5,7 +5,7 @@ export type MergeRequest = {
   projectId: number;
   id: number;
   createdAt: Date;
-  mergedAt: Date;
+  mergedAt: Date | null;
 };
 
 export interface MergeRequestRepository extends Repository<MergeRequest> {

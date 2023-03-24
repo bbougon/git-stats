@@ -14,14 +14,15 @@ abstract class GitlabRepository<T> implements Repository<T> {
 export type MergeRequestDTO = {
   id: number;
   created_at: string;
-  merged_at: string;
+  merged_at: string | null;
   project_id: number;
 };
 
 const fromDTO = (mergeRequestDTO: MergeRequestDTO): MergeRequest => {
+  const mergedAt = mergeRequestDTO.merged_at !== null ? parseISO(mergeRequestDTO.merged_at) : null;
   return {
     createdAt: parseISO(mergeRequestDTO.created_at),
-    mergedAt: parseISO(mergeRequestDTO.merged_at),
+    mergedAt,
     projectId: mergeRequestDTO.project_id,
     id: mergeRequestDTO.id,
   };
