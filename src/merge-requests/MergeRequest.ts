@@ -6,6 +6,7 @@ export type MergeRequest = {
   id: number;
   createdAt: Date;
   mergedAt: Date | null;
+  closedAt: Date | null;
 };
 
 export interface MergeRequestRepository extends Repository<MergeRequest> {
@@ -24,6 +25,7 @@ type MergeRequestStatsResult = {
     hours: number;
   };
   total: {
+    merged: number;
     closed: number;
     all: number;
   };
@@ -38,6 +40,7 @@ export class MergeRequestStats {
 
   result = (): MergeRequestStatsResult => {
     const mergedMergeRequests = this.mergeRequests.filter((mr) => mr.mergedAt !== null);
+    const closedMergeRequests = this.mergeRequests.filter((mr) => mr.closedAt !== null);
     const hoursSpent = mergedMergeRequests.reduce(
       (accumulator, currentValue) => accumulator + differenceInHours(currentValue.mergedAt, currentValue.createdAt),
       0
@@ -48,7 +51,8 @@ export class MergeRequestStats {
         hours: parseFloat((hoursSpent / mergedMergeRequests.length).toFixed(2)),
       },
       total: {
-        closed: mergedMergeRequests.length,
+        merged: mergedMergeRequests.length,
+        closed: closedMergeRequests.length,
         all: this.mergeRequests.length,
       },
     };

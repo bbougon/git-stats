@@ -6,6 +6,7 @@ export class MergeRequestBuilder {
   private id: number;
   private _createdAt: Date;
   private _mergedAt: Date;
+  private closedAt: Date | null = null;
 
   constructor(projectId: number) {
     this.projectId = projectId;
@@ -24,6 +25,13 @@ export class MergeRequestBuilder {
 
   notYetMerged = (): MergeRequestBuilder => {
     this._mergedAt = null;
+    this.closedAt = null;
+    return this;
+  };
+
+  closed = (closedAt: Date): MergeRequestBuilder => {
+    this.closedAt = closedAt;
+    this._mergedAt = null;
     return this;
   };
 
@@ -31,6 +39,7 @@ export class MergeRequestBuilder {
     return {
       createdAt: this._createdAt,
       mergedAt: this._mergedAt,
+      closedAt: this.closedAt,
       projectId: this.projectId,
       id: this.id,
     };

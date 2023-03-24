@@ -26,15 +26,14 @@ describe("Gitlab Repository", () => {
   });
 
   const toGitlabDTO = (mergeRequest: MergeRequest): MergeRequestDTO => {
-    let mergedAt = null;
-    if (mergeRequest.mergedAt !== null) {
-      mergedAt = formatISO(mergeRequest.mergedAt);
-    }
+    const mergedAt = mergeRequest.mergedAt !== null ? formatISO(mergeRequest.mergedAt) : null;
+    const closedAt = mergeRequest.closedAt !== null ? formatISO(mergeRequest.closedAt) : null;
     return {
       created_at: formatISO(mergeRequest.createdAt),
       id: mergeRequest.id,
       project_id: mergeRequest.projectId,
       merged_at: mergedAt,
+      closed_at: closedAt,
     };
   };
 
@@ -170,6 +169,30 @@ describe("Gitlab Repository", () => {
     const thirdMergeRequest = new MergeRequestBuilder(1)
       .createdAt(parseISO("2021-11-03T12:45:12"))
       .notYetMerged()
+      .build();
+    fetchMock.mockResponses([
+      JSON.stringify([toGitlabDTO(firstMergeRequest), toGitlabDTO(secondMergeRequest), toGitlabDTO(thirdMergeRequest)]),
+      {
+        status: 200,
+        headers: {
+          link: "<http://gitlab/merge_requests?order_by=created_at&page=1>; rel='first', <http://gitlab/merge_requests?order_by=created_at&page=1>; rel='last'",
+        },
+      },
+    ]);
+
+    const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeRequestsForPeriod(
+      1,
+      parseISO("2021-11-03T00:00:00"),
+      parseISO("2021-11-04T00:00:00")
+    );
+
+    expect(mergeRequests).toEqual([firstMergeRequest, thirdMergeRequest]);
+  });
+
+  test("should retrieve closed merge requests", async () => {
+    const thirdMergeRequest = new MergeRequestBuilder(1)
+      .createdAt(parseISO("2021-11-03T12:45:12"))
+      .closed(parseISO("2021-11-03T18:15:27"))
       .build();
     fetchMock.mockResponses([
       JSON.stringify([toGitlabDTO(firstMergeRequest), toGitlabDTO(secondMergeRequest), toGitlabDTO(thirdMergeRequest)]),

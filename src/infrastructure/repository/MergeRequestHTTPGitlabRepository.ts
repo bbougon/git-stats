@@ -15,14 +15,18 @@ export type MergeRequestDTO = {
   id: number;
   created_at: string;
   merged_at: string | null;
+  closed_at: string | null;
   project_id: number;
 };
 
 const fromDTO = (mergeRequestDTO: MergeRequestDTO): MergeRequest => {
-  const mergedAt = mergeRequestDTO.merged_at !== null ? parseISO(mergeRequestDTO.merged_at) : null;
+  const parseDate = (date: string | null): Date | null => {
+    return date !== null ? parseISO(date) : null;
+  };
   return {
     createdAt: parseISO(mergeRequestDTO.created_at),
-    mergedAt,
+    mergedAt: parseDate(mergeRequestDTO.merged_at),
+    closedAt: parseDate(mergeRequestDTO.closed_at),
     projectId: mergeRequestDTO.project_id,
     id: mergeRequestDTO.id,
   };
