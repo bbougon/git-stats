@@ -14,7 +14,6 @@ class HTMLContentBuilder {
 
   build = (): string => {
     const stats = mergeRequestsByPeriod(this.stats);
-
     const labels: string[] = [];
     const data: number[] = [];
     for (const [key, value] of stats.entries()) {
@@ -22,6 +21,7 @@ class HTMLContentBuilder {
       data.push(value);
     }
     const htmlPage = fs.readFileSync("./templates/template.html", "utf-8");
+    const aggregatedStats = this.stats.result();
     return htmlPage
       .replace("__LABELS__", JSON.stringify(labels))
       .replace("__DATA__", JSON.stringify(data))
@@ -42,7 +42,12 @@ class HTMLContentBuilder {
           month: "long",
           day: "numeric",
         })
-      );
+      )
+      .replace("__AVERAGE_DAYS__", String(aggregatedStats.average.days))
+      .replace("__AVERAGE_HOURS__", String(aggregatedStats.average.hours))
+      .replace("__TOTAL_MERGED__", String(aggregatedStats.total.merged))
+      .replace("__TOTAL_CLOSED__", String(aggregatedStats.total.closed))
+      .replace("__TOTAL_OVERALL__", String(aggregatedStats.total.all));
   };
 }
 
