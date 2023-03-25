@@ -16,9 +16,9 @@ class HTMLContentBuilder {
     const stats = mergeRequestsByPeriod(this.stats);
     const labels: string[] = [];
     const data: number[] = [];
-    for (const [key, value] of stats.entries()) {
-      labels.push(key);
-      data.push(value);
+    for (const stat of stats) {
+      labels.push(`${stat.unit} ${stat.index}`);
+      data.push(stat.mr);
     }
     const htmlPage = fs.readFileSync("./templates/template.html", "utf-8");
     const aggregatedStats = this.stats.result();

@@ -74,20 +74,31 @@ export const mergeRequestsStats = (
     });
 };
 
-export type Period = string;
+type Unit = string | "Week" | "Month";
+type PeriodIndex = number;
 
-export const mergeRequestsByPeriod = (mergeRequestStats: MergeRequestStats): Map<Period, number> => {
-  const stats: Map<Period, number> = new Map<Period, number>();
+export type Dimension = { unit: Unit; index: number; mr: number };
+
+export const mergeRequestsByPeriod = (mergeRequestStats: MergeRequestStats): Dimension[] => {
+  const stats: Map<PeriodIndex, Dimension> = new Map<PeriodIndex, Dimension>();
   mergeRequestStats
     .mergeRequests()
     .filter((mr) => mr.mergedAt !== null)
     .forEach((mr) => {
-      const key = `Week ${getWeek(mr.mergedAt)}`;
-      if (stats.has(key)) {
-        stats.set(key, stats.get(key) + 1);
+      const index = getWeek(mr.mergedAt);
+      if (stats.has(index)) {
+        const number = stats.get(index);
+        number.mr = number.mr + 1;
+        stats.set(index, number);
       } else {
-        stats.set(key, 1);
+        stats.set(index, { unit: "Week", index, mr: 1 });
       }
     });
-  return stats;
+  const lastKey = Array.from(stats.keys())[stats.size - 1];
+  for (const key of stats.keys()) {
+    if (stats.get(key + 1) == undefined && key + 1 < lastKey) {
+      stats.set(key + 1, { index: key + 1, mr: 0, unit: "Week" });
+    }
+  }
+  return Array.from(stats.values()).sort((stat, nextStat) => (stat.index > nextStat.index ? 1 : -1));
 };

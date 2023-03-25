@@ -27,7 +27,9 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
             <div class="col-sm"># Overall</div><div class="col-sm-8">3</div>
         </div>
     </div>
-    <canvas id="myChart"></canvas>
+    <div class="container-sm">
+        <canvas id="myChart"></canvas>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -88,7 +90,9 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
             <div class="col-sm"># Overall</div><div class="col-sm-8">3</div>
         </div>
     </div>
-    <canvas id="myChart"></canvas>
+    <div class="container-sm">
+        <canvas id="myChart"></canvas>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
