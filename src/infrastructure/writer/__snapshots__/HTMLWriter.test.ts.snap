@@ -28,35 +28,43 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
         </div>
     </div>
     <div class="container-sm">
-        <canvas id="myChart"></canvas>
+        <canvas id="merge-request-merged"></canvas>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    const ctx = document.getElementById('myChart');
+    const mergeRequestContext = document.getElementById('merge-request-merged');
+    const mergeRequestChartType = 'line'
+    const mergeRequestChartDatasets = [{
+        label: '# of Merge Requests merged',
+        data: [1,2],
+        borderWidth: 3,
+        borderJoinStyle: "round",
+        tension: 0.2
+    }]
+    const mergeRequestChartLabels = ["Week 7","Week 8"]
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ["Week 7","Week 8"],
-            datasets: [{
-                label: '# of Merge Requests merged',
-                data: [1,2],
-                borderWidth: 3,
-                borderJoinStyle: "round",
-                tension: 0.2
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
+
+    function renderChart(context, type, labels, datasets) {
+        new Chart(context, {
+            type: type,
+            data: {
+                labels: labels,
+                datasets: datasets,
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
                 }
             }
-        }
-    });
+        });
+    }
+
+    renderChart(mergeRequestContext, mergeRequestChartType, mergeRequestChartLabels, mergeRequestChartDatasets);
 </script>
 
 </body>
@@ -91,35 +99,43 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
         </div>
     </div>
     <div class="container-sm">
-        <canvas id="myChart"></canvas>
+        <canvas id="merge-request-merged"></canvas>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    const ctx = document.getElementById('myChart');
+    const mergeRequestContext = document.getElementById('merge-request-merged');
+    const mergeRequestChartType = 'line'
+    const mergeRequestChartDatasets = [{
+        label: '# of Merge Requests merged',
+        data: [2],
+        borderWidth: 3,
+        borderJoinStyle: "round",
+        tension: 0.2
+    }]
+    const mergeRequestChartLabels = ["Week 8"]
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ["Week 8"],
-            datasets: [{
-                label: '# of Merge Requests merged',
-                data: [2],
-                borderWidth: 3,
-                borderJoinStyle: "round",
-                tension: 0.2
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
+
+    function renderChart(context, type, labels, datasets) {
+        new Chart(context, {
+            type: type,
+            data: {
+                labels: labels,
+                datasets: datasets,
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
                 }
             }
-        }
-    });
+        });
+    }
+
+    renderChart(mergeRequestContext, mergeRequestChartType, mergeRequestChartLabels, mergeRequestChartDatasets);
 </script>
 
 </body>

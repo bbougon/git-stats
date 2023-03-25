@@ -25,35 +25,43 @@
         </div>
     </div>
     <div class="container-sm">
-        <canvas id="myChart"></canvas>
+        <canvas id="merge-request-merged"></canvas>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    const ctx = document.getElementById('myChart');
+    const mergeRequestContext = document.getElementById('merge-request-merged');
+    const mergeRequestChartType = 'line'
+    const mergeRequestChartDatasets = [{
+        label: '# of Merge Requests merged',
+        data: __MERGE_REQUESTS_LINE_CHART_DATA__,
+        borderWidth: 3,
+        borderJoinStyle: "round",
+        tension: 0.2
+    }]
+    const mergeRequestChartLabels = __MERGE_REQUESTS_LINE_CHART_LABELS__
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: __LABELS__,
-            datasets: [{
-                label: '# of Merge Requests merged',
-                data: __DATA__,
-                borderWidth: 3,
-                borderJoinStyle: "round",
-                tension: 0.2
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
+
+    function renderChart(context, type, labels, datasets) {
+        new Chart(context, {
+            type: type,
+            data: {
+                labels: labels,
+                datasets: datasets,
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
                 }
             }
-        }
-    });
+        });
+    }
+
+    renderChart(mergeRequestContext, mergeRequestChartType, mergeRequestChartLabels, mergeRequestChartDatasets);
 </script>
 
 </body>

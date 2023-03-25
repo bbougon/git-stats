@@ -23,8 +23,8 @@ class HTMLContentBuilder {
     const htmlPage = fs.readFileSync("./templates/template.html", "utf-8");
     const aggregatedStats = this.stats.result();
     return htmlPage
-      .replace("__LABELS__", JSON.stringify(labels))
-      .replace("__DATA__", JSON.stringify(data))
+      .replace("__MERGE_REQUESTS_LINE_CHART_LABELS__", JSON.stringify(labels))
+      .replace("__MERGE_REQUESTS_LINE_CHART_DATA__", JSON.stringify(data))
       .replace(
         /__FROM__/g,
         intlFormat(this.period.fromDate, {
