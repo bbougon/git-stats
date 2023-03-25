@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Report __FROM__ to __TO__</title>
+</head>
+<body>
+
+<div>
+    <h2>Merge requests for period __FROM__ to __TO__</h2>
+    <canvas id="myChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const ctx = document.getElementById('myChart');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: __LABELS__,
+            datasets: [{
+                label: '# of Merge Requests merged',
+                data: __DATA__,
+                borderWidth: 3,
+                borderJoinStyle: "round",
+                tension: 0.2
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

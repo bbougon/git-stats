@@ -3,17 +3,21 @@ import {mergeRequestsStats, MergeRequestStats} from "./src/merge-requests/MergeR
 import {MergedRequestHTTPGitlabRepository} from "./src/infrastructure/repository/MergeRequestHTTPGitlabRepository";
 import {parseISO} from "date-fns";
 import {ConsoleWriter} from "./src/infrastructure/writer/ConsoleWriter";
+import {HTMLWriter} from "./src/infrastructure/writer/HTMLWriter";
 
 const commaSeparatedList =(list: string) => {
     return list.split(",")
 }
 
 const writer = (format: string): Writer => {
-    return null
+    if (format === 'html'){
+        return new HTMLWriter("./")
+    }
+    return new ConsoleWriter()
 }
 
 export interface Writer {
-    write(stats: MergeRequestStats): any
+    write(stats: { stats: MergeRequestStats, period: {fromDate: Date, toDate: Date} }): void
 }
 
 program.command('mr')
@@ -23,9 +27,10 @@ program.command('mr')
     .argument('<period>', 'the period you want to analyse (ISO formatted date separated by comma, e.g: 2021-11-02,2021-11-03)', commaSeparatedList)
     .option('-f, --format <writer>', 'format to display the stats (default json in console)', writer, new ConsoleWriter())
     .action((token, projectId, period, options) => {
-        mergeRequestsStats({fromDate: parseISO(period[0]), projectId: projectId, toDate: parseISO(period[1])}, new MergedRequestHTTPGitlabRepository(token))
+        const requestParameter = {fromDate: parseISO(period[0]), projectId: projectId, toDate: parseISO(period[1])};
+        mergeRequestsStats(requestParameter, new MergedRequestHTTPGitlabRepository(token))
             .then((stats) => {
-                options.format.write(stats)
+                options.format.write({stats, period: {fromDate: requestParameter.fromDate, toDate: requestParameter.toDate}})
             })
     });
 

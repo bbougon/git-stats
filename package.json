@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "A simple tool to usage statistics from a gitlab repository",
   "main": "index.ts",
-  "type": "commonjs",
   "scripts": {
     "test": "jest",
     "test:coverage": "jest --coverage --collectCoverageFrom=\"./src/**\"",
@@ -29,6 +28,7 @@
   },
   "dependencies": {
     "@types/parse-link-header": "^2.0.0",
+    "chart.js": "^4.2.1",
     "commander": "^10.0.0",
     "date-fns": "^2.29.3",
     "parse-link-header": "^2.0.0"

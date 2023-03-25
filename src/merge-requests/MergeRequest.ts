@@ -1,4 +1,4 @@
-import { differenceInHours } from "date-fns";
+import { compareAsc, differenceInHours } from "date-fns";
 import { Repository } from "../Repository";
 
 export type MergeRequest = {
@@ -32,15 +32,19 @@ type MergeRequestStatsResult = {
 };
 
 export class MergeRequestStats {
-  private mergeRequests: MergeRequest[];
+  private readonly _mergeRequests: MergeRequest[];
 
   constructor(mergeRequests: MergeRequest[]) {
-    this.mergeRequests = mergeRequests;
+    this._mergeRequests = mergeRequests;
+  }
+
+  public mergeRequests(): MergeRequest[] {
+    return this._mergeRequests.sort((mr, mrToCompare) => compareAsc(mr.mergedAt, mrToCompare.mergedAt));
   }
 
   result = (): MergeRequestStatsResult => {
-    const mergedMergeRequests = this.mergeRequests.filter((mr) => mr.mergedAt !== null);
-    const closedMergeRequests = this.mergeRequests.filter((mr) => mr.closedAt !== null);
+    const mergedMergeRequests = this._mergeRequests.filter((mr) => mr.mergedAt !== null);
+    const closedMergeRequests = this._mergeRequests.filter((mr) => mr.closedAt !== null);
     const hoursSpent = mergedMergeRequests.reduce(
       (accumulator, currentValue) => accumulator + differenceInHours(currentValue.mergedAt, currentValue.createdAt),
       0
@@ -53,7 +57,7 @@ export class MergeRequestStats {
       total: {
         merged: mergedMergeRequests.length,
         closed: closedMergeRequests.length,
-        all: this.mergeRequests.length,
+        all: this._mergeRequests.length,
       },
     };
   };

@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "module": "CommonJS",
+    "target": "ES2021",
     "noImplicitAny": true,
     "removeComments": true,
     "preserveConstEnums": true,
@@ -13,8 +14,9 @@
       "es5",
       "es6",
       "scripthost",
-      "es2015.promise"
-    ]
+      "es2015.promise",
+    ],
+    "jsx": "react"
   },
   "include": ["src/**/*", "index.ts"],
   "exclude": ["node_modules", "**/*.spec.ts", "**/*.test.ts", "**/*__tests__"]

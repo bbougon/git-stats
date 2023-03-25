@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HTML writer should generate an HTML report file for merged requests 1`] = `
+"<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Report Friday, February 11, 2022 to Thursday, February 17, 2022</title>
+</head>
+<body>
+
+<div>
+    <h2>Merge requests for period Friday, February 11, 2022 to Thursday, February 17, 2022</h2>
+    <canvas id="myChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const ctx = document.getElementById('myChart');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ["Week 7","Week 8"],
+            datasets: [{
+                label: '# of Merge Requests merged',
+                data: [1,2],
+                borderWidth: 3,
+                borderJoinStyle: "round",
+                tension: 0.2
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>"
+`;
+
+exports[`HTML writer should generate an HTML report file for merged requests when some mr are not yet merged 1`] = `
+"<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Report Friday, February 11, 2022 to Thursday, February 17, 2022</title>
+</head>
+<body>
+
+<div>
+    <h2>Merge requests for period Friday, February 11, 2022 to Thursday, February 17, 2022</h2>
+    <canvas id="myChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const ctx = document.getElementById('myChart');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ["Week 8"],
+            datasets: [{
+                label: '# of Merge Requests merged',
+                data: [2],
+                borderWidth: 3,
+                borderJoinStyle: "round",
+                tension: 0.2
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>"
+`;
