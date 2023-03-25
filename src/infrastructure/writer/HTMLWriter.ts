@@ -1,7 +1,7 @@
 import { Writer } from "../../../index";
-import { MergeRequestStats } from "../../merge-requests/MergeRequest";
+import { mergeRequestsByPeriod, MergeRequestStats } from "../../merge-requests/MergeRequest";
 import * as fs from "fs";
-import { getWeek, intlFormat } from "date-fns";
+import { intlFormat } from "date-fns";
 
 class HTMLContentBuilder {
   private stats: MergeRequestStats;
@@ -13,18 +13,7 @@ class HTMLContentBuilder {
   }
 
   build = (): string => {
-    const stats: Map<string, number> = new Map<string, number>();
-    this.stats
-      .mergeRequests()
-      .filter((mr) => mr.mergedAt !== null)
-      .forEach((mr) => {
-        const key = `Week ${getWeek(mr.mergedAt)}`;
-        if (stats.has(key)) {
-          stats.set(key, stats.get(key) + 1);
-        } else {
-          stats.set(key, 1);
-        }
-      });
+    const stats = mergeRequestsByPeriod(this.stats);
 
     const labels: string[] = [];
     const data: number[] = [];

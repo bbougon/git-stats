@@ -1,4 +1,4 @@
-import { compareAsc, differenceInHours } from "date-fns";
+import { compareAsc, differenceInHours, getWeek } from "date-fns";
 import { Repository } from "../Repository";
 
 export type MergeRequest = {
@@ -72,4 +72,22 @@ export const mergeRequestsStats = (
     .then((mergeRequests) => {
       return new MergeRequestStats(mergeRequests);
     });
+};
+
+export type Period = string;
+
+export const mergeRequestsByPeriod = (mergeRequestStats: MergeRequestStats): Map<Period, number> => {
+  const stats: Map<Period, number> = new Map<Period, number>();
+  mergeRequestStats
+    .mergeRequests()
+    .filter((mr) => mr.mergedAt !== null)
+    .forEach((mr) => {
+      const key = `Week ${getWeek(mr.mergedAt)}`;
+      if (stats.has(key)) {
+        stats.set(key, stats.get(key) + 1);
+      } else {
+        stats.set(key, 1);
+      }
+    });
+  return stats;
 };
