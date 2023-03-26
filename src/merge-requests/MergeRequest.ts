@@ -1,5 +1,5 @@
 import { compareAsc, differenceInHours, getWeek } from "date-fns";
-import { Repository } from "../Repository";
+import { Repository } from "../Repository.js";
 
 export type MergeRequest = {
   projectId: number;

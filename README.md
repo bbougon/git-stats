@@ -31,9 +31,10 @@ Provide statistics usage of your gitlab projects
     "total": {
       "merged": 58,
       "closed": 14,
+      "opened": 6,
       "all": 78
     }
   }
   ```
-- ` node dist/index.js mr <TOKEN> <PROJECT_ID> <PERIOD> --format html` (<PERIOD> in the following format `2023-01-01,2023-01-31`) will generate an `index.html` in the root project, open it with your favorite browser.
+- ` node dist/index.js mr <TOKEN> <PROJECT_ID> <PERIOD> --format html` (<PERIOD> in the following format `2023-01-01,2023-01-31`) will generate an `index.html` in the root project that will automatically open after generation.
   ![](documentation/chart_screenshot.png)

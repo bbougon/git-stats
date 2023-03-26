@@ -1,9 +1,9 @@
 import {program} from "commander";
-import {mergeRequestsStats, MergeRequestStats} from "./src/merge-requests/MergeRequest";
-import {MergedRequestHTTPGitlabRepository} from "./src/infrastructure/repository/MergeRequestHTTPGitlabRepository";
+import {mergeRequestsStats, MergeRequestStats} from "./src/merge-requests/MergeRequest.js";
+import {MergedRequestHTTPGitlabRepository} from "./src/infrastructure/repository/MergeRequestHTTPGitlabRepository.js";
 import {parseISO} from "date-fns";
-import {ConsoleWriter} from "./src/infrastructure/writer/ConsoleWriter";
-import {HTMLWriter} from "./src/infrastructure/writer/HTMLWriter";
+import {ConsoleWriter} from "./src/infrastructure/writer/ConsoleWriter.js";
+import {HTMLWriter} from "./src/infrastructure/writer/HTMLWriter.js";
 
 const commaSeparatedList =(list: string) => {
     return list.split(",")

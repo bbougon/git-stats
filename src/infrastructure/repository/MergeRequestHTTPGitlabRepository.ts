@@ -1,6 +1,6 @@
-import { MergeRequest, MergeRequestRepository } from "../../merge-requests/MergeRequest";
-import { Repository } from "../../Repository";
-import * as parseLinkHeader from "parse-link-header";
+import { MergeRequest, MergeRequestRepository } from "../../merge-requests/MergeRequest.js";
+import { Repository } from "../../Repository.js";
+import parseLinkHeader from "parse-link-header";
 import { compareAsc, compareDesc, parseISO } from "date-fns";
 
 abstract class GitlabRepository<T> implements Repository<T> {

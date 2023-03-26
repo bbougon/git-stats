@@ -1,3 +1,4 @@
+import { jest } from "@jest/globals";
 import { MergeRequestStats } from "../../merge-requests/MergeRequest";
 import { HTMLWriter } from "./HTMLWriter";
 import { mkdtemp } from "node:fs/promises";
@@ -6,6 +7,10 @@ import * as os from "os";
 import * as fs from "fs";
 import { MergeRequestBuilder } from "../../__tests__/builder";
 import { parseISO } from "date-fns";
+
+jest.mock("./OpenBrowser", () => ({
+  openBrowser: jest.fn(),
+}));
 
 describe("HTML writer", () => {
   test("should generate an HTML report file for merged requests", async () => {

@@ -1,8 +1,8 @@
-import { Writer } from "../../../index";
-import { mergeRequestsByPeriod, MergeRequestStats } from "../../merge-requests/MergeRequest";
+import { Writer } from "../../../index.js";
+import { mergeRequestsByPeriod, MergeRequestStats } from "../../merge-requests/MergeRequest.js";
 import * as fs from "fs";
 import { intlFormat } from "date-fns";
-import open from "open";
+import { openBrowser } from "./OpenBrowser.js";
 
 class HTMLContentBuilder {
   private stats: MergeRequestStats;
@@ -73,7 +73,7 @@ export class HTMLWriter implements Writer {
   write(stats: { stats: MergeRequestStats; period: { fromDate: Date; toDate: Date } }): void {
     try {
       fs.writeFileSync(`${this._filePath}/index.html`, new HTMLContentBuilder(stats).build());
-      open(`${this._filePath}/index.html`)
+      openBrowser(`${this._filePath}/index.html`);
     } catch (e) {
       console.log(e);
     }
