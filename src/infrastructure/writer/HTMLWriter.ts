@@ -1,24 +1,33 @@
 import { Writer } from "../../../index.js";
-import { mergeRequestsByPeriod, MergeRequestStats } from "../../merge-requests/MergeRequest.js";
+import { Dimension, mergeRequestsByPeriod, MergeRequestStats } from "../../merge-requests/MergeRequest.js";
 import * as fs from "fs";
 import { intlFormat } from "date-fns";
 import { openBrowser } from "./OpenBrowser.js";
 
-class HTMLContentBuilder {
-  private stats: MergeRequestStats;
-  private period: { fromDate: Date; toDate: Date };
+const HUMAN_READABLE_MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "december",
+];
 
-  constructor(stats: { stats: MergeRequestStats; period: { fromDate: Date; toDate: Date } }) {
-    this.stats = stats.stats;
-    this.period = stats.period;
-  }
+class HTMLContentBuilder {
+  constructor(private readonly stats: MergeRequestStats) {}
 
   build = (): string => {
     const stats = mergeRequestsByPeriod(this.stats);
     const labels: string[] = [];
     const data: number[] = [];
     for (const stat of stats) {
-      labels.push(`${stat.unit} ${stat.index}`);
+      labels.push(this.buildLabel(stat));
       data.push(stat.mr);
     }
     const htmlPage = fs.readFileSync("./templates/template.html", "utf-8");
@@ -28,7 +37,7 @@ class HTMLContentBuilder {
       .replace("__MERGE_REQUESTS_LINE_CHART_DATA__", JSON.stringify(data))
       .replace(
         /__FROM__/g,
-        intlFormat(this.period.fromDate, {
+        intlFormat(this.stats.period.start, {
           weekday: "long",
           year: "numeric",
           month: "long",
@@ -37,7 +46,7 @@ class HTMLContentBuilder {
       )
       .replace(
         /__TO__/g,
-        intlFormat(this.period.toDate, {
+        intlFormat(this.stats.period.end, {
           weekday: "long",
           year: "numeric",
           month: "long",
@@ -61,6 +70,13 @@ class HTMLContentBuilder {
         ])
       );
   };
+
+  private buildLabel(stat: Dimension) {
+    if (stat.unit === "Month") {
+      return HUMAN_READABLE_MONTHS[stat.index];
+    }
+    return `${stat.unit} ${stat.index}`;
+  }
 }
 
 export class HTMLWriter implements Writer {
@@ -70,7 +86,7 @@ export class HTMLWriter implements Writer {
     this._filePath = filePath;
   }
 
-  write(stats: { stats: MergeRequestStats; period: { fromDate: Date; toDate: Date } }): void {
+  write(stats: MergeRequestStats): void {
     try {
       fs.writeFileSync(`${this._filePath}/index.html`, new HTMLContentBuilder(stats).build());
       openBrowser(`${this._filePath}/index.html`);

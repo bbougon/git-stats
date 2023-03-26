@@ -1,4 +1,4 @@
-import { compareAsc, differenceInHours, getWeek } from "date-fns";
+import { compareAsc, differenceInHours, getMonth, getWeek, intervalToDuration } from "date-fns";
 import { Repository } from "../Repository.js";
 
 export type MergeRequest = {
@@ -32,21 +32,19 @@ type MergeRequestStatsResult = {
   };
 };
 
+type Period = { start: Date; end: Date };
+
 export class MergeRequestStats {
-  private readonly _mergeRequests: MergeRequest[];
+  constructor(private readonly mergeRequests: MergeRequest[], public readonly period: Period) {}
 
-  constructor(mergeRequests: MergeRequest[]) {
-    this._mergeRequests = mergeRequests;
-  }
-
-  public mergeRequests(): MergeRequest[] {
-    return this._mergeRequests.sort((mr, mrToCompare) => compareAsc(mr.mergedAt, mrToCompare.mergedAt));
+  public sortedMergeRequests(): MergeRequest[] {
+    return this.mergeRequests.sort((mr, mrToCompare) => compareAsc(mr.mergedAt, mrToCompare.mergedAt));
   }
 
   result = (): MergeRequestStatsResult => {
-    const mergedMergeRequests = this._mergeRequests.filter((mr) => mr.mergedAt !== null);
-    const closedMergeRequests = this._mergeRequests.filter((mr) => mr.closedAt !== null);
-    const openedMergeRequests = this._mergeRequests.filter((mr) => mr.mergedAt === null && mr.closedAt == null);
+    const mergedMergeRequests = this.mergeRequests.filter((mr) => mr.mergedAt !== null);
+    const closedMergeRequests = this.mergeRequests.filter((mr) => mr.closedAt !== null);
+    const openedMergeRequests = this.mergeRequests.filter((mr) => mr.mergedAt === null && mr.closedAt == null);
     const hoursSpent = mergedMergeRequests.reduce(
       (accumulator, currentValue) => accumulator + differenceInHours(currentValue.mergedAt, currentValue.createdAt),
       0
@@ -60,7 +58,7 @@ export class MergeRequestStats {
         merged: mergedMergeRequests.length,
         closed: closedMergeRequests.length,
         opened: openedMergeRequests.length,
-        all: this._mergeRequests.length,
+        all: this.mergeRequests.length,
       },
     };
   };
@@ -73,7 +71,7 @@ export const mergeRequestsStats = (
   return repository
     .getMergeRequestsForPeriod(requestParameter.projectId, requestParameter.fromDate, requestParameter.toDate)
     .then((mergeRequests) => {
-      return new MergeRequestStats(mergeRequests);
+      return new MergeRequestStats(mergeRequests, { end: requestParameter.toDate, start: requestParameter.fromDate });
     });
 };
 
@@ -84,23 +82,26 @@ export type Dimension = { unit: Unit; index: number; mr: number };
 
 export const mergeRequestsByPeriod = (mergeRequestStats: MergeRequestStats): Dimension[] => {
   const stats: Map<PeriodIndex, Dimension> = new Map<PeriodIndex, Dimension>();
+  const duration = intervalToDuration({ start: mergeRequestStats.period.start, end: mergeRequestStats.period.end });
+  const moreThan2Months = duration.months > 1 && duration.months + duration.days > 2;
+  const unit = moreThan2Months ? "Month" : "Week";
   mergeRequestStats
-    .mergeRequests()
+    .sortedMergeRequests()
     .filter((mr) => mr.mergedAt !== null)
     .forEach((mr) => {
-      const index = getWeek(mr.mergedAt);
+      const index = moreThan2Months ? getMonth(mr.mergedAt) : getWeek(mr.mergedAt);
       if (stats.has(index)) {
-        const number = stats.get(index);
-        number.mr = number.mr + 1;
-        stats.set(index, number);
+        const dimension = stats.get(index);
+        dimension.mr = dimension.mr + 1;
+        stats.set(index, dimension);
       } else {
-        stats.set(index, { unit: "Week", index, mr: 1 });
+        stats.set(index, { unit, index, mr: 1 });
       }
     });
   const lastKey = Array.from(stats.keys())[stats.size - 1];
   for (const key of stats.keys()) {
     if (stats.get(key + 1) == undefined && key + 1 < lastKey) {
-      stats.set(key + 1, { index: key + 1, mr: 0, unit: "Week" });
+      stats.set(key + 1, { index: key + 1, mr: 0, unit });
     }
   }
   return Array.from(stats.values()).sort((stat, nextStat) => (stat.index > nextStat.index ? 1 : -1));

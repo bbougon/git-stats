@@ -17,7 +17,7 @@ const writer = (format: string): Writer => {
 }
 
 export interface Writer {
-    write(stats: { stats: MergeRequestStats, period: {fromDate: Date, toDate: Date} }): void
+    write(stats: MergeRequestStats): void
 }
 
 program.command('mr')
@@ -30,7 +30,7 @@ program.command('mr')
         const requestParameter = {fromDate: parseISO(period[0]), projectId: projectId, toDate: parseISO(period[1])};
         mergeRequestsStats(requestParameter, new MergedRequestHTTPGitlabRepository(token))
             .then((stats) => {
-                options.format.write({stats, period: {fromDate: requestParameter.fromDate, toDate: requestParameter.toDate}})
+                options.format.write(stats)
             })
     });
 

@@ -28,10 +28,14 @@ describe("HTML writer", () => {
       .build();
     const tempDirectory = await mkdtemp(path.join(os.tmpdir(), "report-"));
 
-    new HTMLWriter(tempDirectory).write({
-      stats: new MergeRequestStats([firstMergeRequest, secondMergeRequest, thirdMergeRequest]),
-      period: { fromDate: parseISO("2022-02-11T00:00:00"), toDate: parseISO("2022-02-17T00:00:00") },
-    });
+    const fromDate = parseISO("2022-02-11T00:00:00");
+    const toDate = parseISO("2022-02-17T00:00:00");
+    new HTMLWriter(tempDirectory).write(
+      new MergeRequestStats([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
+        end: toDate,
+        start: fromDate,
+      })
+    );
 
     expect(fs.readFileSync(`${tempDirectory}/index.html`, "utf8")).toMatchSnapshot();
   });
@@ -51,10 +55,39 @@ describe("HTML writer", () => {
       .build();
     const tempDirectory = await mkdtemp(path.join(os.tmpdir(), "report-"));
 
-    new HTMLWriter(tempDirectory).write({
-      stats: new MergeRequestStats([firstMergeRequest, secondMergeRequest, thirdMergeRequest]),
-      period: { fromDate: parseISO("2022-02-11T00:00:00"), toDate: parseISO("2022-02-17T00:00:00") },
-    });
+    const fromDate = parseISO("2022-02-11T00:00:00");
+    const toDate = parseISO("2022-02-17T00:00:00");
+    new HTMLWriter(tempDirectory).write(
+      new MergeRequestStats([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
+        end: toDate,
+        start: fromDate,
+      })
+    );
+
+    expect(fs.readFileSync(`${tempDirectory}/index.html`, "utf8")).toMatchSnapshot();
+  });
+
+  test("should generate an HTML report file with months period", async () => {
+    const firstMergeRequest = new MergeRequestBuilder(1)
+      .createdAt(parseISO("2022-02-11T12:37:22"))
+      .mergedAt(parseISO("2022-02-14T11:53:17"))
+      .build();
+    const secondMergeRequest = new MergeRequestBuilder(1)
+      .createdAt(parseISO("2022-01-10T13:22:54"))
+      .mergedAt(parseISO("2022-01-27T13:22:54"))
+      .build();
+    const thirdMergeRequest = new MergeRequestBuilder(1)
+      .createdAt(parseISO("2022-02-13T09:17:34"))
+      .mergedAt(parseISO("2022-02-16T16:44:22"))
+      .build();
+    const tempDirectory = await mkdtemp(path.join(os.tmpdir(), "report-"));
+
+    new HTMLWriter(tempDirectory).write(
+      new MergeRequestStats([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
+        end: parseISO("2022-03-02T00:00:00"),
+        start: parseISO("2022-01-01T00:00:00"),
+      })
+    );
 
     expect(fs.readFileSync(`${tempDirectory}/index.html`, "utf8")).toMatchSnapshot();
   });

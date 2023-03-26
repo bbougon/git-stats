@@ -179,3 +179,93 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
 </body>
 </html>"
 `;
+
+exports[`HTML writer should generate an HTML report file with months period 1`] = `
+"<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
+    <title>Report Saturday, January 1, 2022 to Wednesday, March 2, 2022</title>
+</head>
+<body>
+
+<div>
+    <h2>Merge requests for period Saturday, January 1, 2022 to Wednesday, March 2, 2022</h2>
+    <div class="container-sm text-left">
+        <h3>Aggregated Statistics</h3>
+        <div class="row">
+            <div class="col-lg-10">
+                <div class="row">
+                    <div class="col-sm">Average time to merge</div><div class="col-sm-4">7.75 days</div><div class="col-sm-4">186 hours</div>
+                </div>
+                <div class="row">
+                    <div class="col-sm"># Merged</div><div class="col-sm-8">3</div>
+                </div>
+                <div class="row">
+                    <div class="col-sm"># Opened</div><div class="col-sm-8">0</div>
+                </div>
+                <div class="row">
+                    <div class="col-sm"># Closed</div><div class="col-sm-8">0</div>
+                </div>
+                <div class="row">
+                    <div class="col-sm"># Overall</div><div class="col-sm-8">3</div>
+                </div>
+            </div>
+            <div class="col-lg-2">
+                <canvas id="aggregated-merge-requests"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="container-sm">
+        <canvas id="merge-request-merged"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const mergeRequestContext = document.getElementById('merge-request-merged');
+    const mergeRequestChartType = 'line'
+    const mergeRequestChartDatasets = [{
+        label: '# of Merge Requests merged',
+        data: [1,2],
+        borderWidth: 3,
+        borderJoinStyle: "round",
+        tension: 0.2
+    }]
+    const mergeRequestChartLabels = ["January","February"]
+
+    const aggregatedMergeRequestContext = document.getElementById("aggregated-merge-requests")
+    const aggregatedMergeRequestChartType = 'doughnut'
+    const aggregatedMergeRequestChartLabels = ["Merged","Opened","Closed","All"]
+    const aggregatedMergeRequestChartDatasets =    [{
+        label: 'Aggregated merge requests',
+        data: [3,0,0,3],
+        hoverOffset: 4
+    }]
+
+    function renderChart(context, type, labels, datasets) {
+        new Chart(context, {
+            type: type,
+            data: {
+                labels: labels,
+                datasets: datasets,
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    renderChart(mergeRequestContext, mergeRequestChartType, mergeRequestChartLabels, mergeRequestChartDatasets);
+    renderChart(aggregatedMergeRequestContext, aggregatedMergeRequestChartType, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets);
+</script>
+
+</body>
+</html>"
+`;

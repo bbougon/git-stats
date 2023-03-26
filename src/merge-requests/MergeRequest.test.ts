@@ -111,27 +111,51 @@ describe("Merge requests statistics", () => {
 
   describe("Statistics by period", () => {
     it("should sort by weeks", () => {
-      const mergeRequests = new MergeRequestsBuilder(1)
-        .total(20)
-        .forPeriod(parseISO("2022-02-01T00:00:00"), parseISO("2022-02-28T00:00:00"))
-        .withEmptyPeriod(7)
-        .build();
+      const start = parseISO("2022-02-01T00:00:00");
+      const end = parseISO("2022-02-28T00:00:00");
+      const mergeRequests = new MergeRequestsBuilder(1).total(20).forPeriod(start, end).withEmptyPeriod(7).build();
 
-      const requestsByPeriod = mergeRequestsByPeriod(new MergeRequestStats(mergeRequests));
+      const requestsByPeriod = mergeRequestsByPeriod(
+        new MergeRequestStats(mergeRequests, {
+          start,
+          end,
+        })
+      );
 
       expect(requestsByPeriod.map((stat) => stat.index)).toStrictEqual([6, 7, 8, 9, 10]);
       expect(requestsByPeriod[1].mr).toEqual(0);
     });
 
     it("should sort by weeks with all expected weeks", () => {
-      const mergeRequests = new MergeRequestsBuilder(1)
-        .total(78)
-        .forPeriod(parseISO("2023-01-01T00:00:00"), parseISO("2023-03-24T00:00:00"))
-        .build();
+      const start = parseISO("2023-01-01T00:00:00");
+      const end = parseISO("2023-02-10T00:00:00");
+      const mergeRequests = new MergeRequestsBuilder(1).total(78).forPeriod(start, end).build();
 
-      const requestsByPeriod = mergeRequestsByPeriod(new MergeRequestStats(mergeRequests));
+      const requestsByPeriod = mergeRequestsByPeriod(
+        new MergeRequestStats(mergeRequests, {
+          start,
+          end,
+        })
+      );
 
-      expect(requestsByPeriod.map((stat) => stat.index)).toStrictEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+      expect(requestsByPeriod.map((stat) => stat.index)).toStrictEqual([1, 2, 3, 4, 5, 6]);
+      expect(requestsByPeriod.map((stat) => stat.unit)).toStrictEqual(Array(6).fill("Week"));
+    });
+
+    it("should move to month period when duration between 2 dates are over 2 months", () => {
+      const start = parseISO("2023-01-01T00:00:00");
+      const end = parseISO("2023-03-24T00:00:00");
+      const mergeRequests = new MergeRequestsBuilder(1).total(78).forPeriod(start, end).build();
+
+      const requestsByPeriod = mergeRequestsByPeriod(
+        new MergeRequestStats(mergeRequests, {
+          start,
+          end,
+        })
+      );
+
+      expect(requestsByPeriod.map((stat) => stat.index)).toStrictEqual([0, 1, 2]);
+      expect(requestsByPeriod.map((stat) => stat.unit)).toStrictEqual(Array(3).fill("Month"));
     });
   });
 });
