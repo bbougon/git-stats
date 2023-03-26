@@ -16,6 +16,8 @@
       "es6",
       "scripthost",
       "es2015.promise",
+      "ES2017.Object",
+      "ES2015.Collection"
     ],
     "jsx": "react"
   },

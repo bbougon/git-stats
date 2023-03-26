@@ -52,6 +52,7 @@ export class MergeRequestsBuilder {
   private _numberOfMergeRequests: number;
   private _period: { from: Date; to: Date };
   private _emptyPeriodNumber: number | undefined = undefined;
+  private _doNotMergeYetRandomly = false;
   constructor(projectId: number) {
     this._projectId = projectId;
     this._numberOfMergeRequests = 5;
@@ -73,6 +74,11 @@ export class MergeRequestsBuilder {
     return this;
   };
 
+  randomlyNotMerged = (): MergeRequestsBuilder => {
+    this._doNotMergeYetRandomly = true;
+    return this;
+  };
+
   build = (): MergeRequest[] => {
     const requests = [];
     const daysInPeriod = differenceInCalendarDays(this._period.to, this._period.from);
@@ -90,12 +96,13 @@ export class MergeRequestsBuilder {
         const daysToMerge = Math.floor(Math.random() * (daysInPeriod - daysForCreation) + daysForCreation + 1);
         mergedAt = addDays(this._period.from, daysToMerge);
         if (this._emptyPeriodNumber == undefined || getWeek(mergedAt) !== this._emptyPeriodNumber) {
-          requests.push(
-            new MergeRequestBuilder(this._projectId)
-              .createdAt(addDays(this._period.from, daysForCreation))
-              .mergedAt(mergedAt)
-              .build()
-          );
+          let mergeRequestBuilder = new MergeRequestBuilder(this._projectId)
+            .createdAt(addDays(this._period.from, daysForCreation))
+            .mergedAt(mergedAt);
+          if (this._doNotMergeYetRandomly && Math.random() > 0.8) {
+            mergeRequestBuilder = mergeRequestBuilder.notYetMerged();
+          }
+          requests.push(mergeRequestBuilder.build());
         }
       }
     }

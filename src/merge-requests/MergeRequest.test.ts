@@ -157,6 +157,22 @@ describe("Merge requests statistics", () => {
       expect(requestsByPeriod.map((stat) => stat.index)).toStrictEqual([0, 1, 2]);
       expect(requestsByPeriod.map((stat) => stat.unit)).toStrictEqual(Array(3).fill("Month"));
     });
+
+    it("should sort period for months according to year overlap", () => {
+      const start = parseISO("2022-10-01T00:00:00");
+      const end = parseISO("2023-03-28T00:00:00");
+      const mergeRequests = new MergeRequestsBuilder(1).total(120).forPeriod(start, end).randomlyNotMerged().build();
+
+      const requestsByPeriod = mergeRequestsByPeriod(
+        new MergeRequestStats(mergeRequests, {
+          start,
+          end,
+        })
+      );
+
+      expect(requestsByPeriod.map((stat) => stat.index)).toStrictEqual([9, 10, 11, 0, 1, 2]);
+      expect(requestsByPeriod.map((stat) => stat.unit)).toStrictEqual(Array(6).fill("Month"));
+    });
   });
 });
 

@@ -38,7 +38,9 @@ export class MergeRequestStats {
   constructor(private readonly mergeRequests: MergeRequest[], public readonly period: Period) {}
 
   public sortedMergeRequests(): MergeRequest[] {
-    return this.mergeRequests.sort((mr, mrToCompare) => compareAsc(mr.mergedAt, mrToCompare.mergedAt));
+    return this.mergeRequests
+      .sort((mr, mrToCompare) => compareAsc(mr.createdAt, mrToCompare.createdAt))
+      .sort((mr, mrToCompare) => compareAsc(mr.mergedAt, mrToCompare.mergedAt));
   }
 
   result = (): MergeRequestStatsResult => {
@@ -76,12 +78,10 @@ export const mergeRequestsStats = (
 };
 
 type Unit = string | "Week" | "Month";
-type PeriodIndex = number;
-
 export type Dimension = { unit: Unit; index: number; mr: number };
 
 export const mergeRequestsByPeriod = (mergeRequestStats: MergeRequestStats): Dimension[] => {
-  const stats: Map<PeriodIndex, Dimension> = new Map<PeriodIndex, Dimension>();
+  const stats: [number, [number, Dimension][]][] = [];
   const duration = intervalToDuration({ start: mergeRequestStats.period.start, end: mergeRequestStats.period.end });
   const moreThan2Months = duration.months > 1 && duration.months + duration.days > 2;
   const unit = moreThan2Months ? "Month" : "Week";
@@ -89,20 +89,35 @@ export const mergeRequestsByPeriod = (mergeRequestStats: MergeRequestStats): Dim
     .sortedMergeRequests()
     .filter((mr) => mr.mergedAt !== null)
     .forEach((mr) => {
+      const year = mr.mergedAt.getFullYear();
       const index = moreThan2Months ? getMonth(mr.mergedAt) : getWeek(mr.mergedAt);
-      if (stats.has(index)) {
-        const dimension = stats.get(index);
-        dimension.mr = dimension.mr + 1;
-        stats.set(index, dimension);
+      if (stats.length === 0) {
+        stats.push([year, [[index, { unit, index, mr: 1 }]]]);
       } else {
-        stats.set(index, { unit, index, mr: 1 });
+        const yearStats = stats.filter((stat) => stat[0] === year);
+        if (yearStats.length === 0) {
+          stats.push([year, [[index, { unit, index, mr: 1 }]]]);
+        } else {
+          const periodStats = yearStats[0][1].filter((stat) => stat[0] === index);
+          if (periodStats.length === 0) {
+            yearStats[0][1].push([index, { unit, index, mr: 1 }]);
+          } else {
+            const dimension = periodStats[0][1];
+            dimension.mr = dimension.mr + 1;
+          }
+        }
       }
     });
-  const lastKey = Array.from(stats.keys())[stats.size - 1];
-  for (const key of stats.keys()) {
-    if (stats.get(key + 1) == undefined && key + 1 < lastKey) {
-      stats.set(key + 1, { index: key + 1, mr: 0, unit });
+  const result: Dimension[] = [];
+  for (const stat of stats) {
+    const flattenDimensions = stat[1].flatMap((val) => val[1]).flatMap((val) => val);
+    const periods = flattenDimensions.map((val) => val.index);
+    for (let i = 0; i < periods.length; i++) {
+      if (i + 1 < periods.length && periods[i + 1] !== periods[i] + 1) {
+        flattenDimensions.push({ unit, index: periods[i] + 1, mr: 0 });
+      }
     }
+    result.push(...flattenDimensions.sort((stat, nextStat) => (stat.index > nextStat.index ? 1 : -1)));
   }
-  return Array.from(stats.values()).sort((stat, nextStat) => (stat.index > nextStat.index ? 1 : -1));
+  return result;
 };
