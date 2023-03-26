@@ -2,6 +2,7 @@ import { Writer } from "../../../index";
 import { mergeRequestsByPeriod, MergeRequestStats } from "../../merge-requests/MergeRequest";
 import * as fs from "fs";
 import { intlFormat } from "date-fns";
+import open from "open";
 
 class HTMLContentBuilder {
   private stats: MergeRequestStats;
@@ -46,12 +47,18 @@ class HTMLContentBuilder {
       .replace("__AVERAGE_DAYS__", String(aggregatedStats.average.days))
       .replace("__AVERAGE_HOURS__", String(aggregatedStats.average.hours))
       .replace("__TOTAL_MERGED__", String(aggregatedStats.total.merged))
+      .replace("__TOTAL_OPENED__", String(aggregatedStats.total.opened))
       .replace("__TOTAL_CLOSED__", String(aggregatedStats.total.closed))
       .replace("__TOTAL_OVERALL__", String(aggregatedStats.total.all))
-      .replace("__MERGE_REQUESTS_DOUGHNUT_CHART_LABELS__", JSON.stringify(["Merged", "Closed", "All"]))
+      .replace("__MERGE_REQUESTS_DOUGHNUT_CHART_LABELS__", JSON.stringify(["Merged", "Opened", "Closed", "All"]))
       .replace(
         "__MERGE_REQUESTS_DOUGHNUT_CHART_DATA__",
-        JSON.stringify([aggregatedStats.total.merged, aggregatedStats.total.closed, aggregatedStats.total.all])
+        JSON.stringify([
+          aggregatedStats.total.merged,
+          aggregatedStats.total.opened,
+          aggregatedStats.total.closed,
+          aggregatedStats.total.all,
+        ])
       );
   };
 }
@@ -66,6 +73,7 @@ export class HTMLWriter implements Writer {
   write(stats: { stats: MergeRequestStats; period: { fromDate: Date; toDate: Date } }): void {
     try {
       fs.writeFileSync(`${this._filePath}/index.html`, new HTMLContentBuilder(stats).build());
+      open(`${this._filePath}/index.html`)
     } catch (e) {
       console.log(e);
     }

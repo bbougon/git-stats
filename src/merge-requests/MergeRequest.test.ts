@@ -47,7 +47,10 @@ describe("Merge requests statistics", () => {
         repository
       );
 
-      expect(stats.result()).toEqual({ average: { days: 3, hours: 72 }, total: { all: 3, merged: 3, closed: 0 } });
+      expect(stats.result()).toEqual({
+        average: { days: 3, hours: 72 },
+        total: { all: 3, merged: 3, closed: 0, opened: 0 },
+      });
     });
 
     it("should have merge request average when merge request is not merged yet", async () => {
@@ -69,7 +72,10 @@ describe("Merge requests statistics", () => {
         repository
       );
 
-      expect(stats.result()).toEqual({ average: { days: 1.04, hours: 25 }, total: { all: 2, merged: 1, closed: 0 } });
+      expect(stats.result()).toEqual({
+        average: { days: 1.04, hours: 25 },
+        total: { all: 2, merged: 1, closed: 0, opened: 1 },
+      });
     });
 
     it("should have merge request average with closed merge requests", async () => {
@@ -96,7 +102,10 @@ describe("Merge requests statistics", () => {
         repository
       );
 
-      expect(stats.result()).toEqual({ average: { days: 1.04, hours: 25 }, total: { all: 2, merged: 1, closed: 1 } });
+      expect(stats.result()).toEqual({
+        average: { days: 1.04, hours: 25 },
+        total: { all: 2, merged: 1, closed: 1, opened: 0 },
+      });
     });
   });
 

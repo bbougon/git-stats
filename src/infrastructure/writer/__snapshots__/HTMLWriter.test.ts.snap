@@ -23,6 +23,9 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
                     <div class="col-sm"># Merged</div><div class="col-sm-8">3</div>
                 </div>
                 <div class="row">
+                    <div class="col-sm"># Opened</div><div class="col-sm-8">0</div>
+                </div>
+                <div class="row">
                     <div class="col-sm"># Closed</div><div class="col-sm-8">0</div>
                 </div>
                 <div class="row">
@@ -55,10 +58,10 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
 
     const aggregatedMergeRequestContext = document.getElementById("aggregated-merge-requests")
     const aggregatedMergeRequestChartType = 'doughnut'
-    const aggregatedMergeRequestChartLabels = ["Merged","Closed","All"]
+    const aggregatedMergeRequestChartLabels = ["Merged","Opened","Closed","All"]
     const aggregatedMergeRequestChartDatasets =    [{
         label: 'Aggregated merge requests',
-        data: [3,0,3],
+        data: [3,0,0,3],
         hoverOffset: 4
     }]
 
@@ -110,6 +113,9 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
                     <div class="col-sm"># Merged</div><div class="col-sm-8">2</div>
                 </div>
                 <div class="row">
+                    <div class="col-sm"># Opened</div><div class="col-sm-8">1</div>
+                </div>
+                <div class="row">
                     <div class="col-sm"># Closed</div><div class="col-sm-8">0</div>
                 </div>
                 <div class="row">
@@ -142,10 +148,10 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
 
     const aggregatedMergeRequestContext = document.getElementById("aggregated-merge-requests")
     const aggregatedMergeRequestChartType = 'doughnut'
-    const aggregatedMergeRequestChartLabels = ["Merged","Closed","All"]
+    const aggregatedMergeRequestChartLabels = ["Merged","Opened","Closed","All"]
     const aggregatedMergeRequestChartDatasets =    [{
         label: 'Aggregated merge requests',
-        data: [2,0,3],
+        data: [2,1,0,3],
         hoverOffset: 4
     }]
 

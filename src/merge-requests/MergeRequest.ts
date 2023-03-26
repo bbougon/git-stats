@@ -27,6 +27,7 @@ type MergeRequestStatsResult = {
   total: {
     merged: number;
     closed: number;
+    opened: number;
     all: number;
   };
 };
@@ -45,6 +46,7 @@ export class MergeRequestStats {
   result = (): MergeRequestStatsResult => {
     const mergedMergeRequests = this._mergeRequests.filter((mr) => mr.mergedAt !== null);
     const closedMergeRequests = this._mergeRequests.filter((mr) => mr.closedAt !== null);
+    const openedMergeRequests = this._mergeRequests.filter((mr) => mr.mergedAt === null && mr.closedAt == null);
     const hoursSpent = mergedMergeRequests.reduce(
       (accumulator, currentValue) => accumulator + differenceInHours(currentValue.mergedAt, currentValue.createdAt),
       0
@@ -57,6 +59,7 @@ export class MergeRequestStats {
       total: {
         merged: mergedMergeRequests.length,
         closed: closedMergeRequests.length,
+        opened: openedMergeRequests.length,
         all: this._mergeRequests.length,
       },
     };

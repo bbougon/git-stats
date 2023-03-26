@@ -32,20 +32,28 @@
     "chart.js": "^4.2.1",
     "commander": "^10.0.0",
     "date-fns": "^2.29.3",
+    "open": "^9.0.0",
     "parse-link-header": "^2.0.0"
   },
   "jest": {
     "reporters": [
       "default",
-      ["jest-html-reporters", {
-        "publicPath": "./html-report",
-        "filename": "report.html",
-        "openReport": true
-      }]
+      [
+        "jest-html-reporters",
+        {
+          "publicPath": "./html-report",
+          "filename": "report.html",
+          "openReport": true
+        }
+      ]
     ],
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "testPathIgnorePatterns": ["<rootDir>/src/__tests__/builder.ts"],
-    "coveragePathIgnorePatterns": ["/__snapshots__/"]
+    "testPathIgnorePatterns": [
+      "<rootDir>/src/__tests__/builder.ts"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/__snapshots__/"
+    ]
   }
 }
