@@ -47,7 +47,12 @@ class HTMLContentBuilder {
       .replace("__AVERAGE_HOURS__", String(aggregatedStats.average.hours))
       .replace("__TOTAL_MERGED__", String(aggregatedStats.total.merged))
       .replace("__TOTAL_CLOSED__", String(aggregatedStats.total.closed))
-      .replace("__TOTAL_OVERALL__", String(aggregatedStats.total.all));
+      .replace("__TOTAL_OVERALL__", String(aggregatedStats.total.all))
+      .replace("__MERGE_REQUESTS_DOUGHNUT_CHART_LABELS__", JSON.stringify(["Merged", "Closed", "All"]))
+      .replace(
+        "__MERGE_REQUESTS_DOUGHNUT_CHART_DATA__",
+        JSON.stringify([aggregatedStats.total.merged, aggregatedStats.total.closed, aggregatedStats.total.all])
+      );
   };
 }
 

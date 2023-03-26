@@ -12,16 +12,23 @@
     <div class="container-sm text-left">
         <h3>Aggregated Statistics</h3>
         <div class="row">
-            <div class="col-sm">Average time to merge</div><div class="col-sm-4">__AVERAGE_DAYS__ days</div><div class="col-sm-4">__AVERAGE_HOURS__ hours</div>
-        </div>
-        <div class="row">
-            <div class="col-sm"># Merged</div><div class="col-sm-8">__TOTAL_MERGED__</div>
-        </div>
-        <div class="row">
-            <div class="col-sm"># Closed</div><div class="col-sm-8">__TOTAL_CLOSED__</div>
-        </div>
-        <div class="row">
-            <div class="col-sm"># Overall</div><div class="col-sm-8">__TOTAL_OVERALL__</div>
+            <div class="col-lg-10">
+                <div class="row">
+                    <div class="col-sm">Average time to merge</div><div class="col-sm-4">__AVERAGE_DAYS__ days</div><div class="col-sm-4">__AVERAGE_HOURS__ hours</div>
+                </div>
+                <div class="row">
+                    <div class="col-sm"># Merged</div><div class="col-sm-8">__TOTAL_MERGED__</div>
+                </div>
+                <div class="row">
+                    <div class="col-sm"># Closed</div><div class="col-sm-8">__TOTAL_CLOSED__</div>
+                </div>
+                <div class="row">
+                    <div class="col-sm"># Overall</div><div class="col-sm-8">__TOTAL_OVERALL__</div>
+                </div>
+            </div>
+            <div class="col-lg-2">
+                <canvas id="aggregated-merge-requests"></canvas>
+            </div>
         </div>
     </div>
     <div class="container-sm">
@@ -43,6 +50,14 @@
     }]
     const mergeRequestChartLabels = __MERGE_REQUESTS_LINE_CHART_LABELS__
 
+    const aggregatedMergeRequestContext = document.getElementById("aggregated-merge-requests")
+    const aggregatedMergeRequestChartType = 'doughnut'
+    const aggregatedMergeRequestChartLabels = __MERGE_REQUESTS_DOUGHNUT_CHART_LABELS__
+    const aggregatedMergeRequestChartDatasets =    [{
+        label: 'Aggregated merge requests',
+        data: __MERGE_REQUESTS_DOUGHNUT_CHART_DATA__,
+        hoverOffset: 4
+    }]
 
     function renderChart(context, type, labels, datasets) {
         new Chart(context, {
@@ -62,6 +77,7 @@
     }
 
     renderChart(mergeRequestContext, mergeRequestChartType, mergeRequestChartLabels, mergeRequestChartDatasets);
+    renderChart(aggregatedMergeRequestContext, aggregatedMergeRequestChartType, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets);
 </script>
 
 </body>

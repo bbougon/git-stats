@@ -15,16 +15,23 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
     <div class="container-sm text-left">
         <h3>Aggregated Statistics</h3>
         <div class="row">
-            <div class="col-sm">Average time to merge</div><div class="col-sm-4">2.14 days</div><div class="col-sm-4">51.33 hours</div>
-        </div>
-        <div class="row">
-            <div class="col-sm"># Merged</div><div class="col-sm-8">3</div>
-        </div>
-        <div class="row">
-            <div class="col-sm"># Closed</div><div class="col-sm-8">0</div>
-        </div>
-        <div class="row">
-            <div class="col-sm"># Overall</div><div class="col-sm-8">3</div>
+            <div class="col-lg-10">
+                <div class="row">
+                    <div class="col-sm">Average time to merge</div><div class="col-sm-4">2.14 days</div><div class="col-sm-4">51.33 hours</div>
+                </div>
+                <div class="row">
+                    <div class="col-sm"># Merged</div><div class="col-sm-8">3</div>
+                </div>
+                <div class="row">
+                    <div class="col-sm"># Closed</div><div class="col-sm-8">0</div>
+                </div>
+                <div class="row">
+                    <div class="col-sm"># Overall</div><div class="col-sm-8">3</div>
+                </div>
+            </div>
+            <div class="col-lg-2">
+                <canvas id="aggregated-merge-requests"></canvas>
+            </div>
         </div>
     </div>
     <div class="container-sm">
@@ -46,6 +53,14 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
     }]
     const mergeRequestChartLabels = ["Week 7","Week 8"]
 
+    const aggregatedMergeRequestContext = document.getElementById("aggregated-merge-requests")
+    const aggregatedMergeRequestChartType = 'doughnut'
+    const aggregatedMergeRequestChartLabels = ["Merged","Closed","All"]
+    const aggregatedMergeRequestChartDatasets =    [{
+        label: 'Aggregated merge requests',
+        data: [3,0,3],
+        hoverOffset: 4
+    }]
 
     function renderChart(context, type, labels, datasets) {
         new Chart(context, {
@@ -65,6 +80,7 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
     }
 
     renderChart(mergeRequestContext, mergeRequestChartType, mergeRequestChartLabels, mergeRequestChartDatasets);
+    renderChart(aggregatedMergeRequestContext, aggregatedMergeRequestChartType, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets);
 </script>
 
 </body>
@@ -86,16 +102,23 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
     <div class="container-sm text-left">
         <h3>Aggregated Statistics</h3>
         <div class="row">
-            <div class="col-sm">Average time to merge</div><div class="col-sm-4">3.13 days</div><div class="col-sm-4">75 hours</div>
-        </div>
-        <div class="row">
-            <div class="col-sm"># Merged</div><div class="col-sm-8">2</div>
-        </div>
-        <div class="row">
-            <div class="col-sm"># Closed</div><div class="col-sm-8">0</div>
-        </div>
-        <div class="row">
-            <div class="col-sm"># Overall</div><div class="col-sm-8">3</div>
+            <div class="col-lg-10">
+                <div class="row">
+                    <div class="col-sm">Average time to merge</div><div class="col-sm-4">3.13 days</div><div class="col-sm-4">75 hours</div>
+                </div>
+                <div class="row">
+                    <div class="col-sm"># Merged</div><div class="col-sm-8">2</div>
+                </div>
+                <div class="row">
+                    <div class="col-sm"># Closed</div><div class="col-sm-8">0</div>
+                </div>
+                <div class="row">
+                    <div class="col-sm"># Overall</div><div class="col-sm-8">3</div>
+                </div>
+            </div>
+            <div class="col-lg-2">
+                <canvas id="aggregated-merge-requests"></canvas>
+            </div>
         </div>
     </div>
     <div class="container-sm">
@@ -117,6 +140,14 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
     }]
     const mergeRequestChartLabels = ["Week 8"]
 
+    const aggregatedMergeRequestContext = document.getElementById("aggregated-merge-requests")
+    const aggregatedMergeRequestChartType = 'doughnut'
+    const aggregatedMergeRequestChartLabels = ["Merged","Closed","All"]
+    const aggregatedMergeRequestChartDatasets =    [{
+        label: 'Aggregated merge requests',
+        data: [2,0,3],
+        hoverOffset: 4
+    }]
 
     function renderChart(context, type, labels, datasets) {
         new Chart(context, {
@@ -136,6 +167,7 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
     }
 
     renderChart(mergeRequestContext, mergeRequestChartType, mergeRequestChartLabels, mergeRequestChartDatasets);
+    renderChart(aggregatedMergeRequestContext, aggregatedMergeRequestChartType, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets);
 </script>
 
 </body>
