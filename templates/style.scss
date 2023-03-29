@@ -1,0 +1,41 @@
+@import "../node_modules/bootstrap/scss/functions";
+@import "../node_modules/bootstrap/scss/variables";
+
+$total: rgb(255, 205, 86);
+$opened: rgb(255, 99, 132);
+$closed: rgb(255, 159, 64);
+$merged: rgb(54, 162, 235);
+
+$stats-colors: (
+"total": $total,
+"opened": $opened,
+"closed": $closed,
+"merged": $merged,
+
+);
+
+$theme-colors: map-merge($theme-colors, $stats-colors);
+
+@each $color, $value in $theme-colors {
+  .swatch-#{$color} {
+    color: color-contrast($value);
+  }
+}
+
+.text-bg-total {
+  color: $white;
+}
+
+.text-bg-opened {
+  color: $white;
+}
+
+.text-bg-closed {
+  color: $white;
+}
+
+.text-bg-merged {
+  color: $white;
+}
+
+@import "../node_modules/bootstrap/scss/bootstrap";

@@ -5,9 +5,11 @@ Provide statistics usage of your gitlab projects
 ## Setup
 **Prerequisites**
 - Node v18.15
+- **[Optional]** sass (`pm install -g sass`)
 
 **Installation**
 - Run `npm run build` will build the module in `./dist` 
+- **[Optional]** Run `sass templates/style.scss style.css` to build the stylesheet
 
 ## Usage
 - `npm dist/index.js --help` will print:
