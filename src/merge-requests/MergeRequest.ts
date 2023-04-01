@@ -94,16 +94,53 @@ export class Dimension {
   }
 }
 
-function fillEmptyPeriodsAndSortChronologically(stats: [number, [number, Dimension][]][], unit: string) {
+function fillEmptyPeriodsAndSortChronologically(
+  stats: [number, [number, Dimension][]][],
+  unit: string,
+  period: Period
+) {
   const result: Dimension[] = [];
-  stats.forEach((stat) => {
-    const flattenDimensions = stat[1].flatMap((val) => val[1]).flatMap((val) => val);
-    const periods = flattenDimensions.map((val) => val.index);
-    for (let i = 0; i < periods.length; i++) {
-      if (i + 1 < periods.length && periods[i + 1] !== periods[i] + 1) {
-        flattenDimensions.push(Dimension.empty(unit, periods[i] + 1));
+
+  const fillPeriodTail = (stat: [number, [number, Dimension][]], dimensions: Dimension[]): void => {
+    let periodEndIndex: number | undefined = undefined;
+    if (stat[0] === period.end.getFullYear()) {
+      periodEndIndex = unit === "Week" ? getWeek(period.end) : getMonth(period.end);
+    }
+    if (
+      periodEndIndex !== undefined &&
+      dimensions.find((dimension) => dimension.index === periodEndIndex) === undefined
+    ) {
+      const dimensionsLength = dimensions.length;
+      for (let i = 0; i <= periodEndIndex - dimensionsLength; i++) {
+        dimensions.push(Dimension.empty(unit, periodEndIndex - i));
       }
     }
+  };
+
+  const fillPeriodInterval = (stat: [number, [number, Dimension][]], dimensions: Dimension[]): void => {
+    const periods = dimensions.map((val) => val.index);
+    const periodStartIndex =
+      stat[0] === period.start.getFullYear() ? (unit === "Week" ? getWeek(period.start) : getMonth(period.start)) : 0;
+    for (let i = 0; i < periodStartIndex + periods.length; i++) {
+      if (periodStartIndex <= i) {
+        let j = i;
+        while (j < periods[i - periodStartIndex]) {
+          if (dimensions.find((dimension) => dimension.index === j) === undefined) {
+            dimensions.push(Dimension.empty(unit, j));
+          }
+          j++;
+        }
+      }
+    }
+  };
+
+  stats.forEach((stat) => {
+    const flattenDimensions = stat[1]
+      .flatMap((val) => val[1])
+      .flatMap((val) => val)
+      .sort((dimension, nextDimension) => (dimension.index > nextDimension.index ? 1 : -1));
+    fillPeriodInterval(stat, flattenDimensions);
+    fillPeriodTail(stat, flattenDimensions);
     result.push(...flattenDimensions.sort((stat, nextStat) => (stat.index > nextStat.index ? 1 : -1)));
   });
   return result;
@@ -137,5 +174,5 @@ export const mergeRequestsByPeriod = (mergeRequestStats: MergeRequestStats): Dim
         }
       }
     });
-  return fillEmptyPeriodsAndSortChronologically(stats, unit);
+  return fillEmptyPeriodsAndSortChronologically(stats, unit, mergeRequestStats.period);
 };

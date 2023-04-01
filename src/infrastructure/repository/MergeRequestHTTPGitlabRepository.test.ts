@@ -44,7 +44,7 @@ describe("Gitlab Repository", () => {
         {
           status: 200,
           headers: {
-            link: "<http://gitlab/merge_requests?order_by=created_at&page=2>; rel='next', <http://gitlab/merge_requests?order_by=created_at&page=1>; rel='first', <http://gitlab/merge_requests?order_by=created_at&page=3>; rel='last'",
+            link: '<http://gitlab/merge_requests?order_by=created_at&page=2>; rel="next", <http://gitlab/merge_requests?order_by=created_at&page=1>; rel="first", <http://gitlab/merge_requests?order_by=created_at&page=3>; rel="last"',
           },
         },
       ],
@@ -53,7 +53,7 @@ describe("Gitlab Repository", () => {
         {
           status: 200,
           headers: {
-            link: "<http://gitlab/merge_requests?order_by=created_at&page=3>; rel='next', <http://gitlab/merge_requests?order_by=created_at&page=1>; rel='first', <http://gitlab/merge_requests?order_by=created_at&page=3>; rel='last'",
+            link: '<http://gitlab/merge_requests?order_by=created_at&page=3>; rel="next", <http://gitlab/merge_requests?order_by=created_at&page=1>; rel="first", <http://gitlab/merge_requests?order_by=created_at&page=3>; rel="last"',
           },
         },
       ],
@@ -62,7 +62,7 @@ describe("Gitlab Repository", () => {
         {
           status: 200,
           headers: {
-            link: "<http://gitlab/merge_requests?order_by=created_at&page=1>; rel='first', <http://gitlab/merge_requests?order_by=created_at&page=1>; rel='last'",
+            link: '<http://gitlab/merge_requests?order_by=created_at&page=1>; rel="first", <http://gitlab/merge_requests?order_by=created_at&page=1>; rel="last"',
           },
         },
       ]

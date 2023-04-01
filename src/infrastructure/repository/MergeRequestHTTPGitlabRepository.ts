@@ -50,8 +50,8 @@ export class MergedRequestHTTPGitlabRepository
       const links = parseLinkHeader(response.headers.get("link"));
       const payload = await response.json();
       const requests = (payload as MergeRequestDTO[]).map((mr) => fromDTO(mr));
-      if (links["'next'"] !== undefined) {
-        return this.paginate(links["'next'"].url, requests).then((mrs) =>
+      if (links["next"] !== undefined) {
+        return this.paginate(links["next"].url, requests).then((mrs) =>
           mrs.filter((mr) => this.isMergeRequestInExpectedPeriod(mr, fromDate, toDate))
         );
       }
@@ -69,8 +69,8 @@ export class MergedRequestHTTPGitlabRepository
       const payload = await response.json();
       const mergeRequestDTO = payload as MergeRequestDTO[];
       result.push(...mergeRequestDTO.map((mr) => fromDTO(mr)));
-      if (links["'next'"] !== undefined) {
-        return this.paginate(links["'next'"].url, result).then((mrs) => mrs);
+      if (links["next"] !== undefined) {
+        return this.paginate(links["next"].url, result).then((mrs) => mrs);
       }
       return Promise.resolve(result);
     });

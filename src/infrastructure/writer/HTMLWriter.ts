@@ -4,7 +4,6 @@ import * as fs from "fs";
 import { intlFormat } from "date-fns";
 import { openBrowser } from "./OpenBrowser.js";
 import * as pug from "pug";
-import { stringify } from "ts-jest";
 
 const HUMAN_READABLE_MONTHS = [
   "January",
@@ -18,7 +17,7 @@ const HUMAN_READABLE_MONTHS = [
   "September",
   "October",
   "November",
-  "december",
+  "December",
 ];
 
 class HTMLContentBuilder {

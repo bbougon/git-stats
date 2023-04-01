@@ -173,6 +173,36 @@ describe("Merge requests statistics", () => {
       expect(requestsByPeriod.map((stat) => stat.index)).toStrictEqual([9, 10, 11, 0, 1, 2]);
       expect(requestsByPeriod.map((stat) => stat.unit)).toStrictEqual(Array(6).fill("Month"));
     });
+
+    it("should fill empty periods", () => {
+      const start = parseISO("2020-01-01T00:00:00");
+      const end = parseISO("2020-12-31T00:00:00");
+      const mergeRequests = [
+        new MergeRequestBuilder(1)
+          .createdAt(parseISO("2020-03-01T00:00:00"))
+          .mergedAt(parseISO("2020-03-12T00:00:00"))
+          .build(),
+        new MergeRequestBuilder(1)
+          .createdAt(parseISO("2020-06-08T00:00:00"))
+          .mergedAt(parseISO("2020-06-09T00:00:00"))
+          .build(),
+        new MergeRequestBuilder(1)
+          .createdAt(parseISO("2020-08-12T00:00:00"))
+          .mergedAt(parseISO("2020-08-14T00:00:00"))
+          .build(),
+      ];
+
+      const requestsByPeriod = mergeRequestsByPeriod(
+        new MergeRequestStats(mergeRequests, {
+          start,
+          end,
+        })
+      );
+
+      expect(requestsByPeriod.map((stat) => stat.index)).toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+      expect(requestsByPeriod.map((stat) => stat.mr)).toStrictEqual([0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0]);
+      expect(requestsByPeriod.map((stat) => stat.unit)).toStrictEqual(Array(12).fill("Month"));
+    });
   });
 });
 
