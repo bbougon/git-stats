@@ -39,4 +39,6 @@ Provide statistics usage of your gitlab projects
   }
   ```
 - ` node dist/index.js mr <TOKEN> <PROJECT_ID> <PERIOD> --format html` (<PERIOD> in the following format `2023-01-01,2023-01-31`) will generate an `index.html` in the root project that will automatically open after generation.
+
+  **example:**
   ![](documentation/chart_screenshot.png)

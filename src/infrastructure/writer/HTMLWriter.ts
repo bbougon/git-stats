@@ -3,6 +3,8 @@ import { Dimension, mergeRequestsByPeriod, MergeRequestStats } from "../../merge
 import * as fs from "fs";
 import { intlFormat } from "date-fns";
 import { openBrowser } from "./OpenBrowser.js";
+import * as pug from "pug";
+import { stringify } from "ts-jest";
 
 const HUMAN_READABLE_MONTHS = [
   "January",
@@ -23,6 +25,22 @@ class HTMLContentBuilder {
   constructor(private readonly stats: MergeRequestStats) {}
 
   build = (): string => {
+    const humanizeDate = (date: Date): string => {
+      return intlFormat(date, {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    };
+    const stringify = (obj: string): string => {
+      return JSON.stringify(obj)
+        .replace(/\u2028/g, "\\u2028")
+        .replace(/\u2029/g, "\\u2029")
+        .replace(/</g, "\\u003C")
+        .replace(/>/g, "\\u003E")
+        .replace(/\//g, "\\u002F");
+    };
     const stats = mergeRequestsByPeriod(this.stats);
     const labels: string[] = [];
     const data: number[] = [];
@@ -30,45 +48,16 @@ class HTMLContentBuilder {
       labels.push(this.buildLabel(stat));
       data.push(stat.mr);
     }
-    const htmlPage = fs.readFileSync("./templates/template.html", "utf-8");
+
     const aggregatedStats = this.stats.result();
-    return htmlPage
-      .replace("__MERGE_REQUESTS_LINE_CHART_LABELS__", JSON.stringify(labels))
-      .replace("__MERGE_REQUESTS_LINE_CHART_DATA__", JSON.stringify(data))
-      .replace(
-        /__FROM__/g,
-        intlFormat(this.stats.period.start, {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })
-      )
-      .replace(
-        /__TO__/g,
-        intlFormat(this.stats.period.end, {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })
-      )
-      .replace("__AVERAGE_DAYS__", String(aggregatedStats.average.days))
-      .replace("__AVERAGE_HOURS__", String(aggregatedStats.average.hours))
-      .replace("__TOTAL_MERGED__", String(aggregatedStats.total.merged))
-      .replace("__TOTAL_OPENED__", String(aggregatedStats.total.opened))
-      .replace("__TOTAL_CLOSED__", String(aggregatedStats.total.closed))
-      .replace("__TOTAL_OVERALL__", String(aggregatedStats.total.all))
-      .replace("__MERGE_REQUESTS_DOUGHNUT_CHART_LABELS__", JSON.stringify(["Merged", "Opened", "Closed", "All"]))
-      .replace(
-        "__MERGE_REQUESTS_DOUGHNUT_CHART_DATA__",
-        JSON.stringify([
-          aggregatedStats.total.merged,
-          aggregatedStats.total.opened,
-          aggregatedStats.total.closed,
-          aggregatedStats.total.all,
-        ])
-      );
+    const start = humanizeDate(this.stats.period.start);
+    const end = humanizeDate(this.stats.period.end);
+    const fn = pug.compileFile("./templates/template.pug", { pretty: true });
+    return fn({
+      stringify,
+      period: { start, end },
+      stats: { mr: { data, labels }, ...aggregatedStats },
+    });
   };
 
   private buildLabel(stat: Dimension) {

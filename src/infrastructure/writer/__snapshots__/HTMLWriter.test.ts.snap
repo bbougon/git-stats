@@ -3,404 +3,392 @@
 exports[`HTML writer should generate an HTML report file for merged requests 1`] = `
 "<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link href="style.css" rel="stylesheet">
+  <head>
     <title>Report Friday, February 11, 2022 to Thursday, February 17, 2022</title>
-</head>
-<body>
-
-<div>
-    <h2>Merge requests for period Friday, February 11, 2022 to Thursday, February 17, 2022</h2>
-    <div class="container-sm text-left">
+    <link href="style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div>
+      <h2>Merge requests for period Friday, February 11, 2022 to Thursday, February 17, 2022</h2>
+      <div class="container-sm text-left">
         <h3>Aggregated Statistics</h3>
         <div class="row">
-            <div class="col-lg-10 text-secondary">
-                <div class="row">
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                        <div class="card mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">2.14</h5>
-                                <p class="card-text"><em>Average time in days</em></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                        <div class="card mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">51.33</h5>
-                                <p class="card-text"><em>Average time in hours</em></p>
-                            </div>
-                        </div>
-                    </div>
+          <div class="col-lg-10 text-secondary">
+            <div class="row">
+              <div class="col-sm-6 mb-3 mb-sm-0">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title">2.14</h5>
+                    <p class="card-text"><em>Average time in days</em></p>
+                  </div>
                 </div>
-                <div class="row">
-                    <div class="col-sm-3 mb-3 mb-sm-0">
-                        <div class="card mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-merged">3</h5>
-                                <p class="card-text"><em># Merged</em></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-3 mb-3 mb-sm-0">
-                        <div class="card mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-opened">0</h5>
-                                <p class="card-text"><em># Opened</em></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-3 mb-3 mb-sm-0">
-                        <div class="card mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-closed">0</h5>
-                                <p class="card-text"><em># Closed</em></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-3 mb-3 mb-sm-0">
-                        <div class="card mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-total">3</h5>
-                                <p class="card-text"><em># Overall</em></p>
-                            </div>
-                        </div>
-                    </div>
+              </div>
+              <div class="col-sm-6 mb-3 mb-sm-0">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title">51.33</h5>
+                    <p class="card-text"><em>Average time in hours</em></p>
+                  </div>
                 </div>
+              </div>
             </div>
-            <div class="col-lg-2">
-
-                <div class="row">
-
+            <div class="row">
+              <div class="col-sm-3 mb-3 mb-sm-0">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title text-merged">3</h5>
+                    <p class="card-text"><em># Merged</em></p>
+                  </div>
                 </div>
-                <div class="row">
-                    <div>
-                        <canvas id="aggregated-merge-requests"></canvas>
-                    </div>
+              </div>
+              <div class="col-sm-3 mb-3 mb-sm-0">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title text-opened">0</h5>
+                    <p class="card-text"><em># Opened</em></p>
+                  </div>
                 </div>
+              </div>
+              <div class="col-sm-3 mb-3 mb-sm-0">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title text-closed">0</h5>
+                    <p class="card-text"><em># Closed</em></p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-3 mb-3 mb-sm-0">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title text-total">3</h5>
+                    <p class="card-text"><em># Overall</em></p>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+          <div class="col-lg-2">
+            <div class="row">
+              <div>
+                <canvas id="aggregated-merge-requests"></canvas>
+              </div>
+            </div>
+          </div>
         </div>
-    </div>
-    <div class="container-sm">
+      </div>
+      <div class="container-sm">
         <canvas id="merge-request-merged"></canvas>
+      </div>
     </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    const mergeRequestContext = document.getElementById('merge-request-merged');
-    const mergeRequestChartType = 'line'
-    const mergeRequestChartDatasets = [{
-        label: '# of Merge Requests merged',
-        data: [1,2],
-        borderWidth: 3,
-        borderJoinStyle: "round",
-        tension: 0.2
-    }]
-    const mergeRequestChartLabels = ["Week 7","Week 8"]
-
-    const aggregatedMergeRequestContext = document.getElementById("aggregated-merge-requests")
-    const aggregatedMergeRequestChartType = 'doughnut'
-    const aggregatedMergeRequestChartLabels = ["Merged","Opened","Closed","All"]
-    const aggregatedMergeRequestChartDatasets =    [{
-        label: 'Aggregated merge requests',
-        data: [3,0,0,3],
-        hoverOffset: 4
-    }]
-
-    function renderChart(context, type, labels, datasets) {
-        new Chart(context, {
-            type: type,
-            data: {
-                labels: labels,
-                datasets: datasets,
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    }
-
-    renderChart(mergeRequestContext, mergeRequestChartType, mergeRequestChartLabels, mergeRequestChartDatasets);
-    renderChart(aggregatedMergeRequestContext, aggregatedMergeRequestChartType, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets);
-</script>
-
-</body>
+    <script type="text/javascript">
+      const mergeRequestContext = document.getElementById('merge-request-merged');
+      const mergeRequestChartType = 'line'
+      const mergeRequestChartDatasets = [{
+          label: '# of Merge Requests merged',
+          data: [1,2],
+          borderWidth: 3,
+          borderJoinStyle: "round",
+          tension: 0.2
+      }]
+      const mergeRequestChartLabels = ["Week 7","Week 8"]
+      
+      const aggregatedMergeRequestContext = document.getElementById("aggregated-merge-requests")
+      const aggregatedMergeRequestChartType = 'doughnut'
+      const aggregatedMergeRequestChartLabels = ['Merged', 'Opened', 'Closed', 'All']
+      const aggregatedMergeRequestChartDatasets =    [{
+          label: 'Aggregated merge requests',
+          data: [
+              3,
+              0,
+              0,
+              3
+          ],
+          hoverOffset: 4
+      }]
+      
+      function renderChart(context, type, labels, datasets) {
+          new Chart(context, {
+              type: type,
+              data: {
+                  labels: labels,
+                  datasets: datasets,
+              },
+              options: {
+                  scales: {
+                      y: {
+                          beginAtZero: true
+                      }
+                  }
+              }
+          });
+      }
+      
+      renderChart(mergeRequestContext, mergeRequestChartType, mergeRequestChartLabels, mergeRequestChartDatasets);
+      renderChart(aggregatedMergeRequestContext, aggregatedMergeRequestChartType, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets);
+    </script>
+  </body>
 </html>"
 `;
 
 exports[`HTML writer should generate an HTML report file for merged requests when some mr are not yet merged 1`] = `
 "<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link href="style.css" rel="stylesheet">
+  <head>
     <title>Report Friday, February 11, 2022 to Thursday, February 17, 2022</title>
-</head>
-<body>
-
-<div>
-    <h2>Merge requests for period Friday, February 11, 2022 to Thursday, February 17, 2022</h2>
-    <div class="container-sm text-left">
+    <link href="style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div>
+      <h2>Merge requests for period Friday, February 11, 2022 to Thursday, February 17, 2022</h2>
+      <div class="container-sm text-left">
         <h3>Aggregated Statistics</h3>
         <div class="row">
-            <div class="col-lg-10 text-secondary">
-                <div class="row">
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                        <div class="card mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">3.13</h5>
-                                <p class="card-text"><em>Average time in days</em></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                        <div class="card mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">75</h5>
-                                <p class="card-text"><em>Average time in hours</em></p>
-                            </div>
-                        </div>
-                    </div>
+          <div class="col-lg-10 text-secondary">
+            <div class="row">
+              <div class="col-sm-6 mb-3 mb-sm-0">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title">3.13</h5>
+                    <p class="card-text"><em>Average time in days</em></p>
+                  </div>
                 </div>
-                <div class="row">
-                    <div class="col-sm-3 mb-3 mb-sm-0">
-                        <div class="card mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-merged">2</h5>
-                                <p class="card-text"><em># Merged</em></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-3 mb-3 mb-sm-0">
-                        <div class="card mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-opened">1</h5>
-                                <p class="card-text"><em># Opened</em></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-3 mb-3 mb-sm-0">
-                        <div class="card mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-closed">0</h5>
-                                <p class="card-text"><em># Closed</em></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-3 mb-3 mb-sm-0">
-                        <div class="card mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-total">3</h5>
-                                <p class="card-text"><em># Overall</em></p>
-                            </div>
-                        </div>
-                    </div>
+              </div>
+              <div class="col-sm-6 mb-3 mb-sm-0">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title">75</h5>
+                    <p class="card-text"><em>Average time in hours</em></p>
+                  </div>
                 </div>
+              </div>
             </div>
-            <div class="col-lg-2">
-
-                <div class="row">
-
+            <div class="row">
+              <div class="col-sm-3 mb-3 mb-sm-0">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title text-merged">2</h5>
+                    <p class="card-text"><em># Merged</em></p>
+                  </div>
                 </div>
-                <div class="row">
-                    <div>
-                        <canvas id="aggregated-merge-requests"></canvas>
-                    </div>
+              </div>
+              <div class="col-sm-3 mb-3 mb-sm-0">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title text-opened">1</h5>
+                    <p class="card-text"><em># Opened</em></p>
+                  </div>
                 </div>
+              </div>
+              <div class="col-sm-3 mb-3 mb-sm-0">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title text-closed">0</h5>
+                    <p class="card-text"><em># Closed</em></p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-3 mb-3 mb-sm-0">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title text-total">3</h5>
+                    <p class="card-text"><em># Overall</em></p>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+          <div class="col-lg-2">
+            <div class="row">
+              <div>
+                <canvas id="aggregated-merge-requests"></canvas>
+              </div>
+            </div>
+          </div>
         </div>
-    </div>
-    <div class="container-sm">
+      </div>
+      <div class="container-sm">
         <canvas id="merge-request-merged"></canvas>
+      </div>
     </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    const mergeRequestContext = document.getElementById('merge-request-merged');
-    const mergeRequestChartType = 'line'
-    const mergeRequestChartDatasets = [{
-        label: '# of Merge Requests merged',
-        data: [2],
-        borderWidth: 3,
-        borderJoinStyle: "round",
-        tension: 0.2
-    }]
-    const mergeRequestChartLabels = ["Week 8"]
-
-    const aggregatedMergeRequestContext = document.getElementById("aggregated-merge-requests")
-    const aggregatedMergeRequestChartType = 'doughnut'
-    const aggregatedMergeRequestChartLabels = ["Merged","Opened","Closed","All"]
-    const aggregatedMergeRequestChartDatasets =    [{
-        label: 'Aggregated merge requests',
-        data: [2,1,0,3],
-        hoverOffset: 4
-    }]
-
-    function renderChart(context, type, labels, datasets) {
-        new Chart(context, {
-            type: type,
-            data: {
-                labels: labels,
-                datasets: datasets,
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    }
-
-    renderChart(mergeRequestContext, mergeRequestChartType, mergeRequestChartLabels, mergeRequestChartDatasets);
-    renderChart(aggregatedMergeRequestContext, aggregatedMergeRequestChartType, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets);
-</script>
-
-</body>
+    <script type="text/javascript">
+      const mergeRequestContext = document.getElementById('merge-request-merged');
+      const mergeRequestChartType = 'line'
+      const mergeRequestChartDatasets = [{
+          label: '# of Merge Requests merged',
+          data: [2],
+          borderWidth: 3,
+          borderJoinStyle: "round",
+          tension: 0.2
+      }]
+      const mergeRequestChartLabels = ["Week 8"]
+      
+      const aggregatedMergeRequestContext = document.getElementById("aggregated-merge-requests")
+      const aggregatedMergeRequestChartType = 'doughnut'
+      const aggregatedMergeRequestChartLabels = ['Merged', 'Opened', 'Closed', 'All']
+      const aggregatedMergeRequestChartDatasets =    [{
+          label: 'Aggregated merge requests',
+          data: [
+              2,
+              1,
+              0,
+              3
+          ],
+          hoverOffset: 4
+      }]
+      
+      function renderChart(context, type, labels, datasets) {
+          new Chart(context, {
+              type: type,
+              data: {
+                  labels: labels,
+                  datasets: datasets,
+              },
+              options: {
+                  scales: {
+                      y: {
+                          beginAtZero: true
+                      }
+                  }
+              }
+          });
+      }
+      
+      renderChart(mergeRequestContext, mergeRequestChartType, mergeRequestChartLabels, mergeRequestChartDatasets);
+      renderChart(aggregatedMergeRequestContext, aggregatedMergeRequestChartType, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets);
+    </script>
+  </body>
 </html>"
 `;
 
 exports[`HTML writer should generate an HTML report file with months period 1`] = `
 "<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link href="style.css" rel="stylesheet">
+  <head>
     <title>Report Saturday, January 1, 2022 to Wednesday, March 2, 2022</title>
-</head>
-<body>
-
-<div>
-    <h2>Merge requests for period Saturday, January 1, 2022 to Wednesday, March 2, 2022</h2>
-    <div class="container-sm text-left">
+    <link href="style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div>
+      <h2>Merge requests for period Saturday, January 1, 2022 to Wednesday, March 2, 2022</h2>
+      <div class="container-sm text-left">
         <h3>Aggregated Statistics</h3>
         <div class="row">
-            <div class="col-lg-10 text-secondary">
-                <div class="row">
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                        <div class="card mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">7.75</h5>
-                                <p class="card-text"><em>Average time in days</em></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 mb-3 mb-sm-0">
-                        <div class="card mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">186</h5>
-                                <p class="card-text"><em>Average time in hours</em></p>
-                            </div>
-                        </div>
-                    </div>
+          <div class="col-lg-10 text-secondary">
+            <div class="row">
+              <div class="col-sm-6 mb-3 mb-sm-0">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title">7.75</h5>
+                    <p class="card-text"><em>Average time in days</em></p>
+                  </div>
                 </div>
-                <div class="row">
-                    <div class="col-sm-3 mb-3 mb-sm-0">
-                        <div class="card mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-merged">3</h5>
-                                <p class="card-text"><em># Merged</em></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-3 mb-3 mb-sm-0">
-                        <div class="card mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-opened">0</h5>
-                                <p class="card-text"><em># Opened</em></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-3 mb-3 mb-sm-0">
-                        <div class="card mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-closed">0</h5>
-                                <p class="card-text"><em># Closed</em></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-3 mb-3 mb-sm-0">
-                        <div class="card mb-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title text-total">3</h5>
-                                <p class="card-text"><em># Overall</em></p>
-                            </div>
-                        </div>
-                    </div>
+              </div>
+              <div class="col-sm-6 mb-3 mb-sm-0">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title">186</h5>
+                    <p class="card-text"><em>Average time in hours</em></p>
+                  </div>
                 </div>
+              </div>
             </div>
-            <div class="col-lg-2">
-
-                <div class="row">
-
+            <div class="row">
+              <div class="col-sm-3 mb-3 mb-sm-0">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title text-merged">3</h5>
+                    <p class="card-text"><em># Merged</em></p>
+                  </div>
                 </div>
-                <div class="row">
-                    <div>
-                        <canvas id="aggregated-merge-requests"></canvas>
-                    </div>
+              </div>
+              <div class="col-sm-3 mb-3 mb-sm-0">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title text-opened">0</h5>
+                    <p class="card-text"><em># Opened</em></p>
+                  </div>
                 </div>
+              </div>
+              <div class="col-sm-3 mb-3 mb-sm-0">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title text-closed">0</h5>
+                    <p class="card-text"><em># Closed</em></p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-3 mb-3 mb-sm-0">
+                <div class="card mb-3">
+                  <div class="card-body text-center">
+                    <h5 class="card-title text-total">3</h5>
+                    <p class="card-text"><em># Overall</em></p>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+          <div class="col-lg-2">
+            <div class="row">
+              <div>
+                <canvas id="aggregated-merge-requests"></canvas>
+              </div>
+            </div>
+          </div>
         </div>
-    </div>
-    <div class="container-sm">
+      </div>
+      <div class="container-sm">
         <canvas id="merge-request-merged"></canvas>
+      </div>
     </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    const mergeRequestContext = document.getElementById('merge-request-merged');
-    const mergeRequestChartType = 'line'
-    const mergeRequestChartDatasets = [{
-        label: '# of Merge Requests merged',
-        data: [1,2],
-        borderWidth: 3,
-        borderJoinStyle: "round",
-        tension: 0.2
-    }]
-    const mergeRequestChartLabels = ["January","February"]
-
-    const aggregatedMergeRequestContext = document.getElementById("aggregated-merge-requests")
-    const aggregatedMergeRequestChartType = 'doughnut'
-    const aggregatedMergeRequestChartLabels = ["Merged","Opened","Closed","All"]
-    const aggregatedMergeRequestChartDatasets =    [{
-        label: 'Aggregated merge requests',
-        data: [3,0,0,3],
-        hoverOffset: 4
-    }]
-
-    function renderChart(context, type, labels, datasets) {
-        new Chart(context, {
-            type: type,
-            data: {
-                labels: labels,
-                datasets: datasets,
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    }
-
-    renderChart(mergeRequestContext, mergeRequestChartType, mergeRequestChartLabels, mergeRequestChartDatasets);
-    renderChart(aggregatedMergeRequestContext, aggregatedMergeRequestChartType, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets);
-</script>
-
-</body>
+    <script type="text/javascript">
+      const mergeRequestContext = document.getElementById('merge-request-merged');
+      const mergeRequestChartType = 'line'
+      const mergeRequestChartDatasets = [{
+          label: '# of Merge Requests merged',
+          data: [1,2],
+          borderWidth: 3,
+          borderJoinStyle: "round",
+          tension: 0.2
+      }]
+      const mergeRequestChartLabels = ["January","February"]
+      
+      const aggregatedMergeRequestContext = document.getElementById("aggregated-merge-requests")
+      const aggregatedMergeRequestChartType = 'doughnut'
+      const aggregatedMergeRequestChartLabels = ['Merged', 'Opened', 'Closed', 'All']
+      const aggregatedMergeRequestChartDatasets =    [{
+          label: 'Aggregated merge requests',
+          data: [
+              3,
+              0,
+              0,
+              3
+          ],
+          hoverOffset: 4
+      }]
+      
+      function renderChart(context, type, labels, datasets) {
+          new Chart(context, {
+              type: type,
+              data: {
+                  labels: labels,
+                  datasets: datasets,
+              },
+              options: {
+                  scales: {
+                      y: {
+                          beginAtZero: true
+                      }
+                  }
+              }
+          });
+      }
+      
+      renderChart(mergeRequestContext, mergeRequestChartType, mergeRequestChartLabels, mergeRequestChartDatasets);
+      renderChart(aggregatedMergeRequestContext, aggregatedMergeRequestChartType, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets);
+    </script>
+  </body>
 </html>"
 `;

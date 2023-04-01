@@ -1,0 +1,104 @@
+doctype html
+html(lang="en")
+    head
+        title Report #{period.start} to #{period.end}
+        link(href="style.css", rel="stylesheet")
+        script(src="https://cdn.jsdelivr.net/npm/chart.js")
+    body
+        div
+            h2 Merge requests for period #{period.start} to #{period.end}
+            div(class='container-sm text-left')
+                h3 Aggregated Statistics
+                div.row
+                    div(class='col-lg-10 text-secondary')
+                        div.row
+                            div(class='col-sm-6 mb-3 mb-sm-0')
+                                div(class='card mb-3')
+                                    div(class='card-body text-center')
+                                        h5.card-title #{stats.average.days}
+                                        p.card-text
+                                            em Average time in days
+                            div(class='col-sm-6 mb-3 mb-sm-0')
+                                div(class='card mb-3')
+                                    div(class='card-body text-center')
+                                        h5.card-title #{stats.average.hours}
+                                        p.card-text
+                                            em Average time in hours
+                        div.row
+                            div(class='col-sm-3 mb-3 mb-sm-0')
+                                div(class='card mb-3')
+                                    div(class='card-body text-center')
+                                        h5(class='card-title text-merged') #{stats.total.merged}
+                                        p.card-text
+                                         em # Merged
+                            div(class='col-sm-3 mb-3 mb-sm-0')
+                                div(class='card mb-3')
+                                    div(class='card-body text-center')
+                                        h5(class='card-title text-opened') #{stats.total.opened}
+                                        p.card-text
+                                            em # Opened
+                            div(class='col-sm-3 mb-3 mb-sm-0')
+                                div(class='card mb-3')
+                                    div(class='card-body text-center')
+                                        h5(class='card-title text-closed') #{stats.total.closed}
+                                        p.card-text
+                                            em # Closed
+                            div(class='col-sm-3 mb-3 mb-sm-0')
+                                div(class='card mb-3')
+                                    div(class='card-body text-center')
+                                        h5(class='card-title text-total') #{stats.total.all}
+                                        p.card-text
+                                            em # Overall
+                    div.col-lg-2
+                        div.row
+                            div
+                                canvas#aggregated-merge-requests
+            div.container-sm
+                canvas#merge-request-merged
+
+
+        script(type='text/javascript').
+            const mergeRequestContext = document.getElementById('merge-request-merged');
+            const mergeRequestChartType = 'line'
+            const mergeRequestChartDatasets = [{
+                label: '# of Merge Requests merged',
+                data: [#{stats.mr.data}],
+                borderWidth: 3,
+                borderJoinStyle: "round",
+                tension: 0.2
+            }]
+            const mergeRequestChartLabels = !{stringify(stats.mr.labels)}
+
+            const aggregatedMergeRequestContext = document.getElementById("aggregated-merge-requests")
+            const aggregatedMergeRequestChartType = 'doughnut'
+            const aggregatedMergeRequestChartLabels = ['Merged', 'Opened', 'Closed', 'All']
+            const aggregatedMergeRequestChartDatasets =    [{
+                label: 'Aggregated merge requests',
+                data: [
+                    #{stats.total.merged},
+                    #{stats.total.opened},
+                    #{stats.total.closed},
+                    #{stats.total.all}
+                ],
+                hoverOffset: 4
+            }]
+
+            function renderChart(context, type, labels, datasets) {
+                new Chart(context, {
+                    type: type,
+                    data: {
+                        labels: labels,
+                        datasets: datasets,
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            renderChart(mergeRequestContext, mergeRequestChartType, mergeRequestChartLabels, mergeRequestChartDatasets);
+            renderChart(aggregatedMergeRequestContext, aggregatedMergeRequestChartType, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets);
