@@ -20,8 +20,8 @@ export interface Writer {
     write(stats: MergeRequestStats): void
 }
 
-program.command('mr')
-    .description('Provide merge requests statistics for a given period')
+program.command('gitlab')
+    .description('Provide merge requests statistics on a gitlab project for a given period')
     .argument('<token>', 'your gitlab API token')
     .argument('<projectId>', 'gitlab project id for which you want to have statistics')
     .argument('<period>', 'the period you want to analyse (ISO formatted date separated by comma, e.g: 2021-11-02,2021-11-03)', commaSeparatedList)
