@@ -1,8 +1,9 @@
 import { enableFetchMocks } from "jest-fetch-mock";
 import { formatISO, parseISO } from "date-fns";
-import { MergedRequestHTTPGitlabRepository, MergeRequestDTO } from "./MergeRequestHTTPGitlabRepository";
+import { MergedRequestHTTPGitlabRepository } from "./MergeRequestHTTPGitlabRepository";
 import { MergeRequestBuilder } from "../../__tests__/builder";
 import { MergeRequest } from "../../merge-requests/MergeRequest";
+import { MergeRequestDTO } from "./GitRepository";
 
 describe("Gitlab Repository", () => {
   let firstMergeRequest: MergeRequest;
