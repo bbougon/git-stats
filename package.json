@@ -10,7 +10,7 @@
     "lint": "eslint --fix . --ext .ts,.tsx,.jsx",
     "prettier": "prettier --write src",
     "prepare": "husky install",
-    "build": "tsc --build"
+    "build": "tsc --build && cp -r templates dist && cp style.css dist"
   },
   "author": "Bertrand Bougon",
   "license": "MIT",

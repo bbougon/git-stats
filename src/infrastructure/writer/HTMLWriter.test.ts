@@ -1,4 +1,7 @@
 import { jest } from "@jest/globals";
+jest.mock("./FilePathConstant", () => ({
+  __dirname: "src/infrastructure/writer/",
+}));
 import { GitStatistics } from "../../merge-events/MergeEvents";
 import { HTMLWriter } from "./HTMLWriter";
 import { mkdtemp } from "node:fs/promises";
@@ -37,7 +40,7 @@ describe("HTML writer", () => {
       })
     );
 
-    expect(fs.readFileSync(`${tempDirectory}/index.html`, "utf8")).toMatchSnapshot();
+    expect(fs.readFileSync(`${tempDirectory}/report/index.html`, "utf8")).toMatchSnapshot();
   });
 
   test("should generate an HTML report file for merged requests when some mr are not yet merged", async () => {
@@ -64,7 +67,7 @@ describe("HTML writer", () => {
       })
     );
 
-    expect(fs.readFileSync(`${tempDirectory}/index.html`, "utf8")).toMatchSnapshot();
+    expect(fs.readFileSync(`${tempDirectory}/report/index.html`, "utf8")).toMatchSnapshot();
   });
 
   test("should generate an HTML report file with months period", async () => {
@@ -89,6 +92,6 @@ describe("HTML writer", () => {
       })
     );
 
-    expect(fs.readFileSync(`${tempDirectory}/index.html`, "utf8")).toMatchSnapshot();
+    expect(fs.readFileSync(`${tempDirectory}/report/index.html`, "utf8")).toMatchSnapshot();
   });
 });
