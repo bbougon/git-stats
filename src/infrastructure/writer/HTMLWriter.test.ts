@@ -1,5 +1,5 @@
 import { jest } from "@jest/globals";
-import { MergeRequestStats } from "../../merge-requests/MergeRequest";
+import { GitStatistics } from "../../merge-events/MergeEvents";
 import { HTMLWriter } from "./HTMLWriter";
 import { mkdtemp } from "node:fs/promises";
 import * as path from "path";
@@ -31,7 +31,7 @@ describe("HTML writer", () => {
     const fromDate = parseISO("2022-02-11T00:00:00");
     const toDate = parseISO("2022-02-17T00:00:00");
     new HTMLWriter(tempDirectory).write(
-      new MergeRequestStats([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
+      new GitStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
         end: toDate,
         start: fromDate,
       })
@@ -58,7 +58,7 @@ describe("HTML writer", () => {
     const fromDate = parseISO("2022-02-11T00:00:00");
     const toDate = parseISO("2022-02-17T00:00:00");
     new HTMLWriter(tempDirectory).write(
-      new MergeRequestStats([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
+      new GitStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
         end: toDate,
         start: fromDate,
       })
@@ -83,7 +83,7 @@ describe("HTML writer", () => {
     const tempDirectory = await mkdtemp(path.join(os.tmpdir(), "report-"));
 
     new HTMLWriter(tempDirectory).write(
-      new MergeRequestStats([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
+      new GitStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
         end: parseISO("2022-03-02T00:00:00"),
         start: parseISO("2022-01-01T00:00:00"),
       })

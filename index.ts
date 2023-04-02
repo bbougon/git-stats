@@ -1,14 +1,14 @@
 import {Command, program} from "commander";
 import {
-    MergeRequestRepository,
-    mergeRequestsStats,
-    MergeRequestsStatsParameters,
-    MergeRequestStats
-} from "./src/merge-requests/MergeRequest.js";
+    MergeEventRepository,
+    mergeEventsStatistics,
+    GitStatistics
+} from "./src/merge-events/MergeEvents.js";
 import {MergedRequestHTTPGitlabRepository} from "./src/infrastructure/repository/MergeRequestHTTPGitlabRepository.js";
 import {parseISO} from "date-fns";
 import {ConsoleWriter} from "./src/infrastructure/writer/ConsoleWriter.js";
 import {HTMLWriter} from "./src/infrastructure/writer/HTMLWriter.js";
+import {MergeRequestsStatsParameters} from "./src/merge-events/Gitlab.js";
 
 const commaSeparatedList =(list: string) => {
     return list.split(",")
@@ -22,7 +22,7 @@ const writer = (format: string): Writer => {
 }
 
 export interface Writer {
-    write(stats: MergeRequestStats): void
+    write(stats: GitStatistics): void
 }
 export type RequestParameters = {
     fromDate: Date;
@@ -48,12 +48,12 @@ const githubCommand = program.command('github')
     .argument('<period>', 'the period you want to analyse (ISO formatted date separated by comma, e.g: 2021-11-02,2021-11-03)', commaSeparatedList);
 
 
-const proceedCommand = (command: Command, commandParameters: (...args: any[]) => CommandParameters, repository: (token: string) => MergeRequestRepository) => {
+const proceedCommand = (command: Command, commandParameters: (...args: any[]) => CommandParameters, repository: (token: string) => MergeEventRepository) => {
     command
         .option('-f, --format <writer>', 'format to display the stats (default json in console)', writer, new ConsoleWriter())
         .action((...args: any[]) => {
             const parameters = commandParameters(...args)
-            mergeRequestsStats(parameters.requestParameters, repository(parameters.token))
+            mergeEventsStatistics(parameters.requestParameters, repository(parameters.token))
                 .then((stats) => {
                     parameters.options.format.write(stats)
                 })

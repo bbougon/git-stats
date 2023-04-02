@@ -2,13 +2,14 @@ import { enableFetchMocks } from "jest-fetch-mock";
 import { formatISO, parseISO } from "date-fns";
 import { MergedRequestHTTPGitlabRepository } from "./MergeRequestHTTPGitlabRepository";
 import { MergeRequestBuilder } from "../../__tests__/builder";
-import { MergeRequest, MergeRequestsStatsParameters } from "../../merge-requests/MergeRequest";
-import { MergeRequestDTO } from "./GitRepository";
+import { MergeEvents } from "../../merge-events/MergeEvents";
+import { MergeEventDTO } from "./GitRepository";
+import { MergeRequestsStatsParameters } from "../../merge-events/Gitlab";
 
 describe("Gitlab Repository", () => {
-  let firstMergeRequest: MergeRequest;
-  let secondMergeRequest: MergeRequest;
-  let thirdMergeRequest: MergeRequest;
+  let firstMergeRequest: MergeEvents;
+  let secondMergeRequest: MergeEvents;
+  let thirdMergeRequest: MergeEvents;
   beforeEach(() => {
     enableFetchMocks();
     fetchMock.resetMocks();
@@ -26,7 +27,7 @@ describe("Gitlab Repository", () => {
       .build();
   });
 
-  const toGitlabDTO = (mergeRequest: MergeRequest): MergeRequestDTO => {
+  const toGitlabDTO = (mergeRequest: MergeEvents): MergeEventDTO => {
     const mergedAt = mergeRequest.mergedAt !== null ? formatISO(mergeRequest.mergedAt) : null;
     const closedAt = mergeRequest.closedAt !== null ? formatISO(mergeRequest.closedAt) : null;
     return {
@@ -74,7 +75,7 @@ describe("Gitlab Repository", () => {
       fromDate: parseISO("2021-11-03T00:00:00Z"),
       toDate: parseISO("2021-11-10T00:00:00Z"),
     } as MergeRequestsStatsParameters;
-    const mergeRequests = await new MergedRequestHTTPGitlabRepository("my-token").getMergeRequestsForPeriod(
+    const mergeRequests = await new MergedRequestHTTPGitlabRepository("my-token").getMergeEventsForPeriod(
       mergeRequestParamaters
     );
 
@@ -108,7 +109,7 @@ describe("Gitlab Repository", () => {
       fromDate: parseISO("2021-11-03T00:00:00Z"),
       toDate: parseISO("2021-11-10T00:00:00Z"),
     } as MergeRequestsStatsParameters;
-    const mergeRequests = await new MergedRequestHTTPGitlabRepository("my-token").getMergeRequestsForPeriod(
+    const mergeRequests = await new MergedRequestHTTPGitlabRepository("my-token").getMergeEventsForPeriod(
       mergeRequestsParameters
     );
 
@@ -148,7 +149,7 @@ describe("Gitlab Repository", () => {
       fromDate: parseISO("2021-11-03T00:00:00"),
       toDate: parseISO("2021-11-04T00:00:00"),
     } as MergeRequestsStatsParameters;
-    const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeRequestsForPeriod(
+    const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeEventsForPeriod(
       mergeRequestsParameters
     );
 
@@ -171,7 +172,7 @@ describe("Gitlab Repository", () => {
       fromDate: parseISO("2021-11-03T00:00:00"),
       toDate: parseISO("2021-11-04T00:00:00"),
     } as MergeRequestsStatsParameters;
-    const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeRequestsForPeriod(
+    const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeEventsForPeriod(
       mergeRequestsParameters
     );
 
@@ -198,7 +199,7 @@ describe("Gitlab Repository", () => {
       fromDate: parseISO("2021-11-03T00:00:00"),
       toDate: parseISO("2021-11-04T00:00:00"),
     } as MergeRequestsStatsParameters;
-    const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeRequestsForPeriod(
+    const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeEventsForPeriod(
       mergeRequestsParameters
     );
 
@@ -225,7 +226,7 @@ describe("Gitlab Repository", () => {
       fromDate: parseISO("2021-11-03T00:00:00"),
       toDate: parseISO("2021-11-04T00:00:00"),
     } as MergeRequestsStatsParameters;
-    const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeRequestsForPeriod(
+    const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeEventsForPeriod(
       mergeRequestsParameters
     );
 

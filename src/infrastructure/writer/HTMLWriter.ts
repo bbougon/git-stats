@@ -1,5 +1,5 @@
 import { Writer } from "../../../index.js";
-import { Dimension, mergeRequestsByPeriod, MergeRequestStats } from "../../merge-requests/MergeRequest.js";
+import { Dimension, mergeEventsByPeriod, GitStatistics } from "../../merge-events/MergeEvents.js";
 import * as fs from "fs";
 import { intlFormat } from "date-fns";
 import { openBrowser } from "./OpenBrowser.js";
@@ -21,7 +21,7 @@ const HUMAN_READABLE_MONTHS = [
 ];
 
 class HTMLContentBuilder {
-  constructor(private readonly stats: MergeRequestStats) {}
+  constructor(private readonly stats: GitStatistics) {}
 
   build = (): string => {
     const humanizeDate = (date: Date): string => {
@@ -40,7 +40,7 @@ class HTMLContentBuilder {
         .replace(/>/g, "\\u003E")
         .replace(/\//g, "\\u002F");
     };
-    const stats = mergeRequestsByPeriod(this.stats);
+    const stats = mergeEventsByPeriod(this.stats);
     const labels: string[] = [];
     const data: number[] = [];
     for (const stat of stats) {
@@ -74,7 +74,7 @@ export class HTMLWriter implements Writer {
     this._filePath = filePath;
   }
 
-  write(stats: MergeRequestStats): void {
+  write(stats: GitStatistics): void {
     try {
       fs.writeFileSync(`${this._filePath}/index.html`, new HTMLContentBuilder(stats).build());
       openBrowser(`${this._filePath}/index.html`);

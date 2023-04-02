@@ -1,6 +1,6 @@
 import * as crypto from "crypto";
-import { MergeRequest } from "../merge-requests/MergeRequest";
-import { addDays, differenceInCalendarDays, getWeek, intervalToDuration, parseISO } from "date-fns";
+import { MergeEvents } from "../merge-events/MergeEvents";
+import { addDays, differenceInCalendarDays, getWeek, parseISO } from "date-fns";
 
 export class MergeRequestBuilder {
   private projectId: number;
@@ -36,7 +36,7 @@ export class MergeRequestBuilder {
     return this;
   };
 
-  build = (): MergeRequest => {
+  build = (): MergeEvents => {
     return {
       createdAt: this._createdAt,
       mergedAt: this._mergedAt,
@@ -79,7 +79,7 @@ export class MergeRequestsBuilder {
     return this;
   };
 
-  build = (): MergeRequest[] => {
+  build = (): MergeEvents[] => {
     const requests = [];
     const daysInPeriod = differenceInCalendarDays(this._period.to, this._period.from);
     for (let i = 0; i < this._numberOfMergeRequests; i++) {

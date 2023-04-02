@@ -1,12 +1,9 @@
-import {
-  MergeRequest,
-  MergeRequestRepository,
-  MergeRequestsStatsParameters,
-} from "../../merge-requests/MergeRequest.js";
+import { MergeEvents, MergeEventRepository } from "../../merge-events/MergeEvents.js";
 import { parseISO } from "date-fns";
-import { GitRepository, HTTPInit, MergeRequestDTO } from "./GitRepository.js";
+import { GitRepository, HTTPInit, MergeEventDTO } from "./GitRepository.js";
+import { MergeRequestsStatsParameters } from "../../merge-events/Gitlab.js";
 
-type GitlabMergeRequestDTO = MergeRequestDTO & {
+type GitlabMergeRequestDTO = MergeEventDTO & {
   id: number;
   created_at: string;
   merged_at: string | null;
@@ -14,7 +11,7 @@ type GitlabMergeRequestDTO = MergeRequestDTO & {
   project_id: number;
 };
 
-const fromDTO = (mergeRequestDTO: GitlabMergeRequestDTO): MergeRequest => {
+const fromDTO = (mergeRequestDTO: GitlabMergeRequestDTO): MergeEvents => {
   const parseDate = (date: string | null): Date | null => {
     return date !== null ? parseISO(date) : null;
   };
@@ -27,7 +24,7 @@ const fromDTO = (mergeRequestDTO: GitlabMergeRequestDTO): MergeRequest => {
   };
 };
 
-export class MergedRequestHTTPGitlabRepository extends GitRepository<MergeRequest> implements MergeRequestRepository {
+export class MergedRequestHTTPGitlabRepository extends GitRepository<MergeEvents> implements MergeEventRepository {
   constructor(private readonly token: string, readonly repositoryUrl = "https://gitlab.com/api/v4/") {
     super();
   }
@@ -40,8 +37,7 @@ export class MergedRequestHTTPGitlabRepository extends GitRepository<MergeReques
     return { headers, url };
   };
 
-  protected mergeRequestsMapper = (): ((payload: MergeRequestDTO[]) => MergeRequest[]) => {
-    return (payload: MergeRequestDTO[]): MergeRequest[] =>
-      (payload as GitlabMergeRequestDTO[]).map((mr) => fromDTO(mr));
+  protected mergeRequestsMapper = (): ((payload: MergeEventDTO[]) => MergeEvents[]) => {
+    return (payload: MergeEventDTO[]): MergeEvents[] => (payload as GitlabMergeRequestDTO[]).map((mr) => fromDTO(mr));
   };
 }

@@ -1,5 +1,5 @@
 import { Repository } from "../../Repository.js";
-import { MergeRequest } from "../../merge-requests/MergeRequest.js";
+import { MergeEvents } from "../../merge-events/MergeEvents.js";
 import parseLinkHeader from "parse-link-header";
 import { compareAsc, compareDesc } from "date-fns";
 import { RequestParameters } from "../../../index.js";
@@ -9,7 +9,7 @@ export type HTTPInit = { url: string; headers: [string, string][] | Record<strin
 export abstract class GitRepository<T> implements Repository<T> {
   protected readonly repositoryUrl: string;
 
-  getMergeRequestsForPeriod(requestParameters: RequestParameters): Promise<MergeRequest[]> {
+  getMergeEventsForPeriod(requestParameters: RequestParameters): Promise<MergeEvents[]> {
     const init = this.httpInit(requestParameters);
     return this.fetchMergeRequestsForPeriod(
       init,
@@ -25,10 +25,10 @@ export abstract class GitRepository<T> implements Repository<T> {
 
   private paginate = (
     url: string,
-    result: MergeRequest[],
+    result: MergeEvents[],
     headers: [string, string][] | Record<string, string> | Headers,
-    mergeRequests: (payload: MergeRequestDTO[]) => MergeRequest[]
-  ): Promise<MergeRequest[]> => {
+    mergeRequests: (payload: MergeEventDTO[]) => MergeEvents[]
+  ): Promise<MergeEvents[]> => {
     return fetch(url, { headers }).then(async (response) => {
       const links = parseLinkHeader(response.headers.get("link"));
       const payload = await response.json();
@@ -40,7 +40,7 @@ export abstract class GitRepository<T> implements Repository<T> {
     });
   };
 
-  private isMergeRequestInExpectedPeriod = (mr: MergeRequest, fromDate: Date, toDate: Date): boolean => {
+  private isMergeRequestInExpectedPeriod = (mr: MergeEvents, fromDate: Date, toDate: Date): boolean => {
     return compareAsc(mr.createdAt, fromDate) >= 0 && compareDesc(mr.createdAt, toDate) >= 0;
   };
 
@@ -48,8 +48,8 @@ export abstract class GitRepository<T> implements Repository<T> {
     init: HTTPInit,
     fromDate: Date,
     toDate: Date,
-    mergeRequests: (payload: MergeRequestDTO[]) => MergeRequest[]
-  ): Promise<MergeRequest[]> => {
+    mergeRequests: (payload: MergeEventDTO[]) => MergeEvents[]
+  ): Promise<MergeEvents[]> => {
     return fetch(init.url, { headers: init.headers }).then(async (response) => {
       const links = parseLinkHeader(response.headers.get("link"));
       const payload = await response.json();
@@ -65,7 +65,7 @@ export abstract class GitRepository<T> implements Repository<T> {
 
   protected abstract httpInit(requestParameters: RequestParameters): HTTPInit;
 
-  protected abstract mergeRequestsMapper(): (payload: MergeRequestDTO[]) => MergeRequest[];
+  protected abstract mergeRequestsMapper(): (payload: MergeEventDTO[]) => MergeEvents[];
 }
 
-export type MergeRequestDTO = object;
+export type MergeEventDTO = object;
