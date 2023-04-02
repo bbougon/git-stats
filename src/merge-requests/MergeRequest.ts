@@ -110,8 +110,8 @@ function fillEmptyPeriodsAndSortChronologically(
       periodEndIndex !== undefined &&
       dimensions.find((dimension) => dimension.index === periodEndIndex) === undefined
     ) {
-      const dimensionsLength = dimensions.length;
-      for (let i = 0; i <= periodEndIndex - dimensionsLength; i++) {
+      const dimensionsLength = Math.max(...dimensions.map((dimension) => dimension.index));
+      for (let i = 0; i < periodEndIndex - dimensionsLength; i++) {
         dimensions.push(Dimension.empty(unit, periodEndIndex - i));
       }
     }

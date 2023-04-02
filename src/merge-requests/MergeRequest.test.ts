@@ -203,6 +203,38 @@ describe("Merge requests statistics", () => {
       expect(requestsByPeriod.map((stat) => stat.mr)).toStrictEqual([0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0]);
       expect(requestsByPeriod.map((stat) => stat.unit)).toStrictEqual(Array(12).fill("Month"));
     });
+
+    it("should fill empty periods in the middle of a year", () => {
+      const start = parseISO("2021-08-01T00:00:00");
+      const end = parseISO("2021-08-31T00:00:00");
+      const mergeRequests = [
+        {
+          closedAt: parseISO("2021-08-03T09:44:24.000Z"),
+          createdAt: parseISO("2021-08-03T09:44:16.000Z"),
+          id: 702124235,
+          mergedAt: parseISO("2021-08-03T09:44:24.000Z"),
+          projectId: 1,
+        },
+        {
+          closedAt: parseISO("2021-08-22T10:09:15.000Z"),
+          createdAt: parseISO("2021-08-22T10:06:35.000Z"),
+          id: 717283366,
+          mergedAt: parseISO("2021-08-22T10:09:15.000Z"),
+          projectId: 1,
+        },
+      ];
+
+      const eventsByPeriod = mergeRequestsByPeriod(
+        new MergeRequestStats(mergeRequests, {
+          start,
+          end,
+        })
+      );
+
+      expect(eventsByPeriod.map((stat) => stat.index)).toStrictEqual([32, 33, 34, 35, 36]);
+      expect(eventsByPeriod.map((stat) => stat.mr)).toStrictEqual([1, 0, 0, 1, 0]);
+      expect(eventsByPeriod.map((stat) => stat.unit)).toStrictEqual(Array(5).fill("Week"));
+    });
   });
 });
 
