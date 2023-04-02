@@ -6,7 +6,7 @@ html(lang="en")
         script(src="https://cdn.jsdelivr.net/npm/chart.js")
     body
         div
-            h2 Merge requests for period #{period.start} to #{period.end}
+            h2 Merged events for period #{period.start} to #{period.end}
             div(class='container-sm text-left')
                 h3 Aggregated Statistics
                 div.row
@@ -52,13 +52,13 @@ html(lang="en")
                     div.col-lg-2
                         div.row
                             div
-                                canvas#aggregated-merge-requests
+                                canvas#aggregated-statistics
             div.container-sm
-                canvas#merge-request-merged
+                canvas#merged-events
 
 
         script(type='text/javascript').
-            const mergeRequestContext = document.getElementById('merge-request-merged');
+            const mergeRequestContext = document.getElementById('merged-events');
             const mergeRequestChartType = 'line'
             const mergeRequestChartDatasets = [{
                 label: '# of Merge Requests merged',
@@ -69,7 +69,7 @@ html(lang="en")
             }]
             const mergeRequestChartLabels = !{stringify(stats.mr.labels)}
 
-            const aggregatedMergeRequestContext = document.getElementById("aggregated-merge-requests")
+            const aggregatedMergeRequestContext = document.getElementById("aggregated-statistics")
             const aggregatedMergeRequestChartType = 'doughnut'
             const aggregatedMergeRequestChartLabels = ['Merged', 'Opened', 'Closed', 'All']
             const aggregatedMergeRequestChartDatasets =    [{

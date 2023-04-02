@@ -1,6 +1,6 @@
 # Gitlab stats
 
-Provide statistics usage of your gitlab projects
+Provide statistics usage of your gitlab/github projects
 
 ## Setup
 **Prerequisites**
@@ -17,13 +17,14 @@ Provide statistics usage of your gitlab projects
   Usage: index [options] [command]
   
   Options:
-  -h, --help                                 display help for command
+  -h, --help                                        display help for command
   
   Commands:
-  mr [options] <token> <projectId> <period>  Provide merge requests statistics for a given period
-  help [command]                             display help for command
+  gitlab [options] <token> <projectId> <period>     Provide merge requests statistics on a gitlab project for a given period
+  github [options] <token> <owner> <repo> <period>  Provide pull requests statistics on a github project for a given period
+  help [command]                                    display help for command
   ```
-- `node dist/index.js mr <TOKEN> <PROJECT_ID> <PERIOD>` (<PERIOD> in the following format `2023-01-01,2023-01-31`) will print:
+- `node dist/index.js gitlab <TOKEN> <PROJECT_ID> <PERIOD>` (<PERIOD> in the following format `2023-01-01,2023-01-31`) will print:
   ```json
   {
     "average": {
@@ -38,7 +39,7 @@ Provide statistics usage of your gitlab projects
     }
   }
   ```
-- ` node dist/index.js mr <TOKEN> <PROJECT_ID> <PERIOD> --format html` (<PERIOD> in the following format `2023-01-01,2023-01-31`) will generate an `index.html` in the root project that will automatically open after generation.
+- ` node dist/index.js gitlab <TOKEN> <PROJECT_ID> <PERIOD> --format html` (<PERIOD> in the following format `2023-01-01,2023-01-31`) will generate an `index.html` in the root project that will automatically open after generation.
 
   **example:**
   ![](documentation/chart_screenshot.png)

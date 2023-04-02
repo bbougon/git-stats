@@ -54,7 +54,7 @@ export abstract class GitRepository<T> implements Repository<T> {
       const links = parseLinkHeader(response.headers.get("link"));
       const payload = await response.json();
       const requests = mergeRequests(payload);
-      if (links["next"] !== undefined) {
+      if (links !== null && links["next"] !== undefined) {
         return this.paginate(links["next"].url, requests, init.headers, mergeRequests).then((mrs) =>
           mrs.filter((mr) => this.isMergeRequestInExpectedPeriod(mr, fromDate, toDate))
         );

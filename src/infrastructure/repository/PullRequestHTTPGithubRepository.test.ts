@@ -94,4 +94,34 @@ describe("Github repository", () => {
     expect(fetch).toHaveBeenNthCalledWith(2, "http://github/repos/OWNER/REPO/pulls?page=2", expectedHeaders);
     expect(fetch).toHaveBeenNthCalledWith(3, "http://github/repos/OWNER/REPO/pulls?page=3", expectedHeaders);
   });
+
+  it("should not paginate if no link in header", async () => {
+    fetchMock.mockResponses([
+      JSON.stringify([toGithubDTO(firstPullRequest)]),
+      {
+        status: 200,
+      },
+    ]);
+
+    const pullRequestParameters = {
+      repo: "my-awesome-project",
+      fromDate: parseISO("2021-11-03T00:00:00Z"),
+      toDate: parseISO("2021-11-10T00:00:00Z"),
+      owner: "bertrand",
+    } as PullRequestsStatsParameter;
+    await new PullRequestHTTPGithubRepository("my-token").getMergeEventsForPeriod(pullRequestParameters);
+
+    const expectedHeaders = {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: "Bearer my-token",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    };
+    expect(fetch).toHaveBeenNthCalledWith(
+      1,
+      "https://api.github.com/repos/bertrand/my-awesome-project/pulls?state=all&sort=created&per_page=100",
+      expectedHeaders
+    );
+  });
 });
