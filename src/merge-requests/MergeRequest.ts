@@ -1,8 +1,9 @@
 import { compareAsc, differenceInHours, getMonth, getWeek, intervalToDuration } from "date-fns";
 import { Repository } from "../Repository.js";
+import { RequestParameters } from "../../index.js";
 
 export type MergeRequest = {
-  projectId: number;
+  project: number;
   id: number;
   createdAt: Date;
   mergedAt: Date | null;
@@ -10,12 +11,10 @@ export type MergeRequest = {
 };
 
 export interface MergeRequestRepository extends Repository<MergeRequest> {
-  getMergeRequestsForPeriod(projectId: number, fromDate: Date, toDate: Date): Promise<MergeRequest[]>;
+  getMergeRequestsForPeriod(requestParameters: RequestParameters): Promise<MergeRequest[]>;
 }
 
-export type MergeRequestsStatsParameters = {
-  fromDate: Date;
-  toDate: Date;
+export type MergeRequestsStatsParameters = RequestParameters & {
   projectId: number;
 };
 
@@ -67,14 +66,12 @@ export class MergeRequestStats {
 }
 
 export const mergeRequestsStats = (
-  requestParameter: MergeRequestsStatsParameters,
+  requestParameter: RequestParameters,
   repository: MergeRequestRepository
 ): Promise<MergeRequestStats> => {
-  return repository
-    .getMergeRequestsForPeriod(requestParameter.projectId, requestParameter.fromDate, requestParameter.toDate)
-    .then((mergeRequests) => {
-      return new MergeRequestStats(mergeRequests, { end: requestParameter.toDate, start: requestParameter.fromDate });
-    });
+  return repository.getMergeRequestsForPeriod(requestParameter).then((mergeRequests) => {
+    return new MergeRequestStats(mergeRequests, { end: requestParameter.toDate, start: requestParameter.fromDate });
+  });
 };
 
 type Unit = string | "Week" | "Month";

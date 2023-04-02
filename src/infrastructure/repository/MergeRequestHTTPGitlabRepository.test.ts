@@ -2,7 +2,7 @@ import { enableFetchMocks } from "jest-fetch-mock";
 import { formatISO, parseISO } from "date-fns";
 import { MergedRequestHTTPGitlabRepository } from "./MergeRequestHTTPGitlabRepository";
 import { MergeRequestBuilder } from "../../__tests__/builder";
-import { MergeRequest } from "../../merge-requests/MergeRequest";
+import { MergeRequest, MergeRequestsStatsParameters } from "../../merge-requests/MergeRequest";
 import { MergeRequestDTO } from "./GitRepository";
 
 describe("Gitlab Repository", () => {
@@ -32,7 +32,7 @@ describe("Gitlab Repository", () => {
     return {
       created_at: formatISO(mergeRequest.createdAt),
       id: mergeRequest.id,
-      project_id: mergeRequest.projectId,
+      project_id: mergeRequest.project,
       merged_at: mergedAt,
       closed_at: closedAt,
     };
@@ -69,10 +69,13 @@ describe("Gitlab Repository", () => {
       ]
     );
 
+    const mergeRequestParamaters = {
+      projectId: 1,
+      fromDate: parseISO("2021-11-03T00:00:00Z"),
+      toDate: parseISO("2021-11-10T00:00:00Z"),
+    } as MergeRequestsStatsParameters;
     const mergeRequests = await new MergedRequestHTTPGitlabRepository("my-token").getMergeRequestsForPeriod(
-      1,
-      parseISO("2021-11-03T00:00:00Z"),
-      parseISO("2021-11-10T00:00:00Z")
+      mergeRequestParamaters
     );
 
     expect(fetch).toHaveBeenNthCalledWith(
@@ -100,10 +103,13 @@ describe("Gitlab Repository", () => {
       },
     ]);
 
+    const mergeRequestsParameters = {
+      projectId: 1,
+      fromDate: parseISO("2021-11-03T00:00:00Z"),
+      toDate: parseISO("2021-11-10T00:00:00Z"),
+    } as MergeRequestsStatsParameters;
     const mergeRequests = await new MergedRequestHTTPGitlabRepository("my-token").getMergeRequestsForPeriod(
-      1,
-      parseISO("2021-11-03T00:00:00Z"),
-      parseISO("2021-11-10T00:00:00Z")
+      mergeRequestsParameters
     );
 
     expect(fetch).toBeCalledTimes(1);
@@ -137,10 +143,13 @@ describe("Gitlab Repository", () => {
       ]
     );
 
+    const mergeRequestsParameters = {
+      projectId: 1,
+      fromDate: parseISO("2021-11-03T00:00:00"),
+      toDate: parseISO("2021-11-04T00:00:00"),
+    } as MergeRequestsStatsParameters;
     const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeRequestsForPeriod(
-      1,
-      parseISO("2021-11-03T00:00:00"),
-      parseISO("2021-11-04T00:00:00")
+      mergeRequestsParameters
     );
 
     expect(mergeRequests).toEqual([firstMergeRequest]);
@@ -157,10 +166,13 @@ describe("Gitlab Repository", () => {
       },
     ]);
 
+    const mergeRequestsParameters = {
+      projectId: 1,
+      fromDate: parseISO("2021-11-03T00:00:00"),
+      toDate: parseISO("2021-11-04T00:00:00"),
+    } as MergeRequestsStatsParameters;
     const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeRequestsForPeriod(
-      1,
-      parseISO("2021-11-03T00:00:00"),
-      parseISO("2021-11-04T00:00:00")
+      mergeRequestsParameters
     );
 
     expect(mergeRequests).toEqual([firstMergeRequest]);
@@ -181,10 +193,13 @@ describe("Gitlab Repository", () => {
       },
     ]);
 
+    const mergeRequestsParameters = {
+      projectId: 1,
+      fromDate: parseISO("2021-11-03T00:00:00"),
+      toDate: parseISO("2021-11-04T00:00:00"),
+    } as MergeRequestsStatsParameters;
     const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeRequestsForPeriod(
-      1,
-      parseISO("2021-11-03T00:00:00"),
-      parseISO("2021-11-04T00:00:00")
+      mergeRequestsParameters
     );
 
     expect(mergeRequests).toEqual([firstMergeRequest, thirdMergeRequest]);
@@ -205,10 +220,13 @@ describe("Gitlab Repository", () => {
       },
     ]);
 
+    const mergeRequestsParameters = {
+      projectId: 1,
+      fromDate: parseISO("2021-11-03T00:00:00"),
+      toDate: parseISO("2021-11-04T00:00:00"),
+    } as MergeRequestsStatsParameters;
     const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeRequestsForPeriod(
-      1,
-      parseISO("2021-11-03T00:00:00"),
-      parseISO("2021-11-04T00:00:00")
+      mergeRequestsParameters
     );
 
     expect(mergeRequests).toEqual([firstMergeRequest, thirdMergeRequest]);

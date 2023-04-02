@@ -2,15 +2,21 @@ import { Repository } from "../../Repository.js";
 import { MergeRequest } from "../../merge-requests/MergeRequest.js";
 import parseLinkHeader from "parse-link-header";
 import { compareAsc, compareDesc } from "date-fns";
+import { RequestParameters } from "../../../index.js";
 
 export type HTTPInit = { url: string; headers: [string, string][] | Record<string, string> | Headers };
 
 export abstract class GitRepository<T> implements Repository<T> {
   protected readonly repositoryUrl: string;
 
-  getMergeRequestsForPeriod(projectId: number, fromDate: Date, toDate: Date): Promise<MergeRequest[]> {
-    const init = this.httpInit(projectId, fromDate);
-    return this.fetchMergeRequestsForPeriod(init, fromDate, toDate, this.mergeRequestsMapper());
+  getMergeRequestsForPeriod(requestParameters: RequestParameters): Promise<MergeRequest[]> {
+    const init = this.httpInit(requestParameters);
+    return this.fetchMergeRequestsForPeriod(
+      init,
+      requestParameters.fromDate,
+      requestParameters.toDate,
+      this.mergeRequestsMapper()
+    );
   }
 
   persist(entity: T) {
@@ -57,7 +63,7 @@ export abstract class GitRepository<T> implements Repository<T> {
     });
   };
 
-  protected abstract httpInit(projectId: number, fromDate: Date): HTTPInit;
+  protected abstract httpInit(requestParameters: RequestParameters): HTTPInit;
 
   protected abstract mergeRequestsMapper(): (payload: MergeRequestDTO[]) => MergeRequest[];
 }

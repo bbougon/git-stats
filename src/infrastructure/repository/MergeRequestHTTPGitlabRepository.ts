@@ -1,4 +1,8 @@
-import { MergeRequest, MergeRequestRepository } from "../../merge-requests/MergeRequest.js";
+import {
+  MergeRequest,
+  MergeRequestRepository,
+  MergeRequestsStatsParameters,
+} from "../../merge-requests/MergeRequest.js";
 import { parseISO } from "date-fns";
 import { GitRepository, HTTPInit, MergeRequestDTO } from "./GitRepository.js";
 
@@ -18,7 +22,7 @@ const fromDTO = (mergeRequestDTO: GitlabMergeRequestDTO): MergeRequest => {
     createdAt: parseISO(mergeRequestDTO.created_at),
     mergedAt: parseDate(mergeRequestDTO.merged_at),
     closedAt: parseDate(mergeRequestDTO.closed_at),
-    projectId: mergeRequestDTO.project_id,
+    project: mergeRequestDTO.project_id,
     id: mergeRequestDTO.id,
   };
 };
@@ -28,11 +32,11 @@ export class MergedRequestHTTPGitlabRepository extends GitRepository<MergeReques
     super();
   }
 
-  protected httpInit = (projectId: number, fromDate: Date): HTTPInit => {
+  protected httpInit = (requestParameters: MergeRequestsStatsParameters): HTTPInit => {
     const headers = { "PRIVATE-TOKEN": this.token };
-    const url = `${
-      this.repositoryUrl
-    }projects/${projectId}/merge_requests?created_after=${fromDate.toISOString()}&per_page=100`;
+    const url = `${this.repositoryUrl}projects/${
+      requestParameters.projectId
+    }/merge_requests?created_after=${requestParameters.fromDate.toISOString()}&per_page=100`;
     return { headers, url };
   };
 

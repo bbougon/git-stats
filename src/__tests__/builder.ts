@@ -41,7 +41,7 @@ export class MergeRequestBuilder {
       createdAt: this._createdAt,
       mergedAt: this._mergedAt,
       closedAt: this.closedAt,
-      projectId: this.projectId,
+      project: this.projectId,
       id: this.id,
     };
   };

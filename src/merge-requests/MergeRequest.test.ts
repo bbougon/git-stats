@@ -4,6 +4,7 @@ import {
   MergeRequestRepository,
   mergeRequestsByPeriod,
   mergeRequestsStats,
+  MergeRequestsStatsParameters,
   MergeRequestStats,
 } from "./MergeRequest";
 import { Repository } from "../Repository";
@@ -43,7 +44,7 @@ describe("Merge requests statistics", () => {
           projectId: 1,
           fromDate: parseISO("2022-02-11T00:00:00"),
           toDate: parseISO("2022-02-25T00:00:00"),
-        },
+        } as MergeRequestsStatsParameters,
         repository
       );
 
@@ -68,7 +69,7 @@ describe("Merge requests statistics", () => {
           projectId: 1,
           fromDate: parseISO("2022-05-08T00:00:00"),
           toDate: parseISO("2022-05-15T00:00:00"),
-        },
+        } as MergeRequestsStatsParameters,
         repository
       );
 
@@ -98,7 +99,7 @@ describe("Merge requests statistics", () => {
           projectId: 1,
           fromDate: parseISO("2022-05-08T00:00:00"),
           toDate: parseISO("2022-05-15T00:00:00"),
-        },
+        } as MergeRequestsStatsParameters,
         repository
       );
 
@@ -247,12 +248,12 @@ abstract class MemoryRepository<T> implements Repository<T> {
 }
 
 class MergeRequestMemoryRepository extends MemoryRepository<MergeRequest> implements MergeRequestRepository {
-  getMergeRequestsForPeriod = (projectId: number, fromDate: Date, toDate: Date): Promise<MergeRequest[]> => {
+  getMergeRequestsForPeriod = (requestParameters: MergeRequestsStatsParameters): Promise<MergeRequest[]> => {
     const mergeRequests = this.entities.filter(
       (mergeRequest) =>
-        mergeRequest.projectId == projectId &&
-        compareAsc(mergeRequest.createdAt, fromDate) >= 0 &&
-        compareDesc(mergeRequest.createdAt, toDate) >= 0
+        mergeRequest.project == requestParameters.projectId &&
+        compareAsc(mergeRequest.createdAt, requestParameters.fromDate) >= 0 &&
+        compareDesc(mergeRequest.createdAt, requestParameters.toDate) >= 0
     );
     return Promise.all(mergeRequests);
   };
