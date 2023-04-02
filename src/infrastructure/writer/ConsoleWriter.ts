@@ -1,4 +1,4 @@
-import { GitStatistics } from "../../merge-events/MergeEvents.js";
+import { GitStatistics } from "../../merge-events/MergeEvent.js";
 import { Writer } from "../../../index.js";
 
 export class ConsoleWriter implements Writer {

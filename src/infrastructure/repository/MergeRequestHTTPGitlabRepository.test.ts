@@ -2,14 +2,14 @@ import { enableFetchMocks } from "jest-fetch-mock";
 import { formatISO, parseISO } from "date-fns";
 import { MergedRequestHTTPGitlabRepository } from "./MergeRequestHTTPGitlabRepository";
 import { MergeRequestBuilder } from "../../__tests__/builder";
-import { MergeEvents } from "../../merge-events/MergeEvents";
+import { MergeEvent } from "../../merge-events/MergeEvent";
 import { MergeEventDTO } from "./GitRepository";
 import { MergeRequestsStatsParameters } from "../../merge-events/Gitlab";
 
 describe("Gitlab Repository", () => {
-  let firstMergeRequest: MergeEvents;
-  let secondMergeRequest: MergeEvents;
-  let thirdMergeRequest: MergeEvents;
+  let firstMergeRequest: MergeEvent;
+  let secondMergeRequest: MergeEvent;
+  let thirdMergeRequest: MergeEvent;
   beforeEach(() => {
     enableFetchMocks();
     fetchMock.resetMocks();
@@ -27,7 +27,7 @@ describe("Gitlab Repository", () => {
       .build();
   });
 
-  const toGitlabDTO = (mergeRequest: MergeEvents): MergeEventDTO => {
+  const toGitlabDTO = (mergeRequest: MergeEvent): MergeEventDTO => {
     const mergedAt = mergeRequest.mergedAt !== null ? formatISO(mergeRequest.mergedAt) : null;
     const closedAt = mergeRequest.closedAt !== null ? formatISO(mergeRequest.closedAt) : null;
     return {

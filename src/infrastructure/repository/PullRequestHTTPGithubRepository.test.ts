@@ -1,14 +1,14 @@
 import { enableFetchMocks } from "jest-fetch-mock";
 import { PullRequestBuilder } from "../../__tests__/builder";
-import { MergeEvents } from "../../merge-events/MergeEvents";
+import { MergeEvent } from "../../merge-events/MergeEvent";
 import { formatISO, parseISO } from "date-fns";
 import { PullRequestsStatsParameter } from "../../merge-events/Github";
 import { PullRequestDTO, PullRequestHTTPGithubRepository } from "./PullRequestHTTPGithubRepository";
 
 describe("Github repository", () => {
-  let firstPullRequest: MergeEvents;
-  let secondPullRequest: MergeEvents;
-  let thirdPullRequest: MergeEvents;
+  let firstPullRequest: MergeEvent;
+  let secondPullRequest: MergeEvent;
+  let thirdPullRequest: MergeEvent;
 
   beforeEach(() => {
     enableFetchMocks();
@@ -28,7 +28,7 @@ describe("Github repository", () => {
       .build();
   });
 
-  const toGithubDTO = (mergeRequest: MergeEvents): PullRequestDTO => {
+  const toGithubDTO = (mergeRequest: MergeEvent): PullRequestDTO => {
     const mergedAt = mergeRequest.mergedAt !== null ? formatISO(mergeRequest.mergedAt) : null;
     const closedAt = mergeRequest.closedAt !== null ? formatISO(mergeRequest.closedAt) : null;
     return {

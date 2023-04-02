@@ -1,5 +1,5 @@
 import { GitRepository, HTTPInit, MergeEventDTO } from "./GitRepository.js";
-import { MergeEventRepository, MergeEvents } from "../../merge-events/MergeEvents.js";
+import { MergeEventRepository, MergeEvent } from "../../merge-events/MergeEvent.js";
 import { parseISO } from "date-fns";
 import { PullRequestsStatsParameter } from "../../merge-events/Github.js";
 
@@ -10,7 +10,7 @@ export type PullRequestDTO = MergeEventDTO & {
   merged_at: string | null;
   closed_at: string | null;
 };
-const fromDTO = (pullRequestDTO: PullRequestDTO): MergeEvents => {
+const fromDTO = (pullRequestDTO: PullRequestDTO): MergeEvent => {
   const parseDate = (date: string | null): Date | null => {
     return date !== null ? parseISO(date) : null;
   };
@@ -23,7 +23,7 @@ const fromDTO = (pullRequestDTO: PullRequestDTO): MergeEvents => {
   };
 };
 
-export class PullRequestHTTPGithubRepository extends GitRepository<MergeEvents> implements MergeEventRepository {
+export class PullRequestHTTPGithubRepository extends GitRepository<MergeEvent> implements MergeEventRepository {
   constructor(private readonly token: string, readonly repositoryUrl = "https://api.github.com/repos") {
     super();
   }
@@ -38,7 +38,7 @@ export class PullRequestHTTPGithubRepository extends GitRepository<MergeEvents> 
     return { headers, url };
   }
 
-  protected mergeRequestsMapper(): (payload: MergeEventDTO[]) => MergeEvents[] {
-    return (payload: MergeEventDTO[]): MergeEvents[] => (payload as PullRequestDTO[]).map((mr) => fromDTO(mr));
+  protected mergeRequestsMapper(): (payload: MergeEventDTO[]) => MergeEvent[] {
+    return (payload: MergeEventDTO[]): MergeEvent[] => (payload as PullRequestDTO[]).map((mr) => fromDTO(mr));
   }
 }

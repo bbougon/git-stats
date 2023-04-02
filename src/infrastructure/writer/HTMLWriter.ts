@@ -1,5 +1,5 @@
 import { Writer } from "../../../index.js";
-import { Dimension, GitStatistics, mergeEventsByPeriod } from "../../merge-events/MergeEvents.js";
+import { Dimension, GitStatistics, mergeEventsByPeriod } from "../../merge-events/MergeEvent.js";
 import * as fs from "fs";
 import { intlFormat } from "date-fns";
 import { openBrowser } from "./OpenBrowser.js";

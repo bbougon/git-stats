@@ -2,7 +2,7 @@ import { compareAsc, differenceInHours, getMonth, getWeek, intervalToDuration } 
 import { Repository } from "../Repository.js";
 import { RequestParameters } from "../../index.js";
 
-export type MergeEvents = {
+export type MergeEvent = {
   project: number | string;
   id: number;
   createdAt: Date;
@@ -10,8 +10,8 @@ export type MergeEvents = {
   closedAt: Date | null;
 };
 
-export interface MergeEventRepository extends Repository<MergeEvents> {
-  getMergeEventsForPeriod(requestParameters: RequestParameters): Promise<MergeEvents[]>;
+export interface MergeEventRepository extends Repository<MergeEvent> {
+  getMergeEventsForPeriod(requestParameters: RequestParameters): Promise<MergeEvent[]>;
 }
 
 type MergeEventsStatisticsResult = {
@@ -30,9 +30,9 @@ type MergeEventsStatisticsResult = {
 type Period = { start: Date; end: Date };
 
 export class GitStatistics {
-  constructor(private readonly mergeEvents: MergeEvents[], public readonly period: Period) {}
+  constructor(private readonly mergeEvents: MergeEvent[], public readonly period: Period) {}
 
-  public sortedMergeEvents(): MergeEvents[] {
+  public sortedMergeEvents(): MergeEvent[] {
     return this.mergeEvents
       .sort((mr, mrToCompare) => compareAsc(mr.createdAt, mrToCompare.createdAt))
       .sort((mr, mrToCompare) => compareAsc(mr.mergedAt, mrToCompare.mergedAt));

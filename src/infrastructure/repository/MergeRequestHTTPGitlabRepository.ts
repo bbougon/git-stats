@@ -1,4 +1,4 @@
-import { MergeEvents, MergeEventRepository } from "../../merge-events/MergeEvents.js";
+import { MergeEvent, MergeEventRepository } from "../../merge-events/MergeEvent.js";
 import { parseISO } from "date-fns";
 import { GitRepository, HTTPInit, MergeEventDTO } from "./GitRepository.js";
 import { MergeRequestsStatsParameters } from "../../merge-events/Gitlab.js";
@@ -11,7 +11,7 @@ type GitlabMergeRequestDTO = MergeEventDTO & {
   project_id: number;
 };
 
-const fromDTO = (mergeRequestDTO: GitlabMergeRequestDTO): MergeEvents => {
+const fromDTO = (mergeRequestDTO: GitlabMergeRequestDTO): MergeEvent => {
   const parseDate = (date: string | null): Date | null => {
     return date !== null ? parseISO(date) : null;
   };
@@ -24,7 +24,7 @@ const fromDTO = (mergeRequestDTO: GitlabMergeRequestDTO): MergeEvents => {
   };
 };
 
-export class MergedRequestHTTPGitlabRepository extends GitRepository<MergeEvents> implements MergeEventRepository {
+export class MergedRequestHTTPGitlabRepository extends GitRepository<MergeEvent> implements MergeEventRepository {
   constructor(private readonly token: string, readonly repositoryUrl = "https://gitlab.com/api/v4/") {
     super();
   }
@@ -37,7 +37,7 @@ export class MergedRequestHTTPGitlabRepository extends GitRepository<MergeEvents
     return { headers, url };
   };
 
-  protected mergeRequestsMapper = (): ((payload: MergeEventDTO[]) => MergeEvents[]) => {
-    return (payload: MergeEventDTO[]): MergeEvents[] => (payload as GitlabMergeRequestDTO[]).map((mr) => fromDTO(mr));
+  protected mergeRequestsMapper = (): ((payload: MergeEventDTO[]) => MergeEvent[]) => {
+    return (payload: MergeEventDTO[]): MergeEvent[] => (payload as GitlabMergeRequestDTO[]).map((mr) => fromDTO(mr));
   };
 }

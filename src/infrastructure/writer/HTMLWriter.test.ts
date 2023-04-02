@@ -2,7 +2,7 @@ import { jest } from "@jest/globals";
 jest.mock("./FilePathConstant", () => ({
   __dirname: "src/infrastructure/writer/",
 }));
-import { GitStatistics } from "../../merge-events/MergeEvents";
+import { GitStatistics } from "../../merge-events/MergeEvent";
 import { HTMLWriter } from "./HTMLWriter";
 import { mkdtemp } from "node:fs/promises";
 import * as path from "path";

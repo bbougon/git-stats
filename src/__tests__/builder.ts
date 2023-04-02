@@ -1,5 +1,5 @@
 import * as crypto from "crypto";
-import { MergeEvents } from "../merge-events/MergeEvents";
+import { MergeEvent } from "../merge-events/MergeEvent";
 import { addDays, differenceInCalendarDays, getWeek, parseISO } from "date-fns";
 
 export class MergeRequestBuilder {
@@ -36,7 +36,7 @@ export class MergeRequestBuilder {
     return this;
   };
 
-  build = (): MergeEvents => {
+  build = (): MergeEvent => {
     return {
       createdAt: this._createdAt,
       mergedAt: this._mergedAt,
@@ -79,7 +79,7 @@ export class MergeRequestsBuilder {
     return this;
   };
 
-  build = (): MergeEvents[] => {
+  build = (): MergeEvent[] => {
     const requests = [];
     const daysInPeriod = differenceInCalendarDays(this._period.to, this._period.from);
     for (let i = 0; i < this._numberOfMergeRequests; i++) {
@@ -144,7 +144,7 @@ export class PullRequestBuilder {
     return this;
   };
 
-  build = (): MergeEvents => {
+  build = (): MergeEvent => {
     return {
       createdAt: this._createdAt,
       mergedAt: this._mergedAt,

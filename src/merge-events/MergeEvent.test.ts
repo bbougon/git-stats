@@ -1,11 +1,11 @@
 import { compareAsc, compareDesc, parseISO } from "date-fns";
 import {
-  MergeEvents,
+  MergeEvent,
   MergeEventRepository,
   mergeEventsByPeriod,
   mergeEventsStatistics,
   GitStatistics,
-} from "./MergeEvents";
+} from "./MergeEvent";
 import { Repository } from "../Repository";
 import { MergeRequestBuilder, MergeRequestsBuilder } from "../__tests__/builder";
 import { MergeRequestsStatsParameters } from "./Gitlab";
@@ -214,19 +214,19 @@ describe("Merge events statistics", () => {
           createdAt: parseISO("2021-08-03T09:44:16.000Z"),
           id: 702124235,
           mergedAt: parseISO("2021-08-03T09:44:24.000Z"),
-          projectId: 1,
+          project: "crm-pilates",
         },
         {
           closedAt: parseISO("2021-08-22T10:09:15.000Z"),
           createdAt: parseISO("2021-08-22T10:06:35.000Z"),
           id: 717283366,
           mergedAt: parseISO("2021-08-22T10:09:15.000Z"),
-          projectId: 1,
+          project: "crm-pilates",
         },
       ];
 
-      const eventsByPeriod = mergeRequestsByPeriod(
-        new MergeRequestStats(mergeRequests, {
+      const eventsByPeriod = mergeEventsByPeriod(
+        new GitStatistics(mergeRequests, {
           start,
           end,
         })
@@ -247,8 +247,8 @@ abstract class MemoryRepository<T> implements Repository<T> {
   }
 }
 
-class MergeRequestMemoryRepository extends MemoryRepository<MergeEvents> implements MergeEventRepository {
-  getMergeEventsForPeriod = (requestParameters: MergeRequestsStatsParameters): Promise<MergeEvents[]> => {
+class MergeRequestMemoryRepository extends MemoryRepository<MergeEvent> implements MergeEventRepository {
+  getMergeEventsForPeriod = (requestParameters: MergeRequestsStatsParameters): Promise<MergeEvent[]> => {
     const mergeRequests = this.entities.filter(
       (mergeRequest) =>
         mergeRequest.project == requestParameters.projectId &&

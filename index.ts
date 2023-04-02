@@ -3,7 +3,7 @@ import {
     MergeEventRepository,
     mergeEventsStatistics,
     GitStatistics
-} from "./src/merge-events/MergeEvents.js";
+} from "./src/merge-events/MergeEvent.js";
 import {MergedRequestHTTPGitlabRepository} from "./src/infrastructure/repository/MergeRequestHTTPGitlabRepository.js";
 import {parseISO} from "date-fns";
 import {ConsoleWriter} from "./src/infrastructure/writer/ConsoleWriter.js";
