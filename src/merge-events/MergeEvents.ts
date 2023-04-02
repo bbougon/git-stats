@@ -3,7 +3,7 @@ import { Repository } from "../Repository.js";
 import { RequestParameters } from "../../index.js";
 
 export type MergeEvents = {
-  project: number;
+  project: number | string;
   id: number;
   createdAt: Date;
   mergedAt: Date | null;

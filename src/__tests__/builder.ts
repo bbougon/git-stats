@@ -109,3 +109,48 @@ export class MergeRequestsBuilder {
     return requests;
   };
 }
+
+export class PullRequestBuilder {
+  private project: string;
+  private id: number;
+  private _createdAt: Date;
+  private _mergedAt: Date;
+  private closedAt: Date | null = null;
+
+  constructor(project: string) {
+    this.project = project;
+    this.id = crypto.randomInt(2 ^ 16);
+  }
+
+  createdAt = (createdAt: Date): PullRequestBuilder => {
+    this._createdAt = createdAt;
+    return this;
+  };
+
+  mergedAt = (mergedAt: Date): PullRequestBuilder => {
+    this._mergedAt = mergedAt;
+    return this;
+  };
+
+  notYetMerged = (): PullRequestBuilder => {
+    this._mergedAt = null;
+    this.closedAt = null;
+    return this;
+  };
+
+  closed = (closedAt: Date): PullRequestBuilder => {
+    this.closedAt = closedAt;
+    this._mergedAt = null;
+    return this;
+  };
+
+  build = (): MergeEvents => {
+    return {
+      createdAt: this._createdAt,
+      mergedAt: this._mergedAt,
+      closedAt: this.closedAt,
+      project: this.project,
+      id: this.id,
+    };
+  };
+}

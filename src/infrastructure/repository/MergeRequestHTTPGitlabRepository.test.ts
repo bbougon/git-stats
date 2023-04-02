@@ -70,13 +70,13 @@ describe("Gitlab Repository", () => {
       ]
     );
 
-    const mergeRequestParamaters = {
+    const mergeRequestParameters = {
       projectId: 1,
       fromDate: parseISO("2021-11-03T00:00:00Z"),
       toDate: parseISO("2021-11-10T00:00:00Z"),
     } as MergeRequestsStatsParameters;
     const mergeRequests = await new MergedRequestHTTPGitlabRepository("my-token").getMergeEventsForPeriod(
-      mergeRequestParamaters
+      mergeRequestParameters
     );
 
     expect(fetch).toHaveBeenNthCalledWith(

@@ -9,6 +9,8 @@ import {parseISO} from "date-fns";
 import {ConsoleWriter} from "./src/infrastructure/writer/ConsoleWriter.js";
 import {HTMLWriter} from "./src/infrastructure/writer/HTMLWriter.js";
 import {MergeRequestsStatsParameters} from "./src/merge-events/Gitlab.js";
+import {PullRequestHTTPGithubRepository} from "./src/infrastructure/repository/PullRequestHTTPGithubRepository.js";
+import {PullRequestsStatsParameter} from "./src/merge-events/Github.js";
 
 const commaSeparatedList =(list: string) => {
     return list.split(",")
@@ -68,6 +70,13 @@ proceedCommand(gitlabCommand, (token: string, projectId: number, period: string[
     } as MergeRequestsStatsParameters, options, token
 }), (token: string) => new MergedRequestHTTPGitlabRepository(token));
 
-//proceedCommand(githubCommand);
+proceedCommand(githubCommand, (token: string, owner: string, repo: string, period: string[], options) => ({
+    requestParameters: {
+        repo,
+        owner,
+        fromDate: parseISO(period[0]),
+        toDate: parseISO(period[1])
+    } as PullRequestsStatsParameter, options, token
+}), (token: string) => new PullRequestHTTPGithubRepository(token));
 
 program.parse()
