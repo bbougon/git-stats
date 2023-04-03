@@ -6,7 +6,7 @@ import { PullRequestsStatsParameter } from "../../merge-events/Github.js";
 export type PullRequestDTO = MergeEventDTO & {
   created_at: string;
   id: number;
-  head: { repo: { name: string } };
+  head: { repo?: { name?: string } };
   merged_at: string | null;
   closed_at: string | null;
 };
@@ -19,7 +19,7 @@ const fromDTO = (pullRequestDTO: PullRequestDTO): MergeEvent => {
     createdAt: parseISO(pullRequestDTO.created_at),
     id: pullRequestDTO.id,
     mergedAt: parseDate(pullRequestDTO.merged_at),
-    project: pullRequestDTO.head.repo.name,
+    project: pullRequestDTO.head.repo?.name,
   };
 };
 

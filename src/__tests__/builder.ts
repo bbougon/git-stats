@@ -111,7 +111,7 @@ export class MergeRequestsBuilder {
 }
 
 export class PullRequestBuilder {
-  private project: string;
+  private project: string | undefined;
   private id: number;
   private _createdAt: Date;
   private _mergedAt: Date;
@@ -141,6 +141,11 @@ export class PullRequestBuilder {
   closed = (closedAt: Date): PullRequestBuilder => {
     this.closedAt = closedAt;
     this._mergedAt = null;
+    return this;
+  };
+
+  noName = (): PullRequestBuilder => {
+    this.project = undefined;
     return this;
   };
 

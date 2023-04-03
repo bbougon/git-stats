@@ -34,7 +34,7 @@ describe("Github repository", () => {
     return {
       created_at: formatISO(mergeRequest.createdAt),
       id: mergeRequest.id,
-      head: { repo: { name: mergeRequest.project } },
+      head: mergeRequest.project !== null ? { repo: { name: mergeRequest.project } } : { repo: null },
       merged_at: mergedAt,
       closed_at: closedAt,
     } as PullRequestDTO;
@@ -123,5 +123,43 @@ describe("Github repository", () => {
       "https://api.github.com/repos/bertrand/my-awesome-project/pulls?state=all&sort=created&per_page=100",
       expectedHeaders
     );
+  });
+
+  it("should not retrieve repo name if not available", async () => {
+    const pullRequest = new PullRequestBuilder("my-awesome-project")
+      .createdAt(parseISO("2021-11-03T12:45:12"))
+      .mergedAt(parseISO("2021-11-04T13:24:12"))
+      .noName()
+      .build();
+    fetchMock.mockResponses([
+      JSON.stringify([toGithubDTO(pullRequest)]),
+      {
+        status: 200,
+      },
+    ]);
+
+    const pullRequestParameters = {
+      repo: "my-awesome-project",
+      fromDate: parseISO("2021-11-03T00:00:00Z"),
+      toDate: parseISO("2021-11-10T00:00:00Z"),
+      owner: "bertrand",
+    } as PullRequestsStatsParameter;
+    const pullRequests = await new PullRequestHTTPGithubRepository("my-token").getMergeEventsForPeriod(
+      pullRequestParameters
+    );
+
+    const expectedHeaders = {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: "Bearer my-token",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    };
+    expect(fetch).toHaveBeenNthCalledWith(
+      1,
+      "https://api.github.com/repos/bertrand/my-awesome-project/pulls?state=all&sort=created&per_page=100",
+      expectedHeaders
+    );
+    expect(pullRequests).toEqual([pullRequest]);
   });
 });
