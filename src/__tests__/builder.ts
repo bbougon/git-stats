@@ -1,6 +1,6 @@
 import * as crypto from "crypto";
-import { MergeRequest } from "../merge-requests/MergeRequest";
-import { addDays, differenceInCalendarDays, getWeek, intervalToDuration, parseISO } from "date-fns";
+import { MergeEvent } from "../merge-events/MergeEvent";
+import { addDays, differenceInCalendarDays, getWeek, parseISO } from "date-fns";
 
 export class MergeRequestBuilder {
   private projectId: number;
@@ -36,12 +36,12 @@ export class MergeRequestBuilder {
     return this;
   };
 
-  build = (): MergeRequest => {
+  build = (): MergeEvent => {
     return {
       createdAt: this._createdAt,
       mergedAt: this._mergedAt,
       closedAt: this.closedAt,
-      projectId: this.projectId,
+      project: this.projectId,
       id: this.id,
     };
   };
@@ -79,7 +79,7 @@ export class MergeRequestsBuilder {
     return this;
   };
 
-  build = (): MergeRequest[] => {
+  build = (): MergeEvent[] => {
     const requests = [];
     const daysInPeriod = differenceInCalendarDays(this._period.to, this._period.from);
     for (let i = 0; i < this._numberOfMergeRequests; i++) {
@@ -107,5 +107,55 @@ export class MergeRequestsBuilder {
       }
     }
     return requests;
+  };
+}
+
+export class PullRequestBuilder {
+  private project: string | undefined;
+  private id: number;
+  private _createdAt: Date;
+  private _mergedAt: Date;
+  private closedAt: Date | null = null;
+
+  constructor(project: string) {
+    this.project = project;
+    this.id = crypto.randomInt(2 ^ 16);
+  }
+
+  createdAt = (createdAt: Date): PullRequestBuilder => {
+    this._createdAt = createdAt;
+    return this;
+  };
+
+  mergedAt = (mergedAt: Date): PullRequestBuilder => {
+    this._mergedAt = mergedAt;
+    return this;
+  };
+
+  notYetMerged = (): PullRequestBuilder => {
+    this._mergedAt = null;
+    this.closedAt = null;
+    return this;
+  };
+
+  closed = (closedAt: Date): PullRequestBuilder => {
+    this.closedAt = closedAt;
+    this._mergedAt = null;
+    return this;
+  };
+
+  noName = (): PullRequestBuilder => {
+    this.project = undefined;
+    return this;
+  };
+
+  build = (): MergeEvent => {
+    return {
+      createdAt: this._createdAt,
+      mergedAt: this._mergedAt,
+      closedAt: this.closedAt,
+      project: this.project,
+      id: this.id,
+    };
   };
 }

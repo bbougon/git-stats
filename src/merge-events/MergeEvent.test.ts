@@ -1,18 +1,19 @@
 import { compareAsc, compareDesc, parseISO } from "date-fns";
 import {
-  MergeRequest,
-  MergeRequestRepository,
-  mergeRequestsByPeriod,
-  mergeRequestsStats,
-  MergeRequestStats,
-} from "./MergeRequest";
+  MergeEvent,
+  MergeEventRepository,
+  mergeEventsByPeriod,
+  mergeEventsStatistics,
+  GitStatistics,
+} from "./MergeEvent";
 import { Repository } from "../Repository";
 import { MergeRequestBuilder, MergeRequestsBuilder } from "../__tests__/builder";
+import { MergeRequestsStatsParameters } from "./Gitlab";
 
-describe("Merge requests statistics", () => {
+describe("Merge events statistics", () => {
   describe("Aggregated statistics", () => {
-    it("should have merge requests average", async () => {
-      const repository: MergeRequestRepository = new MergeRequestMemoryRepository();
+    it("should have merge events average", async () => {
+      const repository: MergeEventRepository = new MergeRequestMemoryRepository();
       repository.persist(
         new MergeRequestBuilder(1)
           .createdAt(parseISO("2022-02-11T00:00:00"))
@@ -38,12 +39,12 @@ describe("Merge requests statistics", () => {
           .build()
       );
 
-      const stats: MergeRequestStats = await mergeRequestsStats(
+      const stats: GitStatistics = await mergeEventsStatistics(
         {
           projectId: 1,
           fromDate: parseISO("2022-02-11T00:00:00"),
           toDate: parseISO("2022-02-25T00:00:00"),
-        },
+        } as MergeRequestsStatsParameters,
         repository
       );
 
@@ -53,8 +54,8 @@ describe("Merge requests statistics", () => {
       });
     });
 
-    it("should have merge request average when merge request is not merged yet", async () => {
-      const repository: MergeRequestRepository = new MergeRequestMemoryRepository();
+    it("should have merge events average when merge request is not merged yet", async () => {
+      const repository: MergeEventRepository = new MergeRequestMemoryRepository();
       repository.persist(
         new MergeRequestBuilder(1)
           .createdAt(parseISO("2022-05-11T12:35:37"))
@@ -63,12 +64,12 @@ describe("Merge requests statistics", () => {
       );
       repository.persist(new MergeRequestBuilder(1).createdAt(parseISO("2022-05-13T14:54:12")).notYetMerged().build());
 
-      const stats: MergeRequestStats = await mergeRequestsStats(
+      const stats: GitStatistics = await mergeEventsStatistics(
         {
           projectId: 1,
           fromDate: parseISO("2022-05-08T00:00:00"),
           toDate: parseISO("2022-05-15T00:00:00"),
-        },
+        } as MergeRequestsStatsParameters,
         repository
       );
 
@@ -78,8 +79,8 @@ describe("Merge requests statistics", () => {
       });
     });
 
-    it("should have merge request average with closed merge requests", async () => {
-      const repository: MergeRequestRepository = new MergeRequestMemoryRepository();
+    it("should have merge events average with closed merge requests", async () => {
+      const repository: MergeEventRepository = new MergeRequestMemoryRepository();
       repository.persist(
         new MergeRequestBuilder(1)
           .createdAt(parseISO("2022-05-11T12:35:37"))
@@ -93,12 +94,12 @@ describe("Merge requests statistics", () => {
           .build()
       );
 
-      const stats: MergeRequestStats = await mergeRequestsStats(
+      const stats: GitStatistics = await mergeEventsStatistics(
         {
           projectId: 1,
           fromDate: parseISO("2022-05-08T00:00:00"),
           toDate: parseISO("2022-05-15T00:00:00"),
-        },
+        } as MergeRequestsStatsParameters,
         repository
       );
 
@@ -115,15 +116,15 @@ describe("Merge requests statistics", () => {
       const end = parseISO("2022-02-28T00:00:00");
       const mergeRequests = new MergeRequestsBuilder(1).total(20).forPeriod(start, end).withEmptyPeriod(7).build();
 
-      const requestsByPeriod = mergeRequestsByPeriod(
-        new MergeRequestStats(mergeRequests, {
+      const eventsByPeriod = mergeEventsByPeriod(
+        new GitStatistics(mergeRequests, {
           start,
           end,
         })
       );
 
-      expect(requestsByPeriod.map((stat) => stat.index)).toStrictEqual([6, 7, 8, 9, 10]);
-      expect(requestsByPeriod[1].mr).toEqual(0);
+      expect(eventsByPeriod.map((stat) => stat.index)).toStrictEqual([6, 7, 8, 9, 10]);
+      expect(eventsByPeriod[1].mr).toEqual(0);
     });
 
     it("should sort by weeks with all expected weeks", () => {
@@ -131,15 +132,15 @@ describe("Merge requests statistics", () => {
       const end = parseISO("2023-02-10T00:00:00");
       const mergeRequests = new MergeRequestsBuilder(1).total(78).forPeriod(start, end).build();
 
-      const requestsByPeriod = mergeRequestsByPeriod(
-        new MergeRequestStats(mergeRequests, {
+      const eventsByPeriod = mergeEventsByPeriod(
+        new GitStatistics(mergeRequests, {
           start,
           end,
         })
       );
 
-      expect(requestsByPeriod.map((stat) => stat.index)).toStrictEqual([1, 2, 3, 4, 5, 6]);
-      expect(requestsByPeriod.map((stat) => stat.unit)).toStrictEqual(Array(6).fill("Week"));
+      expect(eventsByPeriod.map((stat) => stat.index)).toStrictEqual([1, 2, 3, 4, 5, 6]);
+      expect(eventsByPeriod.map((stat) => stat.unit)).toStrictEqual(Array(6).fill("Week"));
     });
 
     it("should move to month period when duration between 2 dates are over 2 months", () => {
@@ -147,15 +148,15 @@ describe("Merge requests statistics", () => {
       const end = parseISO("2023-03-24T00:00:00");
       const mergeRequests = new MergeRequestsBuilder(1).total(78).forPeriod(start, end).build();
 
-      const requestsByPeriod = mergeRequestsByPeriod(
-        new MergeRequestStats(mergeRequests, {
+      const eventsByPeriod = mergeEventsByPeriod(
+        new GitStatistics(mergeRequests, {
           start,
           end,
         })
       );
 
-      expect(requestsByPeriod.map((stat) => stat.index)).toStrictEqual([0, 1, 2]);
-      expect(requestsByPeriod.map((stat) => stat.unit)).toStrictEqual(Array(3).fill("Month"));
+      expect(eventsByPeriod.map((stat) => stat.index)).toStrictEqual([0, 1, 2]);
+      expect(eventsByPeriod.map((stat) => stat.unit)).toStrictEqual(Array(3).fill("Month"));
     });
 
     it("should sort period for months according to year overlap", () => {
@@ -163,15 +164,15 @@ describe("Merge requests statistics", () => {
       const end = parseISO("2023-03-28T00:00:00");
       const mergeRequests = new MergeRequestsBuilder(1).total(120).forPeriod(start, end).randomlyNotMerged().build();
 
-      const requestsByPeriod = mergeRequestsByPeriod(
-        new MergeRequestStats(mergeRequests, {
+      const eventsByPeriod = mergeEventsByPeriod(
+        new GitStatistics(mergeRequests, {
           start,
           end,
         })
       );
 
-      expect(requestsByPeriod.map((stat) => stat.index)).toStrictEqual([9, 10, 11, 0, 1, 2]);
-      expect(requestsByPeriod.map((stat) => stat.unit)).toStrictEqual(Array(6).fill("Month"));
+      expect(eventsByPeriod.map((stat) => stat.index)).toStrictEqual([9, 10, 11, 0, 1, 2]);
+      expect(eventsByPeriod.map((stat) => stat.unit)).toStrictEqual(Array(6).fill("Month"));
     });
 
     it("should fill empty periods", () => {
@@ -192,16 +193,16 @@ describe("Merge requests statistics", () => {
           .build(),
       ];
 
-      const requestsByPeriod = mergeRequestsByPeriod(
-        new MergeRequestStats(mergeRequests, {
+      const eventsByPeriod = mergeEventsByPeriod(
+        new GitStatistics(mergeRequests, {
           start,
           end,
         })
       );
 
-      expect(requestsByPeriod.map((stat) => stat.index)).toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
-      expect(requestsByPeriod.map((stat) => stat.mr)).toStrictEqual([0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0]);
-      expect(requestsByPeriod.map((stat) => stat.unit)).toStrictEqual(Array(12).fill("Month"));
+      expect(eventsByPeriod.map((stat) => stat.index)).toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+      expect(eventsByPeriod.map((stat) => stat.mr)).toStrictEqual([0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0]);
+      expect(eventsByPeriod.map((stat) => stat.unit)).toStrictEqual(Array(12).fill("Month"));
     });
 
     it("should fill empty periods in the middle of a year", () => {
@@ -213,19 +214,19 @@ describe("Merge requests statistics", () => {
           createdAt: parseISO("2021-08-03T09:44:16.000Z"),
           id: 702124235,
           mergedAt: parseISO("2021-08-03T09:44:24.000Z"),
-          projectId: 1,
+          project: "crm-pilates",
         },
         {
           closedAt: parseISO("2021-08-22T10:09:15.000Z"),
           createdAt: parseISO("2021-08-22T10:06:35.000Z"),
           id: 717283366,
           mergedAt: parseISO("2021-08-22T10:09:15.000Z"),
-          projectId: 1,
+          project: "crm-pilates",
         },
       ];
 
-      const eventsByPeriod = mergeRequestsByPeriod(
-        new MergeRequestStats(mergeRequests, {
+      const eventsByPeriod = mergeEventsByPeriod(
+        new GitStatistics(mergeRequests, {
           start,
           end,
         })
@@ -246,13 +247,13 @@ abstract class MemoryRepository<T> implements Repository<T> {
   }
 }
 
-class MergeRequestMemoryRepository extends MemoryRepository<MergeRequest> implements MergeRequestRepository {
-  getMergeRequestsForPeriod = (projectId: number, fromDate: Date, toDate: Date): Promise<MergeRequest[]> => {
+class MergeRequestMemoryRepository extends MemoryRepository<MergeEvent> implements MergeEventRepository {
+  getMergeEventsForPeriod = (requestParameters: MergeRequestsStatsParameters): Promise<MergeEvent[]> => {
     const mergeRequests = this.entities.filter(
       (mergeRequest) =>
-        mergeRequest.projectId == projectId &&
-        compareAsc(mergeRequest.createdAt, fromDate) >= 0 &&
-        compareDesc(mergeRequest.createdAt, toDate) >= 0
+        mergeRequest.project == requestParameters.projectId &&
+        compareAsc(mergeRequest.createdAt, requestParameters.fromDate) >= 0 &&
+        compareDesc(mergeRequest.createdAt, requestParameters.toDate) >= 0
     );
     return Promise.all(mergeRequests);
   };

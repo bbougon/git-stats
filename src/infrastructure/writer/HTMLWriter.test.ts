@@ -1,5 +1,8 @@
 import { jest } from "@jest/globals";
-import { MergeRequestStats } from "../../merge-requests/MergeRequest";
+jest.mock("./FilePathConstant", () => ({
+  __dirname: "src/infrastructure/writer/",
+}));
+import { GitStatistics } from "../../merge-events/MergeEvent";
 import { HTMLWriter } from "./HTMLWriter";
 import { mkdtemp } from "node:fs/promises";
 import * as path from "path";
@@ -31,13 +34,13 @@ describe("HTML writer", () => {
     const fromDate = parseISO("2022-02-11T00:00:00");
     const toDate = parseISO("2022-02-17T00:00:00");
     new HTMLWriter(tempDirectory).write(
-      new MergeRequestStats([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
+      new GitStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
         end: toDate,
         start: fromDate,
       })
     );
 
-    expect(fs.readFileSync(`${tempDirectory}/index.html`, "utf8")).toMatchSnapshot();
+    expect(fs.readFileSync(`${tempDirectory}/report/index.html`, "utf8")).toMatchSnapshot();
   });
 
   test("should generate an HTML report file for merged requests when some mr are not yet merged", async () => {
@@ -58,13 +61,13 @@ describe("HTML writer", () => {
     const fromDate = parseISO("2022-02-11T00:00:00");
     const toDate = parseISO("2022-02-17T00:00:00");
     new HTMLWriter(tempDirectory).write(
-      new MergeRequestStats([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
+      new GitStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
         end: toDate,
         start: fromDate,
       })
     );
 
-    expect(fs.readFileSync(`${tempDirectory}/index.html`, "utf8")).toMatchSnapshot();
+    expect(fs.readFileSync(`${tempDirectory}/report/index.html`, "utf8")).toMatchSnapshot();
   });
 
   test("should generate an HTML report file with months period", async () => {
@@ -83,12 +86,12 @@ describe("HTML writer", () => {
     const tempDirectory = await mkdtemp(path.join(os.tmpdir(), "report-"));
 
     new HTMLWriter(tempDirectory).write(
-      new MergeRequestStats([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
+      new GitStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
         end: parseISO("2022-03-02T00:00:00"),
         start: parseISO("2022-01-01T00:00:00"),
       })
     );
 
-    expect(fs.readFileSync(`${tempDirectory}/index.html`, "utf8")).toMatchSnapshot();
+    expect(fs.readFileSync(`${tempDirectory}/report/index.html`, "utf8")).toMatchSnapshot();
   });
 });

@@ -1,9 +1,11 @@
 import { Writer } from "../../../index.js";
-import { Dimension, mergeRequestsByPeriod, MergeRequestStats } from "../../merge-requests/MergeRequest.js";
+import { Dimension, GitStatistics, mergeEventsByPeriod } from "../../merge-events/MergeEvent.js";
 import * as fs from "fs";
 import { intlFormat } from "date-fns";
 import { openBrowser } from "./OpenBrowser.js";
 import * as pug from "pug";
+import * as path from "path";
+import { __dirname } from "./FilePathConstant.js";
 
 const HUMAN_READABLE_MONTHS = [
   "January",
@@ -21,7 +23,7 @@ const HUMAN_READABLE_MONTHS = [
 ];
 
 class HTMLContentBuilder {
-  constructor(private readonly stats: MergeRequestStats) {}
+  constructor(private readonly stats: GitStatistics) {}
 
   build = (): string => {
     const humanizeDate = (date: Date): string => {
@@ -40,7 +42,7 @@ class HTMLContentBuilder {
         .replace(/>/g, "\\u003E")
         .replace(/\//g, "\\u002F");
     };
-    const stats = mergeRequestsByPeriod(this.stats);
+    const stats = mergeEventsByPeriod(this.stats);
     const labels: string[] = [];
     const data: number[] = [];
     for (const stat of stats) {
@@ -51,7 +53,8 @@ class HTMLContentBuilder {
     const aggregatedStats = this.stats.result();
     const start = humanizeDate(this.stats.period.start);
     const end = humanizeDate(this.stats.period.end);
-    const fn = pug.compileFile("./templates/template.pug", { pretty: true });
+    const templateFilePath = path.resolve(__dirname, "../../../templates/template.pug");
+    const fn = pug.compileFile(templateFilePath, { pretty: true });
     return fn({
       stringify,
       period: { start, end },
@@ -74,10 +77,16 @@ export class HTMLWriter implements Writer {
     this._filePath = filePath;
   }
 
-  write(stats: MergeRequestStats): void {
+  write(stats: GitStatistics): void {
     try {
-      fs.writeFileSync(`${this._filePath}/index.html`, new HTMLContentBuilder(stats).build());
-      openBrowser(`${this._filePath}/index.html`);
+      const reportFilePath = `${this._filePath}/report`;
+      if (!fs.existsSync(reportFilePath)) {
+        fs.mkdirSync(reportFilePath);
+      }
+      fs.writeFileSync(`${reportFilePath}/index.html`, new HTMLContentBuilder(stats).build());
+      const cssFilePath = path.resolve(__dirname, "../../../style.css");
+      fs.copyFileSync(cssFilePath, `${reportFilePath}/style.css`);
+      openBrowser(`${reportFilePath}/index.html`);
     } catch (e) {
       console.log(e);
     }

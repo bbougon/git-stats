@@ -10,7 +10,7 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
   </head>
   <body>
     <div>
-      <h2>Merge requests for period Friday, February 11, 2022 to Thursday, February 17, 2022</h2>
+      <h2>Merged events for period Friday, February 11, 2022 to Thursday, February 17, 2022</h2>
       <div class="container-sm text-left">
         <h3>Aggregated Statistics</h3>
         <div class="row">
@@ -71,18 +71,18 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
           <div class="col-lg-2">
             <div class="row">
               <div>
-                <canvas id="aggregated-merge-requests"></canvas>
+                <canvas id="aggregated-statistics"></canvas>
               </div>
             </div>
           </div>
         </div>
       </div>
       <div class="container-sm">
-        <canvas id="merge-request-merged"></canvas>
+        <canvas id="merged-events"></canvas>
       </div>
     </div>
     <script type="text/javascript">
-      const mergeRequestContext = document.getElementById('merge-request-merged');
+      const mergeRequestContext = document.getElementById('merged-events');
       const mergeRequestChartType = 'line'
       const mergeRequestChartDatasets = [{
           label: '# of Merge Requests merged',
@@ -93,7 +93,7 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
       }]
       const mergeRequestChartLabels = ["Week 7","Week 8"]
       
-      const aggregatedMergeRequestContext = document.getElementById("aggregated-merge-requests")
+      const aggregatedMergeRequestContext = document.getElementById("aggregated-statistics")
       const aggregatedMergeRequestChartType = 'doughnut'
       const aggregatedMergeRequestChartLabels = ['Merged', 'Opened', 'Closed', 'All']
       const aggregatedMergeRequestChartDatasets =    [{
@@ -141,7 +141,7 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
   </head>
   <body>
     <div>
-      <h2>Merge requests for period Friday, February 11, 2022 to Thursday, February 17, 2022</h2>
+      <h2>Merged events for period Friday, February 11, 2022 to Thursday, February 17, 2022</h2>
       <div class="container-sm text-left">
         <h3>Aggregated Statistics</h3>
         <div class="row">
@@ -202,18 +202,18 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
           <div class="col-lg-2">
             <div class="row">
               <div>
-                <canvas id="aggregated-merge-requests"></canvas>
+                <canvas id="aggregated-statistics"></canvas>
               </div>
             </div>
           </div>
         </div>
       </div>
       <div class="container-sm">
-        <canvas id="merge-request-merged"></canvas>
+        <canvas id="merged-events"></canvas>
       </div>
     </div>
     <script type="text/javascript">
-      const mergeRequestContext = document.getElementById('merge-request-merged');
+      const mergeRequestContext = document.getElementById('merged-events');
       const mergeRequestChartType = 'line'
       const mergeRequestChartDatasets = [{
           label: '# of Merge Requests merged',
@@ -224,7 +224,7 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
       }]
       const mergeRequestChartLabels = ["Week 7","Week 8"]
       
-      const aggregatedMergeRequestContext = document.getElementById("aggregated-merge-requests")
+      const aggregatedMergeRequestContext = document.getElementById("aggregated-statistics")
       const aggregatedMergeRequestChartType = 'doughnut'
       const aggregatedMergeRequestChartLabels = ['Merged', 'Opened', 'Closed', 'All']
       const aggregatedMergeRequestChartDatasets =    [{
@@ -272,7 +272,7 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
   </head>
   <body>
     <div>
-      <h2>Merge requests for period Saturday, January 1, 2022 to Wednesday, March 2, 2022</h2>
+      <h2>Merged events for period Saturday, January 1, 2022 to Wednesday, March 2, 2022</h2>
       <div class="container-sm text-left">
         <h3>Aggregated Statistics</h3>
         <div class="row">
@@ -333,18 +333,18 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
           <div class="col-lg-2">
             <div class="row">
               <div>
-                <canvas id="aggregated-merge-requests"></canvas>
+                <canvas id="aggregated-statistics"></canvas>
               </div>
             </div>
           </div>
         </div>
       </div>
       <div class="container-sm">
-        <canvas id="merge-request-merged"></canvas>
+        <canvas id="merged-events"></canvas>
       </div>
     </div>
     <script type="text/javascript">
-      const mergeRequestContext = document.getElementById('merge-request-merged');
+      const mergeRequestContext = document.getElementById('merged-events');
       const mergeRequestChartType = 'line'
       const mergeRequestChartDatasets = [{
           label: '# of Merge Requests merged',
@@ -355,7 +355,7 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
       }]
       const mergeRequestChartLabels = ["January","February","March"]
       
-      const aggregatedMergeRequestContext = document.getElementById("aggregated-merge-requests")
+      const aggregatedMergeRequestContext = document.getElementById("aggregated-statistics")
       const aggregatedMergeRequestChartType = 'doughnut'
       const aggregatedMergeRequestChartLabels = ['Merged', 'Opened', 'Closed', 'All']
       const aggregatedMergeRequestChartDatasets =    [{

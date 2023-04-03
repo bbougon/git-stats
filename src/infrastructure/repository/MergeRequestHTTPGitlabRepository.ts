@@ -1,17 +1,9 @@
-import { MergeRequest, MergeRequestRepository } from "../../merge-requests/MergeRequest.js";
-import { Repository } from "../../Repository.js";
-import parseLinkHeader from "parse-link-header";
-import { compareAsc, compareDesc, parseISO } from "date-fns";
+import { MergeEvent, MergeEventRepository } from "../../merge-events/MergeEvent.js";
+import { parseISO } from "date-fns";
+import { GitRepository, HTTPInit, MergeEventDTO } from "./GitRepository.js";
+import { MergeRequestsStatsParameters } from "../../merge-events/Gitlab.js";
 
-abstract class GitlabRepository<T> implements Repository<T> {
-  protected readonly GITLABAPI: string = "https://gitlab.com/api/v4/";
-
-  persist(entity: T) {
-    throw new Error("Not implemented");
-  }
-}
-
-export type MergeRequestDTO = {
+type GitlabMergeRequestDTO = MergeEventDTO & {
   id: number;
   created_at: string;
   merged_at: string | null;
@@ -19,7 +11,7 @@ export type MergeRequestDTO = {
   project_id: number;
 };
 
-const fromDTO = (mergeRequestDTO: MergeRequestDTO): MergeRequest => {
+const fromDTO = (mergeRequestDTO: GitlabMergeRequestDTO): MergeEvent => {
   const parseDate = (date: string | null): Date | null => {
     return date !== null ? parseISO(date) : null;
   };
@@ -27,52 +19,25 @@ const fromDTO = (mergeRequestDTO: MergeRequestDTO): MergeRequest => {
     createdAt: parseISO(mergeRequestDTO.created_at),
     mergedAt: parseDate(mergeRequestDTO.merged_at),
     closedAt: parseDate(mergeRequestDTO.closed_at),
-    projectId: mergeRequestDTO.project_id,
+    project: mergeRequestDTO.project_id,
     id: mergeRequestDTO.id,
   };
 };
 
-export class MergedRequestHTTPGitlabRepository
-  extends GitlabRepository<MergeRequest>
-  implements MergeRequestRepository
-{
-  private _token: string;
-  constructor(token: string) {
+export class MergedRequestHTTPGitlabRepository extends GitRepository<MergeEvent> implements MergeEventRepository {
+  constructor(private readonly token: string, readonly repositoryUrl = "https://gitlab.com/api/v4/") {
     super();
-    this._token = token;
   }
 
-  getMergeRequestsForPeriod(projectId: number, fromDate: Date, toDate: Date): Promise<MergeRequest[]> {
-    return fetch(
-      `${this.GITLABAPI}projects/${projectId}/merge_requests?created_after=${fromDate.toISOString()}&per_page=100`,
-      { headers: { "PRIVATE-TOKEN": this._token } }
-    ).then(async (response) => {
-      const links = parseLinkHeader(response.headers.get("link"));
-      const payload = await response.json();
-      const requests = (payload as MergeRequestDTO[]).map((mr) => fromDTO(mr));
-      if (links["next"] !== undefined) {
-        return this.paginate(links["next"].url, requests).then((mrs) =>
-          mrs.filter((mr) => this.isMergeRequestInExpectedPeriod(mr, fromDate, toDate))
-        );
-      }
-      return Promise.resolve(requests.filter((mr) => this.isMergeRequestInExpectedPeriod(mr, fromDate, toDate)));
-    });
-  }
+  protected httpInit = (requestParameters: MergeRequestsStatsParameters): HTTPInit => {
+    const headers = { "PRIVATE-TOKEN": this.token };
+    const url = `${this.repositoryUrl}projects/${
+      requestParameters.projectId
+    }/merge_requests?created_after=${requestParameters.fromDate.toISOString()}&per_page=100`;
+    return { headers, url };
+  };
 
-  private isMergeRequestInExpectedPeriod(mr: MergeRequest, fromDate: Date, toDate: Date) {
-    return compareAsc(mr.createdAt, fromDate) >= 0 && compareDesc(mr.createdAt, toDate) >= 0;
-  }
-
-  paginate = (url: string, result: MergeRequest[]): Promise<MergeRequest[]> => {
-    return fetch(url, { headers: { "PRIVATE-TOKEN": this._token } }).then(async (response) => {
-      const links = parseLinkHeader(response.headers.get("link"));
-      const payload = await response.json();
-      const mergeRequestDTO = payload as MergeRequestDTO[];
-      result.push(...mergeRequestDTO.map((mr) => fromDTO(mr)));
-      if (links["next"] !== undefined) {
-        return this.paginate(links["next"].url, result).then((mrs) => mrs);
-      }
-      return Promise.resolve(result);
-    });
+  protected mergeRequestsMapper = (): ((payload: MergeEventDTO[]) => MergeEvent[]) => {
+    return (payload: MergeEventDTO[]): MergeEvent[] => (payload as GitlabMergeRequestDTO[]).map((mr) => fromDTO(mr));
   };
 }

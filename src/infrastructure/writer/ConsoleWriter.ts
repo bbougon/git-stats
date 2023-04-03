@@ -1,8 +1,8 @@
-import { MergeRequestStats } from "../../merge-requests/MergeRequest.js";
+import { GitStatistics } from "../../merge-events/MergeEvent.js";
 import { Writer } from "../../../index.js";
 
 export class ConsoleWriter implements Writer {
-  write(stats: MergeRequestStats): void {
+  write(stats: GitStatistics): void {
     console.log(JSON.stringify(stats.result(), null, 2));
   }
 }

@@ -1,13 +1,15 @@
 import { enableFetchMocks } from "jest-fetch-mock";
 import { formatISO, parseISO } from "date-fns";
-import { MergedRequestHTTPGitlabRepository, MergeRequestDTO } from "./MergeRequestHTTPGitlabRepository";
+import { MergedRequestHTTPGitlabRepository } from "./MergeRequestHTTPGitlabRepository";
 import { MergeRequestBuilder } from "../../__tests__/builder";
-import { MergeRequest } from "../../merge-requests/MergeRequest";
+import { MergeEvent } from "../../merge-events/MergeEvent";
+import { MergeEventDTO } from "./GitRepository";
+import { MergeRequestsStatsParameters } from "../../merge-events/Gitlab";
 
 describe("Gitlab Repository", () => {
-  let firstMergeRequest: MergeRequest;
-  let secondMergeRequest: MergeRequest;
-  let thirdMergeRequest: MergeRequest;
+  let firstMergeRequest: MergeEvent;
+  let secondMergeRequest: MergeEvent;
+  let thirdMergeRequest: MergeEvent;
   beforeEach(() => {
     enableFetchMocks();
     fetchMock.resetMocks();
@@ -25,13 +27,13 @@ describe("Gitlab Repository", () => {
       .build();
   });
 
-  const toGitlabDTO = (mergeRequest: MergeRequest): MergeRequestDTO => {
+  const toGitlabDTO = (mergeRequest: MergeEvent): MergeEventDTO => {
     const mergedAt = mergeRequest.mergedAt !== null ? formatISO(mergeRequest.mergedAt) : null;
     const closedAt = mergeRequest.closedAt !== null ? formatISO(mergeRequest.closedAt) : null;
     return {
       created_at: formatISO(mergeRequest.createdAt),
       id: mergeRequest.id,
-      project_id: mergeRequest.projectId,
+      project_id: mergeRequest.project,
       merged_at: mergedAt,
       closed_at: closedAt,
     };
@@ -68,10 +70,13 @@ describe("Gitlab Repository", () => {
       ]
     );
 
-    const mergeRequests = await new MergedRequestHTTPGitlabRepository("my-token").getMergeRequestsForPeriod(
-      1,
-      parseISO("2021-11-03T00:00:00Z"),
-      parseISO("2021-11-10T00:00:00Z")
+    const mergeRequestParameters = {
+      projectId: 1,
+      fromDate: parseISO("2021-11-03T00:00:00Z"),
+      toDate: parseISO("2021-11-10T00:00:00Z"),
+    } as MergeRequestsStatsParameters;
+    const mergeRequests = await new MergedRequestHTTPGitlabRepository("my-token").getMergeEventsForPeriod(
+      mergeRequestParameters
     );
 
     expect(fetch).toHaveBeenNthCalledWith(
@@ -99,10 +104,13 @@ describe("Gitlab Repository", () => {
       },
     ]);
 
-    const mergeRequests = await new MergedRequestHTTPGitlabRepository("my-token").getMergeRequestsForPeriod(
-      1,
-      parseISO("2021-11-03T00:00:00Z"),
-      parseISO("2021-11-10T00:00:00Z")
+    const mergeRequestsParameters = {
+      projectId: 1,
+      fromDate: parseISO("2021-11-03T00:00:00Z"),
+      toDate: parseISO("2021-11-10T00:00:00Z"),
+    } as MergeRequestsStatsParameters;
+    const mergeRequests = await new MergedRequestHTTPGitlabRepository("my-token").getMergeEventsForPeriod(
+      mergeRequestsParameters
     );
 
     expect(fetch).toBeCalledTimes(1);
@@ -136,10 +144,13 @@ describe("Gitlab Repository", () => {
       ]
     );
 
-    const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeRequestsForPeriod(
-      1,
-      parseISO("2021-11-03T00:00:00"),
-      parseISO("2021-11-04T00:00:00")
+    const mergeRequestsParameters = {
+      projectId: 1,
+      fromDate: parseISO("2021-11-03T00:00:00"),
+      toDate: parseISO("2021-11-04T00:00:00"),
+    } as MergeRequestsStatsParameters;
+    const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeEventsForPeriod(
+      mergeRequestsParameters
     );
 
     expect(mergeRequests).toEqual([firstMergeRequest]);
@@ -156,10 +167,13 @@ describe("Gitlab Repository", () => {
       },
     ]);
 
-    const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeRequestsForPeriod(
-      1,
-      parseISO("2021-11-03T00:00:00"),
-      parseISO("2021-11-04T00:00:00")
+    const mergeRequestsParameters = {
+      projectId: 1,
+      fromDate: parseISO("2021-11-03T00:00:00"),
+      toDate: parseISO("2021-11-04T00:00:00"),
+    } as MergeRequestsStatsParameters;
+    const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeEventsForPeriod(
+      mergeRequestsParameters
     );
 
     expect(mergeRequests).toEqual([firstMergeRequest]);
@@ -180,10 +194,13 @@ describe("Gitlab Repository", () => {
       },
     ]);
 
-    const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeRequestsForPeriod(
-      1,
-      parseISO("2021-11-03T00:00:00"),
-      parseISO("2021-11-04T00:00:00")
+    const mergeRequestsParameters = {
+      projectId: 1,
+      fromDate: parseISO("2021-11-03T00:00:00"),
+      toDate: parseISO("2021-11-04T00:00:00"),
+    } as MergeRequestsStatsParameters;
+    const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeEventsForPeriod(
+      mergeRequestsParameters
     );
 
     expect(mergeRequests).toEqual([firstMergeRequest, thirdMergeRequest]);
@@ -204,10 +221,13 @@ describe("Gitlab Repository", () => {
       },
     ]);
 
-    const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeRequestsForPeriod(
-      1,
-      parseISO("2021-11-03T00:00:00"),
-      parseISO("2021-11-04T00:00:00")
+    const mergeRequestsParameters = {
+      projectId: 1,
+      fromDate: parseISO("2021-11-03T00:00:00"),
+      toDate: parseISO("2021-11-04T00:00:00"),
+    } as MergeRequestsStatsParameters;
+    const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeEventsForPeriod(
+      mergeRequestsParameters
     );
 
     expect(mergeRequests).toEqual([firstMergeRequest, thirdMergeRequest]);
