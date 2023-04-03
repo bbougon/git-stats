@@ -90,7 +90,7 @@ describe("Merge events statistics", () => {
       repository.persist(
         new MergeRequestBuilder(1)
           .createdAt(parseISO("2022-05-13T14:54:12"))
-          .closed(parseISO("2022-05-14T14:54:12"))
+          .closedAt(parseISO("2022-05-14T14:54:12"))
           .build()
       );
 
