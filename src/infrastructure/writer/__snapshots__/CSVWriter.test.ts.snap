@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CSV writer should generate a CSV report file with all merge events 1`] = `
+"Project;id;Created At;Merged At;Closed At
+1;1;2022-02-11T11:37:22.000Z;2022-02-14T10:53:17.000Z;
+1;2;2022-02-12T12:22:54.000Z;;
+1;3;2022-02-13T08:17:34.000Z;;2022-02-16T15:44:22.000Z
+"
+`;

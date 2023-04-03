@@ -4,14 +4,14 @@ import { addDays, differenceInCalendarDays, getWeek, parseISO } from "date-fns";
 
 export class MergeRequestBuilder {
   private projectId: number;
-  private id: number;
+  private _id: number;
   private _createdAt: Date;
   private _mergedAt: Date;
-  private closedAt: Date | null = null;
+  private _closedAt: Date | null = null;
 
   constructor(projectId: number) {
     this.projectId = projectId;
-    this.id = crypto.randomInt(2 ^ 16);
+    this._id = crypto.randomInt(2 ^ 16);
   }
 
   createdAt = (createdAt: Date): MergeRequestBuilder => {
@@ -26,13 +26,18 @@ export class MergeRequestBuilder {
 
   notYetMerged = (): MergeRequestBuilder => {
     this._mergedAt = null;
-    this.closedAt = null;
+    this._closedAt = null;
     return this;
   };
 
-  closed = (closedAt: Date): MergeRequestBuilder => {
-    this.closedAt = closedAt;
+  closedAt = (closedAt: Date): MergeRequestBuilder => {
+    this._closedAt = closedAt;
     this._mergedAt = null;
+    return this;
+  };
+
+  id = (id: number): MergeRequestBuilder => {
+    this._id = id;
     return this;
   };
 
@@ -40,9 +45,9 @@ export class MergeRequestBuilder {
     return {
       createdAt: this._createdAt,
       mergedAt: this._mergedAt,
-      closedAt: this.closedAt,
+      closedAt: this._closedAt,
       project: this.projectId,
-      id: this.id,
+      id: this._id,
     };
   };
 }

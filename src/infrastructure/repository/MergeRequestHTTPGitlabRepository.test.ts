@@ -209,7 +209,7 @@ describe("Gitlab Repository", () => {
   test("should retrieve closed merge requests", async () => {
     const thirdMergeRequest = new MergeRequestBuilder(1)
       .createdAt(parseISO("2021-11-03T12:45:12"))
-      .closed(parseISO("2021-11-03T18:15:27"))
+      .closedAt(parseISO("2021-11-03T18:15:27"))
       .build();
     fetchMock.mockResponses([
       JSON.stringify([toGitlabDTO(firstMergeRequest), toGitlabDTO(secondMergeRequest), toGitlabDTO(thirdMergeRequest)]),
