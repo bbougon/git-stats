@@ -39,7 +39,14 @@ Provide statistics usage of your gitlab/github projects
     }
   }
   ```
-- ` node dist/index.js gitlab <TOKEN> <PROJECT_ID> <PERIOD> --format html` (<PERIOD> in the following format `2023-01-01,2023-01-31`) will generate an `index.html` in the root project that will automatically open after generation.
+- ` node dist/index.js gitlab <TOKEN> <PROJECT_ID> <PERIOD> --format html` (<PERIOD> in the following format `2023-01-01,2023-01-31`) will generate a `report` folder with an `index.html` where the command has been executed.
+  
+  **The report will automatically open after generation.**
 
   **example:**
   ![](documentation/chart_screenshot.png)
+
+### Available output format
+- **Console (Default):** print a lightweight statistics in JSON into the console
+- **HTML:** generates a `HTML` file, opening automatically in your browser
+- **CSV:** generates a `CSV` file with all raws data

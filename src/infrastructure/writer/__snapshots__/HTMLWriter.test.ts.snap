@@ -353,7 +353,7 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
           borderJoinStyle: "round",
           tension: 0.2
       }]
-      const mergeRequestChartLabels = ["January","February","March"]
+      const mergeRequestChartLabels = ["Jan","Feb","Mar"]
       
       const aggregatedMergeRequestContext = document.getElementById("aggregated-statistics")
       const aggregatedMergeRequestChartType = 'doughnut'

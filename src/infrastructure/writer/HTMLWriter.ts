@@ -7,20 +7,7 @@ import * as pug from "pug";
 import * as path from "path";
 import { __dirname } from "./FilePathConstant.js";
 
-const HUMAN_READABLE_MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
+const HUMAN_READABLE_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 class HTMLContentBuilder {
   constructor(private readonly stats: GitStatistics) {}
