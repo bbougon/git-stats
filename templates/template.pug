@@ -12,18 +12,12 @@ html(lang="en")
                 div.row
                     div(class='col-lg-10 text-secondary')
                         div.row
-                            div(class='col-sm-6 mb-3 mb-sm-0')
+                            div(class='col-sm-12 mb-3 mb-sm-0')
                                 div(class='card mb-3')
                                     div(class='card-body text-center')
-                                        h5.card-title #{stats.average.days}
+                                        h5.card-title #{stats.average.months} months, #{stats.average.days} days, #{stats.average.hours} hours, #{stats.average.minutes} minutes, #{stats.average.seconds} seconds
                                         p.card-text
-                                            em Average time in days
-                            div(class='col-sm-6 mb-3 mb-sm-0')
-                                div(class='card mb-3')
-                                    div(class='card-body text-center')
-                                        h5.card-title #{stats.average.hours}
-                                        p.card-text
-                                            em Average time in hours
+                                            em Average time to merge
                         div.row
                             div(class='col-sm-3 mb-3 mb-sm-0')
                                 div(class='card mb-3')

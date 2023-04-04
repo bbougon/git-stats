@@ -16,19 +16,11 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
         <div class="row">
           <div class="col-lg-10 text-secondary">
             <div class="row">
-              <div class="col-sm-6 mb-3 mb-sm-0">
+              <div class="col-sm-12 mb-3 mb-sm-0">
                 <div class="card mb-3">
                   <div class="card-body text-center">
-                    <h5 class="card-title">2.14</h5>
-                    <p class="card-text"><em>Average time in days</em></p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-sm-6 mb-3 mb-sm-0">
-                <div class="card mb-3">
-                  <div class="card-body text-center">
-                    <h5 class="card-title">51.33</h5>
-                    <p class="card-text"><em>Average time in hours</em></p>
+                    <h5 class="card-title">0 months, 2 days, 3 hours, 20 minutes, 0 seconds</h5>
+                    <p class="card-text"><em>Average time to merge</em></p>
                   </div>
                 </div>
               </div>
@@ -141,19 +133,11 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
         <div class="row">
           <div class="col-lg-10 text-secondary">
             <div class="row">
-              <div class="col-sm-6 mb-3 mb-sm-0">
+              <div class="col-sm-12 mb-3 mb-sm-0">
                 <div class="card mb-3">
                   <div class="card-body text-center">
-                    <h5 class="card-title">3.13</h5>
-                    <p class="card-text"><em>Average time in days</em></p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-sm-6 mb-3 mb-sm-0">
-                <div class="card mb-3">
-                  <div class="card-body text-center">
-                    <h5 class="card-title">75</h5>
-                    <p class="card-text"><em>Average time in hours</em></p>
+                    <h5 class="card-title">0 months, 3 days, 3 hours, 0 minutes, 0 seconds</h5>
+                    <p class="card-text"><em>Average time to merge</em></p>
                   </div>
                 </div>
               </div>
@@ -266,19 +250,11 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
         <div class="row">
           <div class="col-lg-10 text-secondary">
             <div class="row">
-              <div class="col-sm-6 mb-3 mb-sm-0">
+              <div class="col-sm-12 mb-3 mb-sm-0">
                 <div class="card mb-3">
                   <div class="card-body text-center">
-                    <h5 class="card-title">7.75</h5>
-                    <p class="card-text"><em>Average time in days</em></p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-sm-6 mb-3 mb-sm-0">
-                <div class="card mb-3">
-                  <div class="card-body text-center">
-                    <h5 class="card-title">186</h5>
-                    <p class="card-text"><em>Average time in hours</em></p>
+                    <h5 class="card-title">0 months, 7 days, 18 hours, 0 minutes, 0 seconds</h5>
+                    <p class="card-text"><em>Average time to merge</em></p>
                   </div>
                 </div>
               </div>

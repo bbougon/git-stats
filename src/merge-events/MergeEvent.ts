@@ -1,6 +1,7 @@
 import { compareAsc, differenceInHours, getMonth, getWeek, intervalToDuration } from "date-fns";
 import { Repository } from "../Repository.js";
 import { RequestParameters } from "../../index.js";
+import moment from "moment";
 
 export type MergeEvent = {
   project: number | string | undefined;
@@ -16,8 +17,11 @@ export interface MergeEventRepository extends Repository<MergeEvent> {
 
 type MergeEventsStatisticsResult = {
   average: {
+    months: number;
     days: number;
     hours: number;
+    minutes: number;
+    seconds: number;
   };
   total: {
     merged: number;
@@ -46,10 +50,14 @@ export class GitStatistics {
       (accumulator, currentValue) => accumulator + differenceInHours(currentValue.mergedAt, currentValue.createdAt),
       0
     );
+    const duration = moment.duration(hoursSpent / mergedMergeRequests.length, "hours");
     return {
       average: {
-        days: parseFloat((hoursSpent / 24 / mergedMergeRequests.length).toFixed(2)),
-        hours: parseFloat((hoursSpent / mergedMergeRequests.length).toFixed(2)),
+        months: parseInt(duration.months().toFixed()),
+        days: parseInt(duration.days().toFixed()),
+        hours: parseInt(duration.hours().toFixed()),
+        minutes: parseInt(duration.minutes().toFixed()),
+        seconds: parseInt(duration.seconds().toFixed()),
       },
       total: {
         merged: mergedMergeRequests.length,

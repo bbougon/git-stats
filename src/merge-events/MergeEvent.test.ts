@@ -49,7 +49,7 @@ describe("Merge events statistics", () => {
       );
 
       expect(stats.result()).toEqual({
-        average: { days: 3, hours: 72 },
+        average: { months: 0, days: 3, hours: 0, minutes: 0, seconds: 0 },
         total: { all: 3, merged: 3, closed: 0, opened: 0 },
       });
     });
@@ -74,7 +74,7 @@ describe("Merge events statistics", () => {
       );
 
       expect(stats.result()).toEqual({
-        average: { days: 1.04, hours: 25 },
+        average: { months: 0, days: 1, hours: 1, minutes: 0, seconds: 0 },
         total: { all: 2, merged: 1, closed: 0, opened: 1 },
       });
     });
@@ -104,8 +104,32 @@ describe("Merge events statistics", () => {
       );
 
       expect(stats.result()).toEqual({
-        average: { days: 1.04, hours: 25 },
+        average: { months: 0, days: 1, hours: 1, minutes: 0, seconds: 0 },
         total: { all: 2, merged: 1, closed: 1, opened: 0 },
+      });
+    });
+
+    it("should have merge events average for duration greater than a month", async () => {
+      const repository: MergeEventRepository = new MergeRequestMemoryRepository();
+      repository.persist(
+        new MergeRequestBuilder(1)
+          .createdAt(parseISO("2022-01-10T12:34:25"))
+          .mergedAt(parseISO("2022-02-14T17:22:54"))
+          .build()
+      );
+
+      const stats: GitStatistics = await mergeEventsStatistics(
+        {
+          projectId: 1,
+          fromDate: parseISO("2022-01-01T00:00:00"),
+          toDate: parseISO("2022-02-25T00:00:00"),
+        } as MergeRequestsStatsParameters,
+        repository
+      );
+
+      expect(stats.result()).toEqual({
+        average: { months: 1, days: 4, hours: 4, minutes: 0, seconds: 0 },
+        total: { all: 1, merged: 1, closed: 0, opened: 0 },
       });
     });
   });
