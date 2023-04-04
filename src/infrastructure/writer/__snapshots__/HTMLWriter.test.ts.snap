@@ -116,8 +116,8 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
               },
               options: {
                   scales: {
-                      y: {
-                          beginAtZero: true
+                      xAxis: {
+                          display: false,
                       }
                   }
               }
@@ -247,8 +247,8 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
               },
               options: {
                   scales: {
-                      y: {
-                          beginAtZero: true
+                      xAxis: {
+                          display: false,
                       }
                   }
               }
@@ -378,8 +378,8 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
               },
               options: {
                   scales: {
-                      y: {
-                          beginAtZero: true
+                      xAxis: {
+                          display: false,
                       }
                   }
               }
