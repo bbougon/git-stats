@@ -114,13 +114,7 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
                   labels: labels,
                   datasets: datasets,
               },
-              options: {
-                  scales: {
-                      xAxis: {
-                          display: false,
-                      }
-                  }
-              }
+              options: {}
           });
       }
       
@@ -245,13 +239,7 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
                   labels: labels,
                   datasets: datasets,
               },
-              options: {
-                  scales: {
-                      xAxis: {
-                          display: false,
-                      }
-                  }
-              }
+              options: {}
           });
       }
       
@@ -376,13 +364,7 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
                   labels: labels,
                   datasets: datasets,
               },
-              options: {
-                  scales: {
-                      xAxis: {
-                          display: false,
-                      }
-                  }
-              }
+              options: {}
           });
       }
       
