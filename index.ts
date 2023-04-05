@@ -1,5 +1,9 @@
 import {Command, program} from "commander";
-import {MergedEventStatistics, MergeEventRepository, gitStatistics} from "./src/merge-events/MergeEvent.js";
+import {
+    MergeEventRepository,
+    gitStatistics,
+    StatisticsAggregate
+} from "./src/merge-events/MergeEvent.js";
 import {MergedRequestHTTPGitlabRepository} from "./src/infrastructure/repository/MergeRequestHTTPGitlabRepository.js";
 import {parseISO} from "date-fns";
 import {ConsoleWriter} from "./src/infrastructure/writer/ConsoleWriter.js";
@@ -24,7 +28,7 @@ const writer = (format: string): Writer => {
 }
 
 export interface Writer {
-    write(stats: MergedEventStatistics): void
+    write(stats: StatisticsAggregate): void
 }
 export type RequestParameters = {
     fromDate: Date;

@@ -1,4 +1,4 @@
-import { MergedEventStatistics } from "../../merge-events/MergeEvent.js";
+import { StatisticsAggregate } from "../../merge-events/MergeEvent.js";
 import { Writer } from "../../../index.js";
 import fs from "fs";
 import { stringify } from "csv-stringify/sync";
@@ -6,6 +6,7 @@ import moment from "moment";
 
 export class CSVWriter implements Writer {
   private HEADER = [
+    { key: "eventType", header: "Event" },
     { key: "project", header: "Project" },
     { key: "id", header: "id" },
     { key: "createdAt", header: "Created At" },
@@ -14,13 +15,16 @@ export class CSVWriter implements Writer {
   ];
   constructor(private readonly filePath: string) {}
 
-  write(stats: MergedEventStatistics): void {
+  write(stats: StatisticsAggregate): void {
     try {
       const reportFilePath = `${this.filePath}/report`;
       if (!fs.existsSync(reportFilePath)) {
         fs.mkdirSync(reportFilePath);
       }
-      const stringifier = stringify(stats.sortedEvents(), {
+      const input = Object.entries(stats).flatMap(([key, value]) =>
+        value.sortedEvents().map((event) => ({ eventType: key, ...event }))
+      );
+      const stringifier = stringify(input, {
         header: true,
         columns: this.HEADER,
         delimiter: ";",

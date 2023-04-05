@@ -29,12 +29,12 @@ describe("CSV writer", () => {
     const fromDate = parseISO("2022-02-11T00:00:00");
     const toDate = parseISO("2022-02-17T00:00:00");
 
-    new CSVWriter(tempDirectory).write(
-      new MergedEventStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
+    new CSVWriter(tempDirectory).write({
+      mergedEvents: new MergedEventStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
         end: toDate,
         start: fromDate,
-      })
-    );
+      }),
+    });
 
     expect(fs.readFileSync(`${tempDirectory}/report/report.csv`, "utf8")).toMatchSnapshot();
   });

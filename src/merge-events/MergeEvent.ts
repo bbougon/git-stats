@@ -90,11 +90,15 @@ function mergeEventsStatistics(
   });
 }
 
+export type StatisticsAggregate = { [key: string]: GitStatistics };
+
 export const gitStatistics = (
   requestParameter: RequestParameters,
   repository: MergeEventRepository
-): Promise<GitStatistics> => {
-  return mergeEventsStatistics(repository, requestParameter);
+): Promise<StatisticsAggregate> => {
+  return mergeEventsStatistics(repository, requestParameter).then((statistics) =>
+    Promise.resolve({ mergedEvents: statistics })
+  );
 };
 
 type Unit = string | "Week" | "Month";

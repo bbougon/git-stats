@@ -19,6 +19,7 @@ export abstract class GitRepository<T> implements Repository<T> {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   persist(entity: T) {
     throw new Error("Not implemented");
   }

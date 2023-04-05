@@ -39,14 +39,16 @@ describe("Merge events statistics", () => {
           .build()
       );
 
-      const stats: MergedEventStatistics = (await gitStatistics(
-        {
-          projectId: 1,
-          fromDate: parseISO("2022-02-11T00:00:00"),
-          toDate: parseISO("2022-02-25T00:00:00"),
-        } as MergeRequestsStatsParameters,
-        repository
-      )) as MergedEventStatistics;
+      const stats: MergedEventStatistics = (
+        await gitStatistics(
+          {
+            projectId: 1,
+            fromDate: parseISO("2022-02-11T00:00:00"),
+            toDate: parseISO("2022-02-25T00:00:00"),
+          } as MergeRequestsStatsParameters,
+          repository
+        )
+      ).mergedEvents as MergedEventStatistics;
 
       expect(stats.result()).toEqual({
         average: { months: 0, days: 3, hours: 0, minutes: 0, seconds: 0 },
@@ -64,14 +66,16 @@ describe("Merge events statistics", () => {
       );
       repository.persist(new MergeRequestBuilder(1).createdAt(parseISO("2022-05-13T14:54:12")).notYetMerged().build());
 
-      const stats: MergedEventStatistics = (await gitStatistics(
-        {
-          projectId: 1,
-          fromDate: parseISO("2022-05-08T00:00:00"),
-          toDate: parseISO("2022-05-15T00:00:00"),
-        } as MergeRequestsStatsParameters,
-        repository
-      )) as MergedEventStatistics;
+      const stats: MergedEventStatistics = (
+        await gitStatistics(
+          {
+            projectId: 1,
+            fromDate: parseISO("2022-05-08T00:00:00"),
+            toDate: parseISO("2022-05-15T00:00:00"),
+          } as MergeRequestsStatsParameters,
+          repository
+        )
+      ).mergedEvents as MergedEventStatistics;
 
       expect(stats.result()).toEqual({
         average: { months: 0, days: 1, hours: 1, minutes: 0, seconds: 0 },
@@ -94,14 +98,16 @@ describe("Merge events statistics", () => {
           .build()
       );
 
-      const stats: MergedEventStatistics = (await gitStatistics(
-        {
-          projectId: 1,
-          fromDate: parseISO("2022-05-08T00:00:00"),
-          toDate: parseISO("2022-05-15T00:00:00"),
-        } as MergeRequestsStatsParameters,
-        repository
-      )) as MergedEventStatistics;
+      const stats: MergedEventStatistics = (
+        await gitStatistics(
+          {
+            projectId: 1,
+            fromDate: parseISO("2022-05-08T00:00:00"),
+            toDate: parseISO("2022-05-15T00:00:00"),
+          } as MergeRequestsStatsParameters,
+          repository
+        )
+      ).mergedEvents as MergedEventStatistics;
 
       expect(stats.result()).toEqual({
         average: { months: 0, days: 1, hours: 1, minutes: 0, seconds: 0 },
@@ -118,14 +124,16 @@ describe("Merge events statistics", () => {
           .build()
       );
 
-      const stats: MergedEventStatistics = (await gitStatistics(
-        {
-          projectId: 1,
-          fromDate: parseISO("2022-01-01T00:00:00"),
-          toDate: parseISO("2022-02-25T00:00:00"),
-        } as MergeRequestsStatsParameters,
-        repository
-      )) as MergedEventStatistics;
+      const stats: MergedEventStatistics = (
+        await gitStatistics(
+          {
+            projectId: 1,
+            fromDate: parseISO("2022-01-01T00:00:00"),
+            toDate: parseISO("2022-02-25T00:00:00"),
+          } as MergeRequestsStatsParameters,
+          repository
+        )
+      ).mergedEvents as MergedEventStatistics;
 
       expect(stats.result()).toEqual({
         average: { months: 1, days: 4, hours: 4, minutes: 0, seconds: 0 },

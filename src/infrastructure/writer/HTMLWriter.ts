@@ -1,5 +1,10 @@
 import { Writer } from "../../../index.js";
-import { Dimension, GitStatistics, MergedEventStatistics, mergeEventsByPeriod } from "../../merge-events/MergeEvent.js";
+import {
+  Dimension,
+  MergedEventStatistics,
+  mergeEventsByPeriod,
+  StatisticsAggregate,
+} from "../../merge-events/MergeEvent.js";
 import * as fs from "fs";
 import { intlFormat } from "date-fns";
 import { openBrowser } from "./OpenBrowser.js";
@@ -10,7 +15,7 @@ import { __dirname } from "./FilePathConstant.js";
 const HUMAN_READABLE_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 class HTMLContentBuilder {
-  constructor(private readonly stats: GitStatistics) {}
+  constructor(private readonly stats: StatisticsAggregate) {}
 
   build = (): string => {
     const humanizeDate = (date: Date): string => {
@@ -29,7 +34,7 @@ class HTMLContentBuilder {
         .replace(/>/g, "\\u003E")
         .replace(/\//g, "\\u002F");
     };
-    const stats = mergeEventsByPeriod(this.stats as MergedEventStatistics);
+    const stats = mergeEventsByPeriod(this.stats.mergedEvents as MergedEventStatistics);
     const labels: string[] = [];
     const data: number[] = [];
     for (const stat of stats) {
@@ -37,9 +42,9 @@ class HTMLContentBuilder {
       data.push(stat.mr);
     }
 
-    const aggregatedStats = this.stats.result();
-    const start = humanizeDate(this.stats.period.start);
-    const end = humanizeDate(this.stats.period.end);
+    const aggregatedStats = this.stats.mergedEvents.result();
+    const start = humanizeDate(this.stats.mergedEvents.period.start);
+    const end = humanizeDate(this.stats.mergedEvents.period.end);
     const templateFilePath = path.resolve(__dirname, "../../../templates/template.pug");
     const fn = pug.compileFile(templateFilePath, { pretty: true });
     return fn({
@@ -64,7 +69,7 @@ export class HTMLWriter implements Writer {
     this._filePath = filePath;
   }
 
-  write(stats: GitStatistics): void {
+  write(stats: StatisticsAggregate): void {
     try {
       const reportFilePath = `${this._filePath}/report`;
       if (!fs.existsSync(reportFilePath)) {
