@@ -1,5 +1,5 @@
 import {Command, program} from "commander";
-import {GitStatistics, MergeEventRepository, mergeEventsStatistics} from "./src/merge-events/MergeEvent.js";
+import {MergedEventStatistics, MergeEventRepository, gitStatistics} from "./src/merge-events/MergeEvent.js";
 import {MergedRequestHTTPGitlabRepository} from "./src/infrastructure/repository/MergeRequestHTTPGitlabRepository.js";
 import {parseISO} from "date-fns";
 import {ConsoleWriter} from "./src/infrastructure/writer/ConsoleWriter.js";
@@ -24,7 +24,7 @@ const writer = (format: string): Writer => {
 }
 
 export interface Writer {
-    write(stats: GitStatistics): void
+    write(stats: MergedEventStatistics): void
 }
 export type RequestParameters = {
     fromDate: Date;
@@ -55,7 +55,7 @@ const proceedCommand = (command: Command, commandParameters: (...args: any[]) =>
         .option('-f, --format <writer>', 'format to display the stats (default json in console), available formats are html, csv and console (default)', writer, new ConsoleWriter())
         .action((...args: any[]) => {
             const parameters = commandParameters(...args)
-            mergeEventsStatistics(parameters.requestParameters, repository(parameters.token))
+            gitStatistics(parameters.requestParameters, repository(parameters.token))
                 .then((stats) => {
                     parameters.options.format.write(stats)
                 })

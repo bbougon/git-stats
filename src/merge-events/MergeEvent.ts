@@ -3,7 +3,9 @@ import { Repository } from "../Repository.js";
 import { RequestParameters } from "../../index.js";
 import moment from "moment";
 
-export type MergeEvent = {
+export type GitEvent = object;
+
+export type MergeEvent = GitEvent & {
   project: number | string | undefined;
   id: number;
   createdAt: Date;
@@ -15,7 +17,9 @@ export interface MergeEventRepository extends Repository<MergeEvent> {
   getMergeEventsForPeriod(requestParameters: RequestParameters): Promise<MergeEvent[]>;
 }
 
-type MergeEventsStatisticsResult = {
+export type GitEventsStatisticsResult = object;
+
+type MergeEventsStatisticsResult = GitEventsStatisticsResult & {
   average: {
     months: number;
     days: number;
@@ -33,14 +37,22 @@ type MergeEventsStatisticsResult = {
 
 type Period = { start: Date; end: Date };
 
-export class GitStatistics {
-  constructor(private readonly mergeEvents: MergeEvent[], public readonly period: Period) {}
+export interface GitStatistics {
+  readonly period: Period;
 
-  public sortedMergeEvents(): MergeEvent[] {
+  result: () => GitEventsStatisticsResult;
+
+  sortedEvents: () => GitEvent[];
+}
+
+export class MergedEventStatistics implements GitStatistics {
+  constructor(private mergeEvents: MergeEvent[], public readonly period: Period) {}
+
+  sortedEvents = (): MergeEvent[] => {
     return this.mergeEvents
       .sort((mr, mrToCompare) => compareAsc(mr.createdAt, mrToCompare.createdAt))
       .sort((mr, mrToCompare) => compareAsc(mr.mergedAt, mrToCompare.mergedAt));
-  }
+  };
 
   result = (): MergeEventsStatisticsResult => {
     const mergedMergeRequests = this.mergeEvents.filter((mr) => mr.mergedAt !== null);
@@ -69,13 +81,20 @@ export class GitStatistics {
   };
 }
 
-export const mergeEventsStatistics = (
+function mergeEventsStatistics(
+  repository: MergeEventRepository,
+  requestParameter: RequestParameters
+): Promise<MergedEventStatistics> {
+  return repository.getMergeEventsForPeriod(requestParameter).then((mergeEvents) => {
+    return new MergedEventStatistics(mergeEvents, { end: requestParameter.toDate, start: requestParameter.fromDate });
+  });
+}
+
+export const gitStatistics = (
   requestParameter: RequestParameters,
   repository: MergeEventRepository
 ): Promise<GitStatistics> => {
-  return repository.getMergeEventsForPeriod(requestParameter).then((mergeEvents) => {
-    return new GitStatistics(mergeEvents, { end: requestParameter.toDate, start: requestParameter.fromDate });
-  });
+  return mergeEventsStatistics(repository, requestParameter);
 };
 
 type Unit = string | "Week" | "Month";
@@ -147,7 +166,7 @@ function fillEmptyPeriodsAndSortChronologically(
   return result;
 }
 
-export const mergeEventsByPeriod = (mergeEventsStatistics: GitStatistics): Dimension[] => {
+export const mergeEventsByPeriod = (mergeEventsStatistics: MergedEventStatistics): Dimension[] => {
   const stats: [number, [number, Dimension][]][] = [];
   const duration = intervalToDuration({
     start: mergeEventsStatistics.period.start,
@@ -156,7 +175,7 @@ export const mergeEventsByPeriod = (mergeEventsStatistics: GitStatistics): Dimen
   const moreThan2Months = duration.months > 1 && duration.months + duration.days > 2;
   const unit = moreThan2Months ? "Month" : "Week";
   mergeEventsStatistics
-    .sortedMergeEvents()
+    .sortedEvents()
     .filter((mr) => mr.mergedAt !== null)
     .forEach((mr) => {
       const year = mr.mergedAt.getFullYear();

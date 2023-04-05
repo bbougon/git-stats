@@ -1,5 +1,5 @@
 import { Writer } from "../../../index.js";
-import { Dimension, GitStatistics, mergeEventsByPeriod } from "../../merge-events/MergeEvent.js";
+import { Dimension, GitStatistics, MergedEventStatistics, mergeEventsByPeriod } from "../../merge-events/MergeEvent.js";
 import * as fs from "fs";
 import { intlFormat } from "date-fns";
 import { openBrowser } from "./OpenBrowser.js";
@@ -29,7 +29,7 @@ class HTMLContentBuilder {
         .replace(/>/g, "\\u003E")
         .replace(/\//g, "\\u002F");
     };
-    const stats = mergeEventsByPeriod(this.stats);
+    const stats = mergeEventsByPeriod(this.stats as MergedEventStatistics);
     const labels: string[] = [];
     const data: number[] = [];
     for (const stat of stats) {

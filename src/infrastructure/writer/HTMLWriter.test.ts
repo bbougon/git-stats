@@ -1,8 +1,5 @@
 import { jest } from "@jest/globals";
-jest.mock("./FilePathConstant", () => ({
-  __dirname: "src/infrastructure/writer/",
-}));
-import { GitStatistics } from "../../merge-events/MergeEvent";
+import { MergedEventStatistics } from "../../merge-events/MergeEvent";
 import { HTMLWriter } from "./HTMLWriter";
 import { mkdtemp } from "node:fs/promises";
 import * as path from "path";
@@ -10,6 +7,10 @@ import * as os from "os";
 import * as fs from "fs";
 import { MergeRequestBuilder } from "../../__tests__/builder";
 import { parseISO } from "date-fns";
+
+jest.mock("./FilePathConstant", () => ({
+  __dirname: "src/infrastructure/writer/",
+}));
 
 jest.mock("./OpenBrowser", () => ({
   openBrowser: jest.fn(),
@@ -30,11 +31,11 @@ describe("HTML writer", () => {
       .mergedAt(parseISO("2022-02-16T16:44:22"))
       .build();
     const tempDirectory = await mkdtemp(path.join(os.tmpdir(), "report-"));
-
     const fromDate = parseISO("2022-02-11T00:00:00");
     const toDate = parseISO("2022-02-17T00:00:00");
+
     new HTMLWriter(tempDirectory).write(
-      new GitStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
+      new MergedEventStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
         end: toDate,
         start: fromDate,
       })
@@ -57,11 +58,11 @@ describe("HTML writer", () => {
       .mergedAt(parseISO("2022-02-16T16:44:22"))
       .build();
     const tempDirectory = await mkdtemp(path.join(os.tmpdir(), "report-"));
-
     const fromDate = parseISO("2022-02-11T00:00:00");
     const toDate = parseISO("2022-02-17T00:00:00");
+
     new HTMLWriter(tempDirectory).write(
-      new GitStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
+      new MergedEventStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
         end: toDate,
         start: fromDate,
       })
@@ -86,7 +87,7 @@ describe("HTML writer", () => {
     const tempDirectory = await mkdtemp(path.join(os.tmpdir(), "report-"));
 
     new HTMLWriter(tempDirectory).write(
-      new GitStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
+      new MergedEventStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
         end: parseISO("2022-03-02T00:00:00"),
         start: parseISO("2022-01-01T00:00:00"),
       })
