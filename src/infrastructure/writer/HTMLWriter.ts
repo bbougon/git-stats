@@ -1,16 +1,12 @@
 import { Writer } from "../../../index.js";
-import {
-  Dimension,
-  MergedEventStatistics,
-  mergeEventsByPeriod,
-  StatisticsAggregate,
-} from "../../merge-events/MergeEvent.js";
+import { MergedEventStatistics, mergeEventsByPeriod } from "../../merge-events/MergeEvent.js";
 import * as fs from "fs";
 import { intlFormat } from "date-fns";
 import { openBrowser } from "./OpenBrowser.js";
 import * as pug from "pug";
 import * as path from "path";
 import { __dirname } from "./FilePathConstant.js";
+import { Dimension, StatisticsAggregate } from "../../GitStatistics.js";
 
 const HUMAN_READABLE_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 

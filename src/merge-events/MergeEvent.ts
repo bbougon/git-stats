@@ -2,10 +2,9 @@ import { compareAsc, differenceInHours, getMonth, getWeek, intervalToDuration } 
 import { Repository } from "../Repository.js";
 import { RequestParameters } from "../../index.js";
 import moment from "moment";
+import { Dimension, GitEvent, GitEventsStatisticsResult, GitStatistics, Period } from "../GitStatistics.js";
 
-export type GitEvent = object;
-
-export type MergeEvent = GitEvent & {
+type MergeEvent = GitEvent & {
   project: number | string | undefined;
   id: number;
   createdAt: Date;
@@ -13,11 +12,9 @@ export type MergeEvent = GitEvent & {
   closedAt: Date | null;
 };
 
-export interface MergeEventRepository extends Repository<MergeEvent> {
+interface MergeEventRepository extends Repository<MergeEvent> {
   getMergeEventsForPeriod(requestParameters: RequestParameters): Promise<MergeEvent[]>;
 }
-
-export type GitEventsStatisticsResult = object;
 
 type MergeEventsStatisticsResult = GitEventsStatisticsResult & {
   average: {
@@ -35,17 +32,7 @@ type MergeEventsStatisticsResult = GitEventsStatisticsResult & {
   };
 };
 
-type Period = { start: Date; end: Date };
-
-export interface GitStatistics {
-  readonly period: Period;
-
-  result: () => GitEventsStatisticsResult;
-
-  sortedEvents: () => GitEvent[];
-}
-
-export class MergedEventStatistics implements GitStatistics {
+class MergedEventStatistics implements GitStatistics {
   constructor(private mergeEvents: MergeEvent[], public readonly period: Period) {}
 
   sortedEvents = (): MergeEvent[] => {
@@ -81,42 +68,48 @@ export class MergedEventStatistics implements GitStatistics {
   };
 }
 
-function mergeEventsStatistics(
+const mergeEventsStatistics = (
   repository: MergeEventRepository,
   requestParameter: RequestParameters
-): Promise<MergedEventStatistics> {
+): Promise<MergedEventStatistics> => {
   return repository.getMergeEventsForPeriod(requestParameter).then((mergeEvents) => {
     return new MergedEventStatistics(mergeEvents, { end: requestParameter.toDate, start: requestParameter.fromDate });
   });
-}
-
-export type StatisticsAggregate = { [key: string]: GitStatistics };
-
-export const gitStatistics = (
-  requestParameter: RequestParameters,
-  repository: MergeEventRepository
-): Promise<StatisticsAggregate> => {
-  return mergeEventsStatistics(repository, requestParameter).then((statistics) =>
-    Promise.resolve({ mergedEvents: statistics })
-  );
 };
 
-type Unit = string | "Week" | "Month";
-export class Dimension {
-  private constructor(public readonly unit: Unit, public readonly index: number, public mr: number) {}
-
-  static create(unit: Unit, index: number) {
-    return new Dimension(unit, index, 1);
-  }
-
-  increase() {
-    this.mr = this.mr + 1;
-  }
-
-  static empty(unit: Unit, index: number) {
-    return new Dimension(unit, index, 0);
-  }
-}
+const mergeEventsByPeriod = (mergeEventsStatistics: MergedEventStatistics): Dimension[] => {
+  const stats: [number, [number, Dimension][]][] = [];
+  const duration = intervalToDuration({
+    start: mergeEventsStatistics.period.start,
+    end: mergeEventsStatistics.period.end,
+  });
+  const moreThan2Months = duration.months > 1 && duration.months + duration.days > 2;
+  const unit = moreThan2Months ? "Month" : "Week";
+  mergeEventsStatistics
+    .sortedEvents()
+    .filter((mr) => mr.mergedAt !== null)
+    .forEach((mr) => {
+      const year = mr.mergedAt.getFullYear();
+      const dimension = Dimension.create(unit, moreThan2Months ? getMonth(mr.mergedAt) : getWeek(mr.mergedAt));
+      if (stats.length === 0) {
+        stats.push([year, [[dimension.index, dimension]]]);
+      } else {
+        const yearStats = stats.filter((stat) => stat[0] === year);
+        if (yearStats.length === 0) {
+          stats.push([year, [[dimension.index, dimension]]]);
+        } else {
+          const periodStats = yearStats[0][1].filter((stat) => stat[0] === dimension.index);
+          if (periodStats.length === 0) {
+            yearStats[0][1].push([dimension.index, dimension]);
+          } else {
+            const dimension = periodStats[0][1];
+            dimension.increase();
+          }
+        }
+      }
+    });
+  return fillEmptyPeriodsAndSortChronologically(stats, unit, mergeEventsStatistics.period);
+};
 
 function fillEmptyPeriodsAndSortChronologically(
   stats: [number, [number, Dimension][]][],
@@ -170,36 +163,4 @@ function fillEmptyPeriodsAndSortChronologically(
   return result;
 }
 
-export const mergeEventsByPeriod = (mergeEventsStatistics: MergedEventStatistics): Dimension[] => {
-  const stats: [number, [number, Dimension][]][] = [];
-  const duration = intervalToDuration({
-    start: mergeEventsStatistics.period.start,
-    end: mergeEventsStatistics.period.end,
-  });
-  const moreThan2Months = duration.months > 1 && duration.months + duration.days > 2;
-  const unit = moreThan2Months ? "Month" : "Week";
-  mergeEventsStatistics
-    .sortedEvents()
-    .filter((mr) => mr.mergedAt !== null)
-    .forEach((mr) => {
-      const year = mr.mergedAt.getFullYear();
-      const dimension = Dimension.create(unit, moreThan2Months ? getMonth(mr.mergedAt) : getWeek(mr.mergedAt));
-      if (stats.length === 0) {
-        stats.push([year, [[dimension.index, dimension]]]);
-      } else {
-        const yearStats = stats.filter((stat) => stat[0] === year);
-        if (yearStats.length === 0) {
-          stats.push([year, [[dimension.index, dimension]]]);
-        } else {
-          const periodStats = yearStats[0][1].filter((stat) => stat[0] === dimension.index);
-          if (periodStats.length === 0) {
-            yearStats[0][1].push([dimension.index, dimension]);
-          } else {
-            const dimension = periodStats[0][1];
-            dimension.increase();
-          }
-        }
-      }
-    });
-  return fillEmptyPeriodsAndSortChronologically(stats, unit, mergeEventsStatistics.period);
-};
+export { MergeEvent, MergeEventRepository, MergedEventStatistics, mergeEventsByPeriod, mergeEventsStatistics };

@@ -1,8 +1,8 @@
-import { StatisticsAggregate } from "../../merge-events/MergeEvent.js";
 import { Writer } from "../../../index.js";
 import fs from "fs";
 import { stringify } from "csv-stringify/sync";
 import moment from "moment";
+import { StatisticsAggregate } from "../../GitStatistics.js";
 
 export class CSVWriter implements Writer {
   private HEADER = [

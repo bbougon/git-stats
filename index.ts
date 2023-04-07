@@ -1,8 +1,6 @@
 import {Command, program} from "commander";
 import {
-    MergeEventRepository,
-    gitStatistics,
-    StatisticsAggregate
+    MergeEventRepository
 } from "./src/merge-events/MergeEvent.js";
 import {MergedRequestHTTPGitlabRepository} from "./src/infrastructure/repository/MergeRequestHTTPGitlabRepository.js";
 import {parseISO} from "date-fns";
@@ -12,6 +10,7 @@ import {MergeRequestsStatsParameters} from "./src/merge-events/Gitlab.js";
 import {PullRequestHTTPGithubRepository} from "./src/infrastructure/repository/PullRequestHTTPGithubRepository.js";
 import {PullRequestsStatsParameter} from "./src/merge-events/Github.js";
 import {CSVWriter} from "./src/infrastructure/writer/CSVWriter.js";
+import {gitStatistics, StatisticsAggregate} from "./src/merge-events/GitStatistics.js";
 
 const commaSeparatedList =(list: string) => {
     return list.split(",")
