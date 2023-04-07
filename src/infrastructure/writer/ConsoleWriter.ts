@@ -1,5 +1,5 @@
 import { Writer } from "../../../index.js";
-import { StatisticsAggregate } from "../../merge-events/GitStatistics.js";
+import { StatisticsAggregate } from "../../GitStatistics.js";
 
 export class ConsoleWriter implements Writer {
   write(stats: StatisticsAggregate): void {

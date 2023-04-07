@@ -1,9 +1,9 @@
 import { compareAsc, compareDesc, parseISO } from "date-fns";
-import { MergedEventStatistics, MergeEvent, MergeEventRepository, mergeEventsByPeriod } from "./MergeEvent";
+import { MergedEventStatistics, MergeEvent, MergeEventRepository } from "./MergeEvent";
 import { Repository } from "../Repository";
 import { MergeRequestBuilder, MergeRequestsBuilder } from "../__tests__/builder";
 import { MergeRequestsStatsParameters } from "./Gitlab";
-import { gitStatistics } from "../GitStatistics";
+import { gitEventsByPeriod, gitStatistics } from "../GitStatistics";
 
 describe("Merge events statistics", () => {
   describe("Aggregated statistics", () => {
@@ -143,11 +143,12 @@ describe("Merge events statistics", () => {
       const end = parseISO("2022-02-28T00:00:00");
       const mergeRequests = new MergeRequestsBuilder(1).total(20).forPeriod(start, end).withEmptyPeriod(7).build();
 
-      const eventsByPeriod = mergeEventsByPeriod(
+      const eventsByPeriod = gitEventsByPeriod(
         new MergedEventStatistics(mergeRequests, {
           start,
           end,
-        })
+        }),
+        (mr: MergeEvent) => mr.mergedAt
       );
 
       expect(eventsByPeriod.map((stat) => stat.index)).toStrictEqual([6, 7, 8, 9, 10]);
@@ -159,11 +160,12 @@ describe("Merge events statistics", () => {
       const end = parseISO("2023-02-10T00:00:00");
       const mergeRequests = new MergeRequestsBuilder(1).total(78).forPeriod(start, end).build();
 
-      const eventsByPeriod = mergeEventsByPeriod(
+      const eventsByPeriod = gitEventsByPeriod(
         new MergedEventStatistics(mergeRequests, {
           start,
           end,
-        })
+        }),
+        (mr: MergeEvent) => mr.mergedAt
       );
 
       expect(eventsByPeriod.map((stat) => stat.index)).toStrictEqual([1, 2, 3, 4, 5, 6]);
@@ -175,11 +177,12 @@ describe("Merge events statistics", () => {
       const end = parseISO("2023-03-24T00:00:00");
       const mergeRequests = new MergeRequestsBuilder(1).total(78).forPeriod(start, end).build();
 
-      const eventsByPeriod = mergeEventsByPeriod(
+      const eventsByPeriod = gitEventsByPeriod(
         new MergedEventStatistics(mergeRequests, {
           start,
           end,
-        })
+        }),
+        (mr: MergeEvent) => mr.mergedAt
       );
 
       expect(eventsByPeriod.map((stat) => stat.index)).toStrictEqual([0, 1, 2]);
@@ -191,11 +194,12 @@ describe("Merge events statistics", () => {
       const end = parseISO("2023-03-28T00:00:00");
       const mergeRequests = new MergeRequestsBuilder(1).total(120).forPeriod(start, end).randomlyNotMerged().build();
 
-      const eventsByPeriod = mergeEventsByPeriod(
+      const eventsByPeriod = gitEventsByPeriod(
         new MergedEventStatistics(mergeRequests, {
           start,
           end,
-        })
+        }),
+        (mr: MergeEvent) => mr.mergedAt
       );
 
       expect(eventsByPeriod.map((stat) => stat.index)).toStrictEqual([9, 10, 11, 0, 1, 2]);
@@ -220,11 +224,12 @@ describe("Merge events statistics", () => {
           .build(),
       ];
 
-      const eventsByPeriod = mergeEventsByPeriod(
+      const eventsByPeriod = gitEventsByPeriod(
         new MergedEventStatistics(mergeRequests, {
           start,
           end,
-        })
+        }),
+        (mr: MergeEvent) => mr.mergedAt
       );
 
       expect(eventsByPeriod.map((stat) => stat.index)).toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
@@ -252,11 +257,12 @@ describe("Merge events statistics", () => {
         },
       ];
 
-      const eventsByPeriod = mergeEventsByPeriod(
+      const eventsByPeriod = gitEventsByPeriod(
         new MergedEventStatistics(mergeRequests, {
           start,
           end,
-        })
+        }),
+        (mr: MergeEvent) => mr.mergedAt
       );
 
       expect(eventsByPeriod.map((stat) => stat.index)).toStrictEqual([32, 33, 34, 35, 36]);

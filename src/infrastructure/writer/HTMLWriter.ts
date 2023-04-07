@@ -1,12 +1,12 @@
 import { Writer } from "../../../index.js";
-import { MergedEventStatistics, mergeEventsByPeriod } from "../../merge-events/MergeEvent.js";
+import { MergedEventStatistics, MergeEvent } from "../../merge-events/MergeEvent.js";
 import * as fs from "fs";
 import { intlFormat } from "date-fns";
 import { openBrowser } from "./OpenBrowser.js";
 import * as pug from "pug";
 import * as path from "path";
 import { __dirname } from "./FilePathConstant.js";
-import { Dimension, StatisticsAggregate } from "../../GitStatistics.js";
+import { Dimension, gitEventsByPeriod, StatisticsAggregate } from "../../GitStatistics.js";
 
 const HUMAN_READABLE_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -30,7 +30,7 @@ class HTMLContentBuilder {
         .replace(/>/g, "\\u003E")
         .replace(/\//g, "\\u002F");
     };
-    const stats = mergeEventsByPeriod(this.stats.mergedEvents as MergedEventStatistics);
+    const stats = gitEventsByPeriod(this.stats.mergedEvents as MergedEventStatistics, (mr: MergeEvent) => mr.mergedAt);
     const labels: string[] = [];
     const data: number[] = [];
     for (const stat of stats) {

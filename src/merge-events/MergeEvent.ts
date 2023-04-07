@@ -1,8 +1,8 @@
-import { compareAsc, differenceInHours, getMonth, getWeek, intervalToDuration } from "date-fns";
+import { compareAsc, differenceInHours } from "date-fns";
 import { Repository } from "../Repository.js";
 import { RequestParameters } from "../../index.js";
 import moment from "moment";
-import { Dimension, GitEvent, GitEventsStatisticsResult, GitStatistics, Period } from "../GitStatistics.js";
+import { GitEvent, GitEventsStatisticsResult, GitStatistics, Period } from "../GitStatistics.js";
 
 type MergeEvent = GitEvent & {
   project: number | string | undefined;
@@ -77,90 +77,4 @@ const mergeEventsStatistics = (
   });
 };
 
-const mergeEventsByPeriod = (mergeEventsStatistics: MergedEventStatistics): Dimension[] => {
-  const stats: [number, [number, Dimension][]][] = [];
-  const duration = intervalToDuration({
-    start: mergeEventsStatistics.period.start,
-    end: mergeEventsStatistics.period.end,
-  });
-  const moreThan2Months = duration.months > 1 && duration.months + duration.days > 2;
-  const unit = moreThan2Months ? "Month" : "Week";
-  mergeEventsStatistics
-    .sortedEvents()
-    .filter((mr) => mr.mergedAt !== null)
-    .forEach((mr) => {
-      const year = mr.mergedAt.getFullYear();
-      const dimension = Dimension.create(unit, moreThan2Months ? getMonth(mr.mergedAt) : getWeek(mr.mergedAt));
-      if (stats.length === 0) {
-        stats.push([year, [[dimension.index, dimension]]]);
-      } else {
-        const yearStats = stats.filter((stat) => stat[0] === year);
-        if (yearStats.length === 0) {
-          stats.push([year, [[dimension.index, dimension]]]);
-        } else {
-          const periodStats = yearStats[0][1].filter((stat) => stat[0] === dimension.index);
-          if (periodStats.length === 0) {
-            yearStats[0][1].push([dimension.index, dimension]);
-          } else {
-            const dimension = periodStats[0][1];
-            dimension.increase();
-          }
-        }
-      }
-    });
-  return fillEmptyPeriodsAndSortChronologically(stats, unit, mergeEventsStatistics.period);
-};
-
-function fillEmptyPeriodsAndSortChronologically(
-  stats: [number, [number, Dimension][]][],
-  unit: string,
-  period: Period
-) {
-  const result: Dimension[] = [];
-
-  const fillPeriodTail = (stat: [number, [number, Dimension][]], dimensions: Dimension[]): void => {
-    let periodEndIndex: number | undefined = undefined;
-    if (stat[0] === period.end.getFullYear()) {
-      periodEndIndex = unit === "Week" ? getWeek(period.end) : getMonth(period.end);
-    }
-    if (
-      periodEndIndex !== undefined &&
-      dimensions.find((dimension) => dimension.index === periodEndIndex) === undefined
-    ) {
-      const dimensionsLength = Math.max(...dimensions.map((dimension) => dimension.index));
-      for (let i = 0; i < periodEndIndex - dimensionsLength; i++) {
-        dimensions.push(Dimension.empty(unit, periodEndIndex - i));
-      }
-    }
-  };
-
-  const fillPeriodInterval = (stat: [number, [number, Dimension][]], dimensions: Dimension[]): void => {
-    const periods = dimensions.map((val) => val.index);
-    const periodStartIndex =
-      stat[0] === period.start.getFullYear() ? (unit === "Week" ? getWeek(period.start) : getMonth(period.start)) : 0;
-    for (let i = 0; i < periodStartIndex + periods.length; i++) {
-      if (periodStartIndex <= i) {
-        let j = i;
-        while (j < periods[i - periodStartIndex]) {
-          if (dimensions.find((dimension) => dimension.index === j) === undefined) {
-            dimensions.push(Dimension.empty(unit, j));
-          }
-          j++;
-        }
-      }
-    }
-  };
-
-  stats.forEach((stat) => {
-    const flattenDimensions = stat[1]
-      .flatMap((val) => val[1])
-      .flatMap((val) => val)
-      .sort((dimension, nextDimension) => (dimension.index > nextDimension.index ? 1 : -1));
-    fillPeriodInterval(stat, flattenDimensions);
-    fillPeriodTail(stat, flattenDimensions);
-    result.push(...flattenDimensions.sort((stat, nextStat) => (stat.index > nextStat.index ? 1 : -1)));
-  });
-  return result;
-}
-
-export { MergeEvent, MergeEventRepository, MergedEventStatistics, mergeEventsByPeriod, mergeEventsStatistics };
+export { MergeEvent, MergeEventRepository, MergedEventStatistics, mergeEventsStatistics };

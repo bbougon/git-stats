@@ -10,7 +10,7 @@ import {MergeRequestsStatsParameters} from "./src/merge-events/Gitlab.js";
 import {PullRequestHTTPGithubRepository} from "./src/infrastructure/repository/PullRequestHTTPGithubRepository.js";
 import {PullRequestsStatsParameter} from "./src/merge-events/Github.js";
 import {CSVWriter} from "./src/infrastructure/writer/CSVWriter.js";
-import {gitStatistics, StatisticsAggregate} from "./src/merge-events/GitStatistics.js";
+import {gitStatistics, StatisticsAggregate} from "./src/GitStatistics.js";
 
 const commaSeparatedList =(list: string) => {
     return list.split(",")
