@@ -1,4 +1,4 @@
-import { MergeRequestBuilder } from "../../__tests__/builder";
+import { MergeEventBuilderForMR } from "../../__tests__/builder";
 import { mkdtemp } from "node:fs/promises";
 import path from "path";
 import os from "os";
@@ -9,7 +9,7 @@ import { MergedEventStatistics } from "../../statistics/merge-events/MergeEvent"
 
 describe("CSV writer", () => {
   test("should generate a CSV report file with all merge events", async () => {
-    const mergeRequestBuilder = new MergeRequestBuilder(1);
+    const mergeRequestBuilder = new MergeEventBuilderForMR(1);
     const firstMergeRequest = mergeRequestBuilder
       .id(1)
       .createdAt(parseISO("2022-02-11T12:37:22+01:00"))

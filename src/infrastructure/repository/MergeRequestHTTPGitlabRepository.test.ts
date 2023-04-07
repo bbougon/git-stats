@@ -1,7 +1,7 @@
 import { enableFetchMocks } from "jest-fetch-mock";
 import { formatISO, parseISO } from "date-fns";
 import { MergedRequestHTTPGitlabRepository } from "./MergeRequestHTTPGitlabRepository";
-import { MergeRequestBuilder } from "../../__tests__/builder";
+import { MergeEventBuilderForMR } from "../../__tests__/builder";
 import { MergeEventDTO } from "./GitRepository";
 import { MergeEvent } from "../../statistics/merge-events/MergeEvent";
 import { MergeRequestsStatsParameters } from "../../statistics/Gitlab";
@@ -13,15 +13,15 @@ describe("Gitlab Repository", () => {
   beforeEach(() => {
     enableFetchMocks();
     fetchMock.resetMocks();
-    firstMergeRequest = new MergeRequestBuilder(1)
+    firstMergeRequest = new MergeEventBuilderForMR(1)
       .createdAt(parseISO("2021-11-03T12:45:12"))
       .mergedAt(parseISO("2021-11-04T13:24:12"))
       .build();
-    secondMergeRequest = new MergeRequestBuilder(1)
+    secondMergeRequest = new MergeEventBuilderForMR(1)
       .createdAt(parseISO("2021-11-05T12:45:12"))
       .mergedAt(parseISO("2021-11-09T12:45:12"))
       .build();
-    thirdMergeRequest = new MergeRequestBuilder(1)
+    thirdMergeRequest = new MergeEventBuilderForMR(1)
       .createdAt(parseISO("2021-11-08T12:45:12"))
       .mergedAt(parseISO("2021-11-13T12:45:12"))
       .build();
@@ -180,7 +180,7 @@ describe("Gitlab Repository", () => {
   });
 
   test("should retrieve merge requests even if not merged", async () => {
-    const thirdMergeRequest = new MergeRequestBuilder(1)
+    const thirdMergeRequest = new MergeEventBuilderForMR(1)
       .createdAt(parseISO("2021-11-03T12:45:12"))
       .notYetMerged()
       .build();
@@ -207,7 +207,7 @@ describe("Gitlab Repository", () => {
   });
 
   test("should retrieve closed merge requests", async () => {
-    const thirdMergeRequest = new MergeRequestBuilder(1)
+    const thirdMergeRequest = new MergeEventBuilderForMR(1)
       .createdAt(parseISO("2021-11-03T12:45:12"))
       .closedAt(parseISO("2021-11-03T18:15:27"))
       .build();

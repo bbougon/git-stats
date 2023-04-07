@@ -2,7 +2,7 @@ import * as crypto from "crypto";
 import { addDays, differenceInCalendarDays, getWeek, parseISO } from "date-fns";
 import { MergeEvent } from "../statistics/merge-events/MergeEvent";
 
-export class MergeRequestBuilder {
+export class MergeEventBuilderForMR {
   private projectId: number;
   private _id: number;
   private _createdAt: Date;
@@ -14,29 +14,29 @@ export class MergeRequestBuilder {
     this._id = crypto.randomInt(2 ^ 16);
   }
 
-  createdAt = (createdAt: Date): MergeRequestBuilder => {
+  createdAt = (createdAt: Date): MergeEventBuilderForMR => {
     this._createdAt = createdAt;
     return this;
   };
 
-  mergedAt = (mergedAt: Date): MergeRequestBuilder => {
+  mergedAt = (mergedAt: Date): MergeEventBuilderForMR => {
     this._mergedAt = mergedAt;
     return this;
   };
 
-  notYetMerged = (): MergeRequestBuilder => {
+  notYetMerged = (): MergeEventBuilderForMR => {
     this._mergedAt = null;
     this._closedAt = null;
     return this;
   };
 
-  closedAt = (closedAt: Date): MergeRequestBuilder => {
+  closedAt = (closedAt: Date): MergeEventBuilderForMR => {
     this._closedAt = closedAt;
     this._mergedAt = null;
     return this;
   };
 
-  id = (id: number): MergeRequestBuilder => {
+  id = (id: number): MergeEventBuilderForMR => {
     this._id = id;
     return this;
   };
@@ -52,7 +52,7 @@ export class MergeRequestBuilder {
   };
 }
 
-export class MergeRequestsBuilder {
+export class MergeEventsBuilderForMR {
   private _projectId: number;
   private _numberOfMergeRequests: number;
   private _period: { from: Date; to: Date };
@@ -64,22 +64,22 @@ export class MergeRequestsBuilder {
     this._period = { from: parseISO("2021-01-01T00:00:00"), to: parseISO("2021-01-08T00:00:00") };
   }
 
-  total = (numberOfMergeRequests: number): MergeRequestsBuilder => {
+  total = (numberOfMergeRequests: number): MergeEventsBuilderForMR => {
     this._numberOfMergeRequests = numberOfMergeRequests;
     return this;
   };
 
-  forPeriod = (from: Date, to: Date): MergeRequestsBuilder => {
+  forPeriod = (from: Date, to: Date): MergeEventsBuilderForMR => {
     this._period = { from, to };
     return this;
   };
 
-  withEmptyPeriod = (periodNumber: number): MergeRequestsBuilder => {
+  withEmptyPeriod = (periodNumber: number): MergeEventsBuilderForMR => {
     this._emptyPeriodNumber = periodNumber;
     return this;
   };
 
-  randomlyNotMerged = (): MergeRequestsBuilder => {
+  randomlyNotMerged = (): MergeEventsBuilderForMR => {
     this._doNotMergeYetRandomly = true;
     return this;
   };
@@ -93,7 +93,7 @@ export class MergeRequestsBuilder {
         mergedAt = addDays(this._period.from, 2);
         if (this._emptyPeriodNumber == undefined || getWeek(mergedAt) !== this._emptyPeriodNumber) {
           requests.push(
-            new MergeRequestBuilder(this._projectId).createdAt(this._period.from).mergedAt(mergedAt).build()
+            new MergeEventBuilderForMR(this._projectId).createdAt(this._period.from).mergedAt(mergedAt).build()
           );
         }
       } else {
@@ -101,7 +101,7 @@ export class MergeRequestsBuilder {
         const daysToMerge = Math.floor(Math.random() * (daysInPeriod - daysForCreation) + daysForCreation + 1);
         mergedAt = addDays(this._period.from, daysToMerge);
         if (this._emptyPeriodNumber == undefined || getWeek(mergedAt) !== this._emptyPeriodNumber) {
-          let mergeRequestBuilder = new MergeRequestBuilder(this._projectId)
+          let mergeRequestBuilder = new MergeEventBuilderForMR(this._projectId)
             .createdAt(addDays(this._period.from, daysForCreation))
             .mergedAt(mergedAt);
           if (this._doNotMergeYetRandomly && Math.random() > 0.8) {
@@ -115,7 +115,7 @@ export class MergeRequestsBuilder {
   };
 }
 
-export class PullRequestBuilder {
+export class MergeEventBuilderForPR {
   private project: string | undefined;
   private id: number;
   private _createdAt: Date;
@@ -127,29 +127,29 @@ export class PullRequestBuilder {
     this.id = crypto.randomInt(2 ^ 16);
   }
 
-  createdAt = (createdAt: Date): PullRequestBuilder => {
+  createdAt = (createdAt: Date): MergeEventBuilderForPR => {
     this._createdAt = createdAt;
     return this;
   };
 
-  mergedAt = (mergedAt: Date): PullRequestBuilder => {
+  mergedAt = (mergedAt: Date): MergeEventBuilderForPR => {
     this._mergedAt = mergedAt;
     return this;
   };
 
-  notYetMerged = (): PullRequestBuilder => {
+  notYetMerged = (): MergeEventBuilderForPR => {
     this._mergedAt = null;
     this.closedAt = null;
     return this;
   };
 
-  closed = (closedAt: Date): PullRequestBuilder => {
+  closed = (closedAt: Date): MergeEventBuilderForPR => {
     this.closedAt = closedAt;
     this._mergedAt = null;
     return this;
   };
 
-  noName = (): PullRequestBuilder => {
+  noName = (): MergeEventBuilderForPR => {
     this.project = undefined;
     return this;
   };
