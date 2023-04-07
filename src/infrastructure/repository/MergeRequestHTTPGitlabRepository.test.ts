@@ -2,9 +2,9 @@ import { enableFetchMocks } from "jest-fetch-mock";
 import { formatISO, parseISO } from "date-fns";
 import { MergedRequestHTTPGitlabRepository } from "./MergeRequestHTTPGitlabRepository";
 import { MergeRequestBuilder } from "../../__tests__/builder";
-import { MergeEvent } from "../../merge-events/MergeEvent";
 import { MergeEventDTO } from "./GitRepository";
-import { MergeRequestsStatsParameters } from "../../merge-events/Gitlab";
+import { MergeEvent } from "../../statistics/merge-events/MergeEvent";
+import { MergeRequestsStatsParameters } from "../../statistics/Gitlab";
 
 describe("Gitlab Repository", () => {
   let firstMergeRequest: MergeEvent;

@@ -1,9 +1,9 @@
 import { enableFetchMocks } from "jest-fetch-mock";
 import { PullRequestBuilder } from "../../__tests__/builder";
-import { MergeEvent } from "../../merge-events/MergeEvent";
 import { formatISO, parseISO } from "date-fns";
-import { PullRequestsStatsParameter } from "../../merge-events/Github";
 import { PullRequestDTO, PullRequestHTTPGithubRepository } from "./PullRequestHTTPGithubRepository";
+import { MergeEvent } from "../../statistics/merge-events/MergeEvent";
+import { PullRequestsStatsParameter } from "../../statistics/Github";
 
 describe("Github repository", () => {
   let firstPullRequest: MergeEvent;

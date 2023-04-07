@@ -1,6 +1,6 @@
 import { MergeEventRepository, mergeEventsStatistics } from "./merge-events/MergeEvent.js";
-import { RequestParameters } from "../index.js";
 import { getMonth, getWeek, intervalToDuration } from "date-fns";
+import { RequestParameters } from "../../index.js";
 
 type GitEvent = object;
 type GitEventsStatisticsResult = object;

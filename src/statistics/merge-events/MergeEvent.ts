@@ -1,8 +1,8 @@
 import { compareAsc, differenceInHours } from "date-fns";
-import { Repository } from "../Repository.js";
-import { RequestParameters } from "../../index.js";
 import moment from "moment";
 import { GitEvent, GitEventsStatisticsResult, GitStatistics, Period } from "../GitStatistics.js";
+import { Repository } from "../../Repository.js";
+import { RequestParameters } from "../../../index.js";
 
 type MergeEvent = GitEvent & {
   project: number | string | undefined;

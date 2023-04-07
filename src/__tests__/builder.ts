@@ -1,6 +1,6 @@
 import * as crypto from "crypto";
-import { MergeEvent } from "../merge-events/MergeEvent";
 import { addDays, differenceInCalendarDays, getWeek, parseISO } from "date-fns";
+import { MergeEvent } from "../statistics/merge-events/MergeEvent";
 
 export class MergeRequestBuilder {
   private projectId: number;

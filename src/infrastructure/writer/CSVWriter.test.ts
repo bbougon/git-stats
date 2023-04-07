@@ -2,10 +2,10 @@ import { MergeRequestBuilder } from "../../__tests__/builder";
 import { mkdtemp } from "node:fs/promises";
 import path from "path";
 import os from "os";
-import { MergedEventStatistics } from "../../merge-events/MergeEvent";
 import fs from "fs";
 import { parseISO } from "date-fns";
 import { CSVWriter } from "./CSVWriter";
+import { MergedEventStatistics } from "../../statistics/merge-events/MergeEvent";
 
 describe("CSV writer", () => {
   test("should generate a CSV report file with all merge events", async () => {

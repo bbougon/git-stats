@@ -1,9 +1,9 @@
 import { compareAsc, compareDesc, parseISO } from "date-fns";
 import { MergedEventStatistics, MergeEvent, MergeEventRepository } from "./MergeEvent";
-import { Repository } from "../Repository";
-import { MergeRequestBuilder, MergeRequestsBuilder } from "../__tests__/builder";
-import { MergeRequestsStatsParameters } from "./Gitlab";
 import { gitEventsByPeriod, gitStatistics } from "../GitStatistics";
+import { MergeRequestBuilder, MergeRequestsBuilder } from "../../__tests__/builder";
+import { MergeRequestsStatsParameters } from "../Gitlab";
+import { Repository } from "../../Repository";
 
 describe("Merge events statistics", () => {
   describe("Aggregated statistics", () => {
