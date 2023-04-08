@@ -9,11 +9,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        node-version: [ 16.x ]
-
+        node-version: [ 18.15.x ]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Node js
@@ -34,6 +32,7 @@ jobs:
     - name: Check out repository code
       uses: actions/checkout@v3
     - name: Bumping version
+      id: bumping-version
       uses: jpb06/bump-package@latest
       with:
         major-keywords: BREAKING CHANGE
@@ -42,13 +41,11 @@ jobs:
     needs: test
 
   build:
-    if: needs.bump.bumping-version.outputs.bump-performed == 'true'
+    if: needs.bump.steps.bumping-version.outputs.bump-performed == 'true'
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        node-version: [ 16.x ]
-
+        node-version: [ 18.15.x ]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Node js
@@ -73,7 +70,6 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
-
     steps:
       - name: Download gitflows-stats artifact
         uses: actions/download-artifact@v3
