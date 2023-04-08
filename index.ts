@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import {Command, program} from "commander";
 import {MergedRequestHTTPGitlabRepository} from "./src/infrastructure/repository/MergeRequestHTTPGitlabRepository.js";
 import {parseISO} from "date-fns";
