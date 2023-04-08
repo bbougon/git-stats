@@ -26,14 +26,14 @@ const gitStatistics = (
 type Unit = string | "Week" | "Month";
 
 class Dimension {
-  private constructor(public readonly unit: Unit, public readonly index: number, public mr: number) {}
+  constructor(public readonly unit: Unit, public readonly index: number, public total: number) {}
 
   static create(unit: Unit, index: number) {
     return new Dimension(unit, index, 1);
   }
 
   increase() {
-    this.mr = this.mr + 1;
+    this.total = this.total + 1;
   }
 
   static empty(unit: Unit, index: number) {
@@ -43,7 +43,11 @@ class Dimension {
 
 type Year = number;
 type PeriodIndex = number;
-const gitEventsByPeriod = (gitEventStatistics: GitStatistics, eventDate: (mr: GitEvent) => Date): Dimension[] => {
+
+const gitEventsByPeriod = (
+  gitEventStatistics: GitStatistics,
+  eventDate: (event: GitEvent) => Date
+): [Year, [PeriodIndex, Dimension][]][] => {
   const stats: [Year, [PeriodIndex, Dimension][]][] = [];
   const duration = intervalToDuration({
     start: gitEventStatistics.period.start,
@@ -54,9 +58,9 @@ const gitEventsByPeriod = (gitEventStatistics: GitStatistics, eventDate: (mr: Gi
 
   gitEventStatistics
     .sortedEvents()
-    .filter((mr) => eventDate(mr) !== null)
-    .forEach((mr) => {
-      const _eventDate = eventDate(mr);
+    .filter((event) => eventDate(event) !== null)
+    .forEach((event) => {
+      const _eventDate = eventDate(event);
       const year = _eventDate.getFullYear();
       const dimension = Dimension.create(unit, moreThan2Months ? getMonth(_eventDate) : getWeek(_eventDate));
       if (stats.length === 0) {
@@ -79,57 +83,41 @@ const gitEventsByPeriod = (gitEventStatistics: GitStatistics, eventDate: (mr: Gi
   return fillEmptyPeriodsAndSortChronologically(stats, unit, gitEventStatistics.period);
 };
 
-function fillEmptyPeriodsAndSortChronologically(
-  stats: [number, [number, Dimension][]][],
+const fillEmptyPeriodsAndSortChronologically = (
+  stats: [Year, [PeriodIndex, Dimension][]][],
   unit: string,
   period: Period
-) {
-  const result: Dimension[] = [];
+): [Year, [PeriodIndex, Dimension][]][] => {
+  const completeStatistics = stats;
+  const periodEndIndex = unit === "Week" ? getWeek(period.end) : getMonth(period.end);
 
-  const fillPeriodTail = (stat: [number, [number, Dimension][]], dimensions: Dimension[]): void => {
-    let periodEndIndex: number | undefined = undefined;
-    if (stat[0] === period.end.getFullYear()) {
-      periodEndIndex = unit === "Week" ? getWeek(period.end) : getMonth(period.end);
-    }
-    if (
-      periodEndIndex !== undefined &&
-      dimensions.find((dimension) => dimension.index === periodEndIndex) === undefined
-    ) {
-      const dimensionsLength = Math.max(...dimensions.map((dimension) => dimension.index));
-      for (let i = 0; i < periodEndIndex - dimensionsLength; i++) {
-        dimensions.push(Dimension.empty(unit, periodEndIndex - i));
+  function fillEmptyPeriodsInInterval(stat: [number, [PeriodIndex, Dimension][]], lastPeriodIndex: number) {
+    let firstPeriodIndex = unit === "Week" ? getWeek(period.start) : getMonth(period.start);
+    while (firstPeriodIndex < lastPeriodIndex) {
+      const currentPeriodIndex = firstPeriodIndex;
+      if (stat[1].find((currentStat) => currentStat[0] === currentPeriodIndex) === undefined) {
+        stat[1].push([currentPeriodIndex, Dimension.empty(unit, currentPeriodIndex)]);
       }
+      firstPeriodIndex++;
     }
-  };
+  }
 
-  const fillPeriodInterval = (stat: [number, [number, Dimension][]], dimensions: Dimension[]): void => {
-    const periods = dimensions.map((val) => val.index);
-    const periodStartIndex =
-      stat[0] === period.start.getFullYear() ? (unit === "Week" ? getWeek(period.start) : getMonth(period.start)) : 0;
-    for (let i = 0; i < periodStartIndex + periods.length; i++) {
-      if (periodStartIndex <= i) {
-        let j = i;
-        while (j < periods[i - periodStartIndex]) {
-          if (dimensions.find((dimension) => dimension.index === j) === undefined) {
-            dimensions.push(Dimension.empty(unit, j));
-          }
-          j++;
-        }
-      }
+  function fillPeriodTail(stat: [number, [PeriodIndex, Dimension][]], lastPeriodIndex: number) {
+    let postPeriodIndex = lastPeriodIndex + 1;
+    while (postPeriodIndex <= periodEndIndex) {
+      stat[1].push([postPeriodIndex, Dimension.empty(unit, postPeriodIndex)]);
+      postPeriodIndex++;
     }
-  };
+  }
 
-  stats.forEach((stat) => {
-    const flattenDimensions = stat[1]
-      .flatMap((val) => val[1])
-      .flatMap((val) => val)
-      .sort((dimension, nextDimension) => (dimension.index > nextDimension.index ? 1 : -1));
-    fillPeriodInterval(stat, flattenDimensions);
-    fillPeriodTail(stat, flattenDimensions);
-    result.push(...flattenDimensions.sort((stat, nextStat) => (stat.index > nextStat.index ? 1 : -1)));
+  completeStatistics.forEach((stat) => {
+    const lastPeriodIndex = stat[1].slice(-1)[0][1].index;
+    fillEmptyPeriodsInInterval(stat, lastPeriodIndex);
+    fillPeriodTail(stat, lastPeriodIndex);
+    stat[1].sort((stat, nextStat) => (stat[0] > nextStat[0] ? 1 : -1));
   });
-  return result;
-}
+  return completeStatistics;
+};
 
 export { Dimension, Unit, StatisticsAggregate, GitStatistics, Period, GitEventsStatisticsResult, GitEvent };
 export { gitStatistics, gitEventsByPeriod };

@@ -1,7 +1,7 @@
 {
-  "name": "gitlab-stats",
-  "version": "1.0.0",
-  "description": "A simple tool to usage statistics from a gitlab repository",
+  "name": "git-stats",
+  "version": "0.0.1",
+  "description": "A simple tool to generate git usage statistics from gitlab or github API",
   "type": "module",
   "exports": "./index.js",
   "scripts": {

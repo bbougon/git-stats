@@ -5,10 +5,9 @@ import { openBrowser } from "./OpenBrowser.js";
 import * as pug from "pug";
 import * as path from "path";
 import { __dirname } from "./FilePathConstant.js";
-import { Dimension, gitEventsByPeriod, StatisticsAggregate } from "../../statistics/GitStatistics.js";
+import { gitEventsByPeriod, StatisticsAggregate } from "../../statistics/GitStatistics.js";
 import { MergedEventStatistics, MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
-
-const HUMAN_READABLE_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+import { buildLabel } from "./HumanReadableLabels.js";
 
 class HTMLContentBuilder {
   constructor(private readonly stats: StatisticsAggregate) {}
@@ -34,8 +33,10 @@ class HTMLContentBuilder {
     const labels: string[] = [];
     const data: number[] = [];
     for (const stat of stats) {
-      labels.push(this.buildLabel(stat));
-      data.push(stat.mr);
+      stat[1].map((stat) => {
+        labels.push(buildLabel(stat[1]));
+        data.push(stat[1].total);
+      });
     }
 
     const aggregatedStats = this.stats.mergedEvents.result();
@@ -49,13 +50,6 @@ class HTMLContentBuilder {
       stats: { mr: { data, labels }, ...aggregatedStats },
     });
   };
-
-  private buildLabel(stat: Dimension) {
-    if (stat.unit === "Month") {
-      return HUMAN_READABLE_MONTHS[stat.index];
-    }
-    return `${stat.unit} ${stat.index}`;
-  }
 }
 
 export class HTMLWriter implements Writer {
