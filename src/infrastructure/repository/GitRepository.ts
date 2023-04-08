@@ -1,8 +1,8 @@
 import { Repository } from "../../Repository.js";
-import { MergeEvent } from "../../merge-events/MergeEvent.js";
 import parseLinkHeader from "parse-link-header";
 import { compareAsc, compareDesc } from "date-fns";
 import { RequestParameters } from "../../../index.js";
+import { MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
 
 export type HTTPInit = { url: string; headers: [string, string][] | Record<string, string> | Headers };
 
@@ -19,6 +19,7 @@ export abstract class GitRepository<T> implements Repository<T> {
     );
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   persist(entity: T) {
     throw new Error("Not implemented");
   }

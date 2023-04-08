@@ -1,16 +1,16 @@
 import { Writer } from "../../../index.js";
-import { Dimension, GitStatistics, mergeEventsByPeriod } from "../../merge-events/MergeEvent.js";
 import * as fs from "fs";
 import { intlFormat } from "date-fns";
 import { openBrowser } from "./OpenBrowser.js";
 import * as pug from "pug";
 import * as path from "path";
 import { __dirname } from "./FilePathConstant.js";
-
-const HUMAN_READABLE_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+import { gitEventsByPeriod, StatisticsAggregate } from "../../statistics/GitStatistics.js";
+import { MergedEventStatistics, MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
+import { buildLabel } from "./HumanReadableLabels.js";
 
 class HTMLContentBuilder {
-  constructor(private readonly stats: GitStatistics) {}
+  constructor(private readonly stats: StatisticsAggregate) {}
 
   build = (): string => {
     const humanizeDate = (date: Date): string => {
@@ -29,17 +29,19 @@ class HTMLContentBuilder {
         .replace(/>/g, "\\u003E")
         .replace(/\//g, "\\u002F");
     };
-    const stats = mergeEventsByPeriod(this.stats);
+    const stats = gitEventsByPeriod(this.stats.mergedEvents as MergedEventStatistics, (mr: MergeEvent) => mr.mergedAt);
     const labels: string[] = [];
     const data: number[] = [];
     for (const stat of stats) {
-      labels.push(this.buildLabel(stat));
-      data.push(stat.mr);
+      stat[1].map((stat) => {
+        labels.push(buildLabel(stat[1]));
+        data.push(stat[1].total);
+      });
     }
 
-    const aggregatedStats = this.stats.result();
-    const start = humanizeDate(this.stats.period.start);
-    const end = humanizeDate(this.stats.period.end);
+    const aggregatedStats = this.stats.mergedEvents.result();
+    const start = humanizeDate(this.stats.mergedEvents.period.start);
+    const end = humanizeDate(this.stats.mergedEvents.period.end);
     const templateFilePath = path.resolve(__dirname, "../../../templates/template.pug");
     const fn = pug.compileFile(templateFilePath, { pretty: true });
     return fn({
@@ -48,13 +50,6 @@ class HTMLContentBuilder {
       stats: { mr: { data, labels }, ...aggregatedStats },
     });
   };
-
-  private buildLabel(stat: Dimension) {
-    if (stat.unit === "Month") {
-      return HUMAN_READABLE_MONTHS[stat.index];
-    }
-    return `${stat.unit} ${stat.index}`;
-  }
 }
 
 export class HTMLWriter implements Writer {
@@ -64,7 +59,7 @@ export class HTMLWriter implements Writer {
     this._filePath = filePath;
   }
 
-  write(stats: GitStatistics): void {
+  write(stats: StatisticsAggregate): void {
     try {
       const reportFilePath = `${this._filePath}/report`;
       if (!fs.existsSync(reportFilePath)) {

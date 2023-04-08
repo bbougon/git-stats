@@ -1,7 +1,7 @@
-import { MergeEvent, MergeEventRepository } from "../../merge-events/MergeEvent.js";
 import { parseISO } from "date-fns";
 import { GitRepository, HTTPInit, MergeEventDTO } from "./GitRepository.js";
-import { MergeRequestsStatsParameters } from "../../merge-events/Gitlab.js";
+import { MergeEvent, MergeEventRepository } from "../../statistics/merge-events/MergeEvent.js";
+import { MergeRequestsStatsParameters } from "../../statistics/Gitlab.js";
 
 type GitlabMergeRequestDTO = MergeEventDTO & {
   id: number;

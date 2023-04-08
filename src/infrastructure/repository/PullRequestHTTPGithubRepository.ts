@@ -1,7 +1,7 @@
 import { GitRepository, HTTPInit, MergeEventDTO } from "./GitRepository.js";
-import { MergeEventRepository, MergeEvent } from "../../merge-events/MergeEvent.js";
 import { parseISO } from "date-fns";
-import { PullRequestsStatsParameter } from "../../merge-events/Github.js";
+import { MergeEvent, MergeEventRepository } from "../../statistics/merge-events/MergeEvent.js";
+import { PullRequestsStatsParameter } from "../../statistics/Github.js";
 
 export type PullRequestDTO = MergeEventDTO & {
   created_at: string;

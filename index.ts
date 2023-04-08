@@ -1,13 +1,15 @@
+#!/usr/bin/env node
 import {Command, program} from "commander";
-import {GitStatistics, MergeEventRepository, mergeEventsStatistics} from "./src/merge-events/MergeEvent.js";
 import {MergedRequestHTTPGitlabRepository} from "./src/infrastructure/repository/MergeRequestHTTPGitlabRepository.js";
 import {parseISO} from "date-fns";
 import {ConsoleWriter} from "./src/infrastructure/writer/ConsoleWriter.js";
 import {HTMLWriter} from "./src/infrastructure/writer/HTMLWriter.js";
-import {MergeRequestsStatsParameters} from "./src/merge-events/Gitlab.js";
 import {PullRequestHTTPGithubRepository} from "./src/infrastructure/repository/PullRequestHTTPGithubRepository.js";
-import {PullRequestsStatsParameter} from "./src/merge-events/Github.js";
 import {CSVWriter} from "./src/infrastructure/writer/CSVWriter.js";
+import {gitStatistics, StatisticsAggregate} from "./src/statistics/GitStatistics.js";
+import {MergeEventRepository} from "./src/statistics/merge-events/MergeEvent.js";
+import {MergeRequestsStatsParameters} from "./src/statistics/Gitlab.js";
+import {PullRequestsStatsParameter} from "./src/statistics/Github.js";
 
 const commaSeparatedList =(list: string) => {
     return list.split(",")
@@ -24,7 +26,7 @@ const writer = (format: string): Writer => {
 }
 
 export interface Writer {
-    write(stats: GitStatistics): void
+    write(stats: StatisticsAggregate): void
 }
 export type RequestParameters = {
     fromDate: Date;
@@ -55,7 +57,7 @@ const proceedCommand = (command: Command, commandParameters: (...args: any[]) =>
         .option('-f, --format <writer>', 'format to display the stats (default json in console), available formats are html, csv and console (default)', writer, new ConsoleWriter())
         .action((...args: any[]) => {
             const parameters = commandParameters(...args)
-            mergeEventsStatistics(parameters.requestParameters, repository(parameters.token))
+            gitStatistics(parameters.requestParameters, repository(parameters.token))
                 .then((stats) => {
                     parameters.options.format.write(stats)
                 })

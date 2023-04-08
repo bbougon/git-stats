@@ -1,9 +1,9 @@
 import { enableFetchMocks } from "jest-fetch-mock";
-import { PullRequestBuilder } from "../../__tests__/builder";
-import { MergeEvent } from "../../merge-events/MergeEvent";
+import { MergeEventBuilderForPR } from "../../__tests__/builder";
 import { formatISO, parseISO } from "date-fns";
-import { PullRequestsStatsParameter } from "../../merge-events/Github";
 import { PullRequestDTO, PullRequestHTTPGithubRepository } from "./PullRequestHTTPGithubRepository";
+import { MergeEvent } from "../../statistics/merge-events/MergeEvent";
+import { PullRequestsStatsParameter } from "../../statistics/Github";
 
 describe("Github repository", () => {
   let firstPullRequest: MergeEvent;
@@ -14,15 +14,15 @@ describe("Github repository", () => {
     enableFetchMocks();
     fetchMock.resetMocks();
 
-    firstPullRequest = new PullRequestBuilder("my-awesome-project")
+    firstPullRequest = new MergeEventBuilderForPR("my-awesome-project")
       .createdAt(parseISO("2021-11-03T12:45:12"))
       .mergedAt(parseISO("2021-11-04T13:24:12"))
       .build();
-    secondPullRequest = new PullRequestBuilder("my-awesome-project")
+    secondPullRequest = new MergeEventBuilderForPR("my-awesome-project")
       .createdAt(parseISO("2021-11-05T12:45:12"))
       .mergedAt(parseISO("2021-11-09T12:45:12"))
       .build();
-    thirdPullRequest = new PullRequestBuilder("my-awesome-project")
+    thirdPullRequest = new MergeEventBuilderForPR("my-awesome-project")
       .createdAt(parseISO("2021-11-08T12:45:12"))
       .mergedAt(parseISO("2021-11-13T12:45:12"))
       .build();
@@ -126,7 +126,7 @@ describe("Github repository", () => {
   });
 
   it("should not retrieve repo name if not available", async () => {
-    const pullRequest = new PullRequestBuilder("my-awesome-project")
+    const pullRequest = new MergeEventBuilderForPR("my-awesome-project")
       .createdAt(parseISO("2021-11-03T12:45:12"))
       .mergedAt(parseISO("2021-11-04T13:24:12"))
       .noName()

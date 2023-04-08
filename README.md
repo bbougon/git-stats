@@ -2,17 +2,11 @@
 
 Provide statistics usage of your gitlab/github projects
 
-## Setup
-**Prerequisites**
-- Node v18.15
-- **[Optional]** sass (`pm install -g sass`)
-
-**Installation**
-- Run `npm run build` will build the module in `./dist` 
-- **[Optional]** Run `sass templates/style.scss style.css` to build the stylesheet
+## Install
+Run `npm install -g gitflows-stats`
 
 ## Usage
-- `npm dist/index.js --help` will print:
+- `gitflows-stats --help` will print:
   ```shell
   Usage: index [options] [command]
   
@@ -24,22 +18,50 @@ Provide statistics usage of your gitlab/github projects
   github [options] <token> <owner> <repo> <period>  Provide pull requests statistics on a github project for a given period
   help [command]                                    display help for command
   ```
-- `node dist/index.js gitlab <TOKEN> <PROJECT_ID> <PERIOD>` (<PERIOD> in the following format `2023-01-01,2023-01-31`) will print:
+- `gitflows-stats gitlab <TOKEN> <PROJECT_ID> <PERIOD>` (<PERIOD> in the following format `2023-01-01,2023-01-31`) will print:
   ```json
   {
-    "average": {
-      "days": 3.79,
-      "hours": 90.84
-  },
+  "average": {
+      "months": 0,
+      "days": 4,
+      "hours": 22,
+      "minutes": 48,
+      "seconds": 0
+    },
     "total": {
-      "merged": 58,
-      "closed": 14,
-      "opened": 6,
-      "all": 78
-    }
+      "merged": 15,
+      "closed": 2,
+      "opened": 3,
+      "all": 20
+    },
+    "data": [
+      [
+        2023,
+        [
+          {
+            "Week 9": 1
+          },
+          {
+            "Week 10": 5
+          },
+          {
+            "Week 11": 3
+          },
+          {
+            "Week 12": 2
+          },
+          {
+            "Week 13": 2
+          },
+          {
+            "Week 14": 2
+          }
+        ]
+      ]
+    ]
   }
   ```
-- ` node dist/index.js gitlab <TOKEN> <PROJECT_ID> <PERIOD> --format html` (<PERIOD> in the following format `2023-01-01,2023-01-31`) will generate a `report` folder with an `index.html` where the command has been executed.
+- `gitflows-stats gitlab <TOKEN> <PROJECT_ID> <PERIOD> --format html` (<PERIOD> in the following format `2023-01-01,2023-01-31`) will generate a `report` folder with an `index.html` where the command has been executed.
   
   **The report will automatically open after generation.**
 
