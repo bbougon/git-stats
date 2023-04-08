@@ -1,4 +1,4 @@
-name: Gitlab Stats CI
+name: Gitstats CI
 
 on:
   push:
@@ -7,8 +7,7 @@ on:
       - main
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
 
     strategy:
@@ -27,3 +26,65 @@ jobs:
       - name: Execute tests
         run: |
           npm run test
+
+  bump:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v3
+    - name: Bumping version
+      uses: jpb06/bump-package@latest
+      with:
+        major-keywords: BREAKING CHANGE
+        minor-keywords: feat,Feat,minor
+        patch-keywords: fix,Fix
+    needs: test
+
+  build:
+    if: needs.bump.bumping-version.outputs.bump-performed == 'true'
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [ 16.x ]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install dependencies
+        run: |
+          npm ci
+      - name: Build module
+        run: |
+          npm run build
+      - shell: bash
+        run: |
+          mkdir build && cp -r dist build && cp -r documentation build && cp package.json README.md build
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: gitflows-stats
+          path: build
+    needs: bump
+
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download gitflows-stats artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: gitflows-stats
+      - name: Set up Node js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    needs: build
