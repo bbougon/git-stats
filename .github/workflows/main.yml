@@ -41,7 +41,6 @@ jobs:
     needs: test
 
   build:
-    if: needs.bump.steps.bumping-version.outputs.bump-performed == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -58,27 +57,26 @@ jobs:
       - name: Build module
         run: |
           npm run build
-      - shell: bash
-        run: |
-          mkdir build && cp -r dist build && cp -r documentation build && cp package.json README.md build
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
         with:
-          name: gitflows-stats
-          path: build
+          name: gitflows-stats-build
+          path: .
     needs: bump
 
   publish:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [ 18.15.x ]
     steps:
       - name: Download gitflows-stats artifact
         uses: actions/download-artifact@v3
         with:
-          name: gitflows-stats
+          name: gitflows-stats-build
       - name: Set up Node js
         uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
       - run: npm publish
         env:
