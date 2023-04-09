@@ -28,6 +28,8 @@ jobs:
   bump:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    outputs:
+      bump-performed: ${{ steps.bumping-version.outputs.bump-performed }}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -41,6 +43,7 @@ jobs:
     needs: test
 
   build:
+    if: needs.bump.outputs.bump-performed == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:
