@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [ 18.15.x ]
+        node-version: [18.15.x]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Node js
@@ -29,22 +29,22 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-    - name: Check out repository code
-      uses: actions/checkout@v3
-    - name: Bumping version
-      id: bumping-version
-      uses: jpb06/bump-package@latest
-      with:
-        major-keywords: BREAKING CHANGE
-        minor-keywords: feat,Feat,minor
-        patch-keywords: fix,Fix
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Bumping version
+        id: bumping-version
+        uses: jpb06/bump-package@latest
+        with:
+          major-keywords: BREAKING CHANGE
+          minor-keywords: feat,Feat,minor
+          patch-keywords: fix,Fix
     needs: test
 
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [ 18.15.x ]
+        node-version: [18.15.x]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Node js
@@ -53,7 +53,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
         run: |
-          npm ci --omit=dev --ignore-scripts
+          npm ci
       - name: Build module
         run: |
           npm run build
@@ -71,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [ 18.15.x ]
+        node-version: [18.15.x]
     steps:
       - name: Download gitflows-stats artifact
         uses: actions/download-artifact@v3
@@ -83,7 +83,7 @@ jobs:
       - name: Set up Node js
         uses: actions/setup-node@v3
         with:
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
