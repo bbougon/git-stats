@@ -25,8 +25,8 @@ class CustomMultiBarForTests implements CustomMultiBar {
         this.stopCalled = true;
       }
 
-      update(currentPageNumber: number, payload?: { total: number; title: string | Title; value: number }): void {
-        this.progress = currentPageNumber;
+      update(value: number, payload?: { total: number; title: string | Title; value: number }): void {
+        this.progress = value / this.total;
       }
     })();
     bar.progress = payload.value;

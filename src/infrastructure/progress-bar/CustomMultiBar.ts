@@ -7,8 +7,8 @@ export interface CustomGenericBar {
 
   stop(): void;
 
-  update(currentPageNumber: number): void;
-  update(currentPageNumber: number, payload: { total: number; title: string | Title; value: number }): void;
+  update(value: number): void;
+  update(value: number, payload: { total: number; title: string | Title; value: number }): void;
 
   getProgress(): number;
 }

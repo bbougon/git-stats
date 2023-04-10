@@ -3,7 +3,9 @@ import { ProgressBar } from "./ProgressBar.js";
 import { Title } from "./Title.js";
 import { CustomGenericBar } from "./CustomMultiBar.js";
 
-function getLinkHeaderPageValue(links: Links, rel: string) {
+type PageNumber = number;
+
+const getLinkHeaderPageValue = (links: Links, rel: string): PageNumber => {
   return parseInt(
     links[rel].url
       .split("&")
@@ -14,14 +16,14 @@ function getLinkHeaderPageValue(links: Links, rel: string) {
       }, new Map<string, string>())
       .get("page")
   );
+};
+
+interface ProgressBarUpdateStrategy {
+  apply(bar: CustomGenericBar, parameters?: { title: string | Title; args: any[] }): Promise<void>;
 }
 
-interface ProgressBarStrategy {
-  apply(bar: CustomGenericBar, parameters?: { title: string | Title; args: any[] }): void;
-}
-
-class PaginationProgressBarUpdateStrategy implements ProgressBarStrategy {
-  apply(bar: CustomGenericBar, parameters: { title: string | Title; args: any[] }): void {
+class PaginationProgressBarUpdateStrategy implements ProgressBarUpdateStrategy {
+  apply(bar: CustomGenericBar, parameters: { title: string | Title; args: any[] }): Promise<void> {
     const links: Links = parameters.args[0];
     const currentPageNumber = getLinkHeaderPageValue(links, "next");
     const totalPages = getLinkHeaderPageValue(links, "last");
@@ -33,12 +35,14 @@ class PaginationProgressBarUpdateStrategy implements ProgressBarStrategy {
     if (bar.getTotal() === currentPageNumber) {
       bar.stop();
     }
+    return Promise.resolve();
   }
 }
 
-class DefaultProgressBarUpdateStrategy implements ProgressBarStrategy {
-  apply(bar: CustomGenericBar): void {
+class DefaultProgressBarUpdateStrategy implements ProgressBarUpdateStrategy {
+  apply(bar: CustomGenericBar): Promise<void> {
     bar.update(1);
+    return Promise.resolve();
   }
 }
 
@@ -71,8 +75,8 @@ class DefaultProgressBarCreateStrategy implements ProgressBarCreateStrategy {
   }
 }
 
-export class ProgressBarCreateStrategies {
-  private static strategies: Map<string, ProgressBarCreateStrategy> = new Map([
+class ProgressBarCreateStrategies {
+  protected static strategies: Map<string, ProgressBarCreateStrategy> = new Map([
     [Title.Paginate, new PaginationProgressBarCreateStrategy()],
   ]);
 
@@ -85,12 +89,12 @@ export class ProgressBarCreateStrategies {
   }
 }
 
-export class ProgressBarUpdateStrategies {
-  private static strategies: Map<string, ProgressBarStrategy> = new Map([
+class ProgressBarUpdateStrategies {
+  protected static strategies: Map<string, ProgressBarUpdateStrategy> = new Map([
     [Title.Paginate, new PaginationProgressBarUpdateStrategy()],
   ]);
 
-  static for(title: string | Title): ProgressBarStrategy {
+  static for(title: string | Title): ProgressBarUpdateStrategy {
     const progressBarStrategy = this.strategies.get(title);
     if (progressBarStrategy) {
       return progressBarStrategy;
@@ -98,3 +102,10 @@ export class ProgressBarUpdateStrategies {
     return new DefaultProgressBarUpdateStrategy();
   }
 }
+
+export {
+  ProgressBarCreateStrategies,
+  ProgressBarUpdateStrategies,
+  ProgressBarUpdateStrategy,
+  ProgressBarCreateStrategy,
+};

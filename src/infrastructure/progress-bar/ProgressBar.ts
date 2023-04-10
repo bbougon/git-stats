@@ -44,6 +44,27 @@ class ProgressBar {
     }
     return Promise.reject();
   }
+
+  updateOverall() {
+    const totalAccumulated = Array.from(this._bars.values())
+      .filter((bar) => bar.title !== Title.Overall)
+      .reduce(
+        (accumulator, current) => {
+          return {
+            totalProgress:
+              accumulator.totalProgress +
+              (current.bar.getTotal() * current.bar.getProgress() * 100) / current.bar.getTotal(),
+            total: accumulator.total + (100 / current.bar.getTotal()) * current.bar.getTotal(),
+          };
+        },
+        { totalProgress: 0, total: 0 }
+      );
+    Array.from(this._bars.values())
+      .filter((bar) => bar.title === Title.Overall)
+      .forEach((overAll) =>
+        overAll.bar.update(overAll.bar.getTotal() / (totalAccumulated.total / totalAccumulated.totalProgress))
+      );
+  }
 }
 
 export { ProgressBar };
@@ -55,7 +76,11 @@ function progressBar(title: string | Title, progressBar: ProgressBar = ProgressB
       progressBar
         .hasBar(title)
         .then((bar) => {
-          ProgressBarUpdateStrategies.for(title).apply(bar, { title, args });
+          ProgressBarUpdateStrategies.for(title)
+            .apply(bar, { title, args })
+            .then(() => {
+              progressBar.updateOverall();
+            });
         })
         .catch(() => {
           ProgressBarCreateStrategies.for(title).apply(progressBar, { title, args });
