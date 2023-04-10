@@ -1,4 +1,10 @@
 import { enableFetchMocks } from "jest-fetch-mock";
+
+jest.mock("../progress-bar/ProgressBar", () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  return { progressBar: (_title: string) => jest.fn() };
+});
+
 import { formatISO, parseISO } from "date-fns";
 import { MergedRequestHTTPGitlabRepository } from "./MergeRequestHTTPGitlabRepository";
 import { MergeEventBuilderForMR } from "../../__tests__/builder";
@@ -10,6 +16,8 @@ describe("Gitlab Repository", () => {
   let firstMergeRequest: MergeEvent;
   let secondMergeRequest: MergeEvent;
   let thirdMergeRequest: MergeEvent;
+
+  afterAll(() => jest.resetAllMocks());
   beforeEach(() => {
     enableFetchMocks();
     fetchMock.resetMocks();

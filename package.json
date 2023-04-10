@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.21.0",
+    "@types/cli-progress": "^3.11.0",
     "@types/jest": "^29.5.0",
     "@typescript-eslint/eslint-plugin": "^5.56.0",
     "@typescript-eslint/parser": "^5.56.0",
@@ -34,7 +35,9 @@
     "@types/parse-link-header": "^2.0.0",
     "@types/pug": "^2.0.6",
     "bootstrap": "^5.3.0-alpha2",
+    "chalk": "^5.2.0",
     "chart.js": "^4.2.1",
+    "cli-progress": "^3.12.0",
     "commander": "^10.0.0",
     "csv": "^6.2.8",
     "date-fns": "^2.29.3",
@@ -42,6 +45,7 @@
     "open": "^9.0.0",
     "parse-link-header": "^2.0.0",
     "pug": "^3.0.2",
+    "reflect-metadata": "^0.1.13",
     "typescript": "^5.0.2"
   },
   "jest": {
@@ -60,10 +64,15 @@
     "resolver": "ts-jest-resolver",
     "testEnvironment": "node",
     "testPathIgnorePatterns": [
-      "<rootDir>/src/__tests__/builder.ts"
+      "<rootDir>/src/__tests__/builder.ts",
+      "<rootDir>/src/__tests__/SetupJestMock.ts",
+      "<rootDir>/src/__tests__/CustomProgressBar.ts"
     ],
     "coveragePathIgnorePatterns": [
       "/__snapshots__/"
+    ],
+    "setupFiles": [
+      "<rootDir>/src/__tests__/SetupJestMock.ts"
     ]
   },
   "bin": {
