@@ -6,19 +6,12 @@
     "removeComments": true,
     "preserveConstEnums": true,
     "sourceMap": true,
-    "moduleResolution":"NodeNext",
+    "moduleResolution": "NodeNext",
     "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "outDir": "dist",
-    "lib": [
-      "decorators",
-      "dom",
-      "es5",
-      "es6",
-      "scripthost",
-      "es2015.promise",
-      "ES2017.Object",
-      "ES2015.Collection"
-    ],
+    "lib": ["decorators", "dom", "es5", "es6", "scripthost", "es2015.promise", "ES2017.Object", "ES2015.Collection"],
     "jsx": "react"
   },
   "include": ["src/**/*", "index.ts"],

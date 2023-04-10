@@ -10,6 +10,8 @@ import { gitStatistics, StatisticsAggregate } from "./src/statistics/GitStatisti
 import { MergeEventRepository } from "./src/statistics/merge-events/MergeEvent.js";
 import { MergeRequestsStatsParameters } from "./src/statistics/Gitlab.js";
 import { PullRequestsStatsParameter } from "./src/statistics/Github.js";
+import { ProgressBar } from "./src/infrastructure/progress-bar/ProgressBar.js";
+import { Title } from "./src/infrastructure/progress-bar/Title.js";
 
 const commaSeparatedList = (list: string) => {
   return list.split(",");
@@ -77,6 +79,7 @@ const proceedCommand = (
       const parameters = commandParameters(...args);
       gitStatistics(parameters.requestParameters, repository(parameters.token)).then((stats) => {
         parameters.options.format.write(stats);
+        ProgressBar.progressBar().clear();
       });
     });
 };

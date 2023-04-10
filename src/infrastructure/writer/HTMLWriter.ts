@@ -8,6 +8,8 @@ import { __dirname } from "./FilePathConstant.js";
 import { gitEventsByPeriod, StatisticsAggregate } from "../../statistics/GitStatistics.js";
 import { MergedEventStatistics, MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
 import { buildLabel } from "./HumanReadableLabels.js";
+import { progressBar } from "../progress-bar/ProgressBar.js";
+import { Title } from "../progress-bar/Title.js";
 
 class HTMLContentBuilder {
   constructor(private readonly stats: StatisticsAggregate) {}
@@ -59,6 +61,7 @@ export class HTMLWriter implements Writer {
     this._filePath = filePath;
   }
 
+  @progressBar(Title.Generate_HTML)
   write(stats: StatisticsAggregate): void {
     try {
       const reportFilePath = `${this._filePath}/report`;

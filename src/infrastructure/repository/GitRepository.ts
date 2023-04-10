@@ -1,8 +1,9 @@
 import { Repository } from "../../Repository.js";
-import parseLinkHeader from "parse-link-header";
+import parseLinkHeader, { Links } from "parse-link-header";
 import { compareAsc, compareDesc } from "date-fns";
 import { RequestParameters } from "../../../index.js";
 import { MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
+import { progressBar } from "../progress-bar/ProgressBar.js";
 
 export type HTTPInit = { url: string; headers: [string, string][] | Record<string, string> | Headers };
 
@@ -24,22 +25,23 @@ export abstract class GitRepository<T> implements Repository<T> {
     throw new Error("Not implemented");
   }
 
-  private paginate = (
-    url: string,
+  @progressBar("Paginate")
+  private paginate(
+    links: Links,
     result: MergeEvent[],
     headers: [string, string][] | Record<string, string> | Headers,
     mergeRequests: (payload: MergeEventDTO[]) => MergeEvent[]
-  ): Promise<MergeEvent[]> => {
-    return fetch(url, { headers }).then(async (response) => {
-      const links = parseLinkHeader(response.headers.get("link"));
-      const payload = await response.json();
-      result.push(...mergeRequests(payload));
-      if (links["next"] !== undefined) {
-        return this.paginate(links["next"].url, result, headers, mergeRequests).then((mrs) => mrs);
-      }
-      return Promise.resolve(result);
-    });
-  };
+  ): Promise<MergeEvent[]> {
+    if (links !== null && links["next"] !== undefined) {
+      return fetch(links["next"].url, { headers }).then(async (response) => {
+        const links = parseLinkHeader(response.headers.get("link"));
+        const payload = await response.json();
+        result.push(...mergeRequests(payload));
+        return this.paginate(links, result, headers, mergeRequests).then((mrs) => mrs);
+      });
+    }
+    return Promise.resolve(result);
+  }
 
   private isMergeRequestInExpectedPeriod = (mr: MergeEvent, fromDate: Date, toDate: Date): boolean => {
     return compareAsc(mr.createdAt, fromDate) >= 0 && compareDesc(mr.createdAt, toDate) >= 0;
@@ -55,12 +57,9 @@ export abstract class GitRepository<T> implements Repository<T> {
       const links = parseLinkHeader(response.headers.get("link"));
       const payload = await response.json();
       const requests = mergeRequests(payload);
-      if (links !== null && links["next"] !== undefined) {
-        return this.paginate(links["next"].url, requests, init.headers, mergeRequests).then((mrs) =>
-          mrs.filter((mr) => this.isMergeRequestInExpectedPeriod(mr, fromDate, toDate))
-        );
-      }
-      return Promise.resolve(requests.filter((mr) => this.isMergeRequestInExpectedPeriod(mr, fromDate, toDate)));
+      return this.paginate(links, requests, init.headers, mergeRequests).then((mrs) =>
+        mrs.filter((mr) => this.isMergeRequestInExpectedPeriod(mr, fromDate, toDate))
+      );
     });
   };
 

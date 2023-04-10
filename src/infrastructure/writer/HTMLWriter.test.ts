@@ -1,12 +1,12 @@
 import { jest } from "@jest/globals";
-import { HTMLWriter } from "./HTMLWriter";
+import { HTMLWriter } from "./HTMLWriter.js";
 import { mkdtemp } from "node:fs/promises";
 import * as path from "path";
 import * as os from "os";
 import * as fs from "fs";
-import { MergeEventBuilderForMR } from "../../__tests__/builder";
+import { MergeEventBuilderForMR } from "../../__tests__/builder.js";
 import { parseISO } from "date-fns";
-import { MergedEventStatistics } from "../../statistics/merge-events/MergeEvent";
+import { MergedEventStatistics } from "../../statistics/merge-events/MergeEvent.js";
 
 jest.mock("./FilePathConstant", () => ({
   __dirname: "src/infrastructure/writer/",
