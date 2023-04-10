@@ -73,16 +73,19 @@ class DefaultProgressBarCreateStrategy implements ProgressBarCreateStrategy {
   }
 }
 
-class GenerateCSVProgressBarCreateStrategy implements ProgressBarCreateStrategy {
+class GenerateReportProgressBarCreateStrategy implements ProgressBarCreateStrategy {
+  constructor(private readonly title: Title) {}
+
   apply(progressBar: ProgressBar, param: { args?: any[]; title: string | Title }): void {
-    progressBar.add(Title.Generate_CSV, { total: 1, startValue: 0 }, { title: Title.Generate_CSV, total: 1, value: 0 });
+    progressBar.add(this.title, { total: 1, startValue: 0 }, { title: this.title, total: 1, value: 0 });
   }
 }
 
 class ProgressBarCreateStrategies {
   protected static strategies: Map<string, ProgressBarCreateStrategy> = new Map([
     [Title.Paginate, new PaginationProgressBarCreateStrategy()],
-    [Title.Generate_CSV, new GenerateCSVProgressBarCreateStrategy()],
+    [Title.Generate_CSV, new GenerateReportProgressBarCreateStrategy(Title.Generate_CSV)],
+    [Title.Generate_HTML, new GenerateReportProgressBarCreateStrategy(Title.Generate_HTML)],
   ]);
 
   static for(title: string | Title): ProgressBarCreateStrategy {
@@ -94,7 +97,7 @@ class ProgressBarCreateStrategies {
   }
 }
 
-class GenerateCSVProgressBarUpdateStrategy implements ProgressBarUpdateStrategy {
+class GenerateReportProgressBarUpdateStrategy implements ProgressBarUpdateStrategy {
   apply(bar: CustomGenericBar, parameters?: { title: string | Title; args: any[] }): void {
     bar.update(1);
   }
@@ -103,7 +106,8 @@ class GenerateCSVProgressBarUpdateStrategy implements ProgressBarUpdateStrategy 
 class ProgressBarUpdateStrategies {
   protected static strategies: Map<string, ProgressBarUpdateStrategy> = new Map([
     [Title.Paginate, new PaginationProgressBarUpdateStrategy()],
-    [Title.Generate_CSV, new GenerateCSVProgressBarUpdateStrategy()],
+    [Title.Generate_CSV, new GenerateReportProgressBarUpdateStrategy()],
+    [Title.Generate_HTML, new GenerateReportProgressBarUpdateStrategy()],
   ]);
 
   static for(title: string | Title): ProgressBarUpdateStrategy {
