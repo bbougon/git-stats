@@ -32,8 +32,8 @@ class ProgressBar {
     this._bars.add({ title, bar });
   }
 
-  stopAll() {
-    this._bars.forEach((bar) => bar.bar.stop());
+  clear() {
+    this._bars.clear();
   }
 
   hasBar(title: string | Title): Promise<CustomGenericBar> {
@@ -61,9 +61,15 @@ class ProgressBar {
       );
     Array.from(this._bars.values())
       .filter((bar) => bar.title === Title.Overall)
-      .forEach((overAll) =>
-        overAll.bar.update(overAll.bar.getTotal() / (totalAccumulated.total / totalAccumulated.totalProgress))
-      );
+      .forEach((overAll) => {
+        const value = overAll.bar.getTotal() / (totalAccumulated.total / totalAccumulated.totalProgress);
+        overAll.bar.update(value);
+        if (value === overAll.bar.getTotal()) {
+          for (const bar of this._bars.values()) {
+            bar.bar.stop();
+          }
+        }
+      });
   }
 }
 

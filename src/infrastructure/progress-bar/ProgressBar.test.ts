@@ -147,7 +147,7 @@ describe("Progress Bar decorator", () => {
       expect(bar.getProgress()).toEqual(0.4);
     });
 
-    it.skip("should stop all processes when overall is done", async () => {
+    it("should stop all processes when overall is done", async () => {
       ProgressBarCreateStrategiesForTests.addAnyBarStrategy(1);
       ProgressBarUpdateStrategiesForTests.addAnyBarStrategy(1);
       const customProgressBar = new CustomProgressBar();

@@ -80,7 +80,7 @@ const proceedCommand = (
       const parameters = commandParameters(...args);
       gitStatistics(parameters.requestParameters, repository(parameters.token)).then((stats) => {
         parameters.options.format.write(stats);
-        ProgressBar.progressBar().stopAll();
+        ProgressBar.progressBar().clear();
       });
     });
 };
