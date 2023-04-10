@@ -2,7 +2,7 @@ import { ProgressBar } from "../infrastructure/progress-bar/ProgressBar.js";
 import { CustomGenericBar, CustomMultiBar } from "../infrastructure/progress-bar/CustomMultiBar.js";
 import { Title } from "../infrastructure/progress-bar/Title.js";
 
-class CustomMultiBarForTests implements CustomMultiBar {
+export class CustomMultiBarForTests implements CustomMultiBar {
   create(
     total: number,
     startValue: number,

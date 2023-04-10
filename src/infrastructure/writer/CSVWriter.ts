@@ -3,6 +3,8 @@ import fs from "fs";
 import { stringify } from "csv-stringify/sync";
 import moment from "moment";
 import { StatisticsAggregate } from "../../statistics/GitStatistics.js";
+import { progressBar } from "../progress-bar/ProgressBar.js";
+import { Title } from "../progress-bar/Title.js";
 
 export class CSVWriter implements Writer {
   private HEADER = [
@@ -15,6 +17,7 @@ export class CSVWriter implements Writer {
   ];
   constructor(private readonly filePath: string) {}
 
+  @progressBar(Title.Generate_CSV)
   write(stats: StatisticsAggregate): void {
     try {
       const reportFilePath = `${this.filePath}/report`;

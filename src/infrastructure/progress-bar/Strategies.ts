@@ -19,11 +19,11 @@ const getLinkHeaderPageValue = (links: Links, rel: string): PageNumber => {
 };
 
 interface ProgressBarUpdateStrategy {
-  apply(bar: CustomGenericBar, parameters?: { title: string | Title; args: any[] }): Promise<void>;
+  apply(bar: CustomGenericBar, parameters?: { title: string | Title; args: any[] }): void;
 }
 
 class PaginationProgressBarUpdateStrategy implements ProgressBarUpdateStrategy {
-  apply(bar: CustomGenericBar, parameters: { title: string | Title; args: any[] }): Promise<void> {
+  apply(bar: CustomGenericBar, parameters: { title: string | Title; args: any[] }): void {
     const links: Links = parameters.args[0];
     const currentPageNumber = getLinkHeaderPageValue(links, "next");
     const totalPages = getLinkHeaderPageValue(links, "last");
@@ -35,14 +35,12 @@ class PaginationProgressBarUpdateStrategy implements ProgressBarUpdateStrategy {
     if (bar.getTotal() === currentPageNumber) {
       bar.stop();
     }
-    return Promise.resolve();
   }
 }
 
 class DefaultProgressBarUpdateStrategy implements ProgressBarUpdateStrategy {
-  apply(bar: CustomGenericBar): Promise<void> {
+  apply(bar: CustomGenericBar): void {
     bar.update(1);
-    return Promise.resolve();
   }
 }
 
@@ -75,9 +73,16 @@ class DefaultProgressBarCreateStrategy implements ProgressBarCreateStrategy {
   }
 }
 
+class GenerateCSVProgressBarCreateStrategy implements ProgressBarCreateStrategy {
+  apply(progressBar: ProgressBar, param: { args?: any[]; title: string | Title }): void {
+    progressBar.add(Title.Generate_CSV, { total: 1, startValue: 0 }, { title: Title.Generate_CSV, total: 1, value: 0 });
+  }
+}
+
 class ProgressBarCreateStrategies {
   protected static strategies: Map<string, ProgressBarCreateStrategy> = new Map([
     [Title.Paginate, new PaginationProgressBarCreateStrategy()],
+    [Title.Generate_CSV, new GenerateCSVProgressBarCreateStrategy()],
   ]);
 
   static for(title: string | Title): ProgressBarCreateStrategy {
@@ -89,9 +94,16 @@ class ProgressBarCreateStrategies {
   }
 }
 
+class GenerateCSVProgressBarUpdateStrategy implements ProgressBarUpdateStrategy {
+  apply(bar: CustomGenericBar, parameters?: { title: string | Title; args: any[] }): void {
+    bar.update(1);
+  }
+}
+
 class ProgressBarUpdateStrategies {
   protected static strategies: Map<string, ProgressBarUpdateStrategy> = new Map([
     [Title.Paginate, new PaginationProgressBarUpdateStrategy()],
+    [Title.Generate_CSV, new GenerateCSVProgressBarUpdateStrategy()],
   ]);
 
   static for(title: string | Title): ProgressBarUpdateStrategy {

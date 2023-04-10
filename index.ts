@@ -76,7 +76,6 @@ const proceedCommand = (
       new ConsoleWriter()
     )
     .action((...args: any[]) => {
-      ProgressBar.progressBar().add(Title.Overall);
       const parameters = commandParameters(...args);
       gitStatistics(parameters.requestParameters, repository(parameters.token)).then((stats) => {
         parameters.options.format.write(stats);

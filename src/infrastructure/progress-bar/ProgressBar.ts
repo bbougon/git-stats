@@ -34,6 +34,7 @@ class ProgressBar {
 
   clear() {
     this._bars.clear();
+    this._bars.forEach((value) => value.bar.stop());
   }
 
   hasBar(title: string | Title): Promise<CustomGenericBar> {
@@ -42,34 +43,7 @@ class ProgressBar {
         return Promise.resolve(bar.bar);
       }
     }
-    return Promise.reject();
-  }
-
-  updateOverall() {
-    const totalAccumulated = Array.from(this._bars.values())
-      .filter((bar) => bar.title !== Title.Overall)
-      .reduce(
-        (accumulator, current) => {
-          return {
-            totalProgress:
-              accumulator.totalProgress +
-              (current.bar.getTotal() * current.bar.getProgress() * 100) / current.bar.getTotal(),
-            total: accumulator.total + (100 / current.bar.getTotal()) * current.bar.getTotal(),
-          };
-        },
-        { totalProgress: 0, total: 0 }
-      );
-    Array.from(this._bars.values())
-      .filter((bar) => bar.title === Title.Overall)
-      .forEach((overAll) => {
-        const value = overAll.bar.getTotal() / (totalAccumulated.total / totalAccumulated.totalProgress);
-        overAll.bar.update(value);
-        if (value === overAll.bar.getTotal()) {
-          for (const bar of this._bars.values()) {
-            bar.bar.stop();
-          }
-        }
-      });
+    return Promise.reject("no bar");
   }
 }
 
@@ -78,20 +52,26 @@ export { ProgressBar };
 function progressBar(title: string | Title, progressBar: ProgressBar = ProgressBar.progressBar()) {
   return function (target: any, propertyKey: string | symbol, descriptor?: PropertyDescriptor) {
     const original = descriptor.value;
-    descriptor.value = function (...args: any[]) {
+    descriptor.value = async function (...args: any[]) {
       progressBar
         .hasBar(title)
         .then((bar) => {
-          ProgressBarUpdateStrategies.for(title)
-            .apply(bar, { title, args })
-            .then(() => {
-              progressBar.updateOverall();
-            });
+          ProgressBarUpdateStrategies.for(title).apply(bar, { title, args });
         })
         .catch(() => {
           ProgressBarCreateStrategies.for(title).apply(progressBar, { title, args });
         });
-      return original.call(this, ...args);
+      const call = original.call(this, ...args);
+      await new Promise((f) => setTimeout(f, 1));
+      progressBar
+        .hasBar(title)
+        .then((bar) => {
+          ProgressBarUpdateStrategies.for(title).apply(bar, { title, args });
+        })
+        .catch((reason) => {
+          return;
+        });
+      return call;
     };
   };
 }

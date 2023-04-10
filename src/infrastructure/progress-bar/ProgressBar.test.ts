@@ -1,14 +1,8 @@
-import { ProgressBar, progressBar } from "./ProgressBar.js";
+import { progressBar } from "./ProgressBar.js";
 import { CustomProgressBar } from "../../__tests__/CustomProgressBar.js";
 import parseLinkHeader from "parse-link-header";
 import { Title } from "./Title.js";
 import { CustomGenericBar } from "./CustomMultiBar.js";
-import {
-  ProgressBarCreateStrategies,
-  ProgressBarCreateStrategy,
-  ProgressBarUpdateStrategy,
-  ProgressBarUpdateStrategies,
-} from "./Strategies";
 
 describe("Progress Bar decorator", () => {
   const descriptor = (): PropertyDescriptor => {
@@ -126,72 +120,4 @@ describe("Progress Bar decorator", () => {
       expect(customProgressBar.bars.size).toEqual(0);
     });
   });
-
-  describe("Overall", () => {
-    it("should make the overall process progress", async () => {
-      ProgressBarCreateStrategiesForTests.addAnyBarStrategy();
-      ProgressBarUpdateStrategiesForTests.addAnyBarStrategy();
-      const customProgressBar = new CustomProgressBar();
-      callProgressBarAndExecuteDescriptor(Title.Overall, customProgressBar, descriptor());
-      await new Promise((f) => setTimeout(f, 1));
-      callProgressBarAndExecuteDescriptor("any bar", customProgressBar, descriptor());
-      await new Promise((f) => setTimeout(f, 1));
-      callProgressBarAndExecuteDescriptor("another bar", customProgressBar, descriptor());
-      await new Promise((f) => setTimeout(f, 1));
-
-      callProgressBarAndExecuteDescriptor("any bar", customProgressBar, descriptor());
-      await new Promise((f) => setTimeout(f, 1));
-
-      expect(customProgressBar.bars.size).toEqual(3);
-      const bar: CustomGenericBar = customProgressBar.bars.values().next().value.bar;
-      expect(bar.getProgress()).toEqual(0.4);
-    });
-
-    it("should stop all processes when overall is done", async () => {
-      ProgressBarCreateStrategiesForTests.addAnyBarStrategy(1);
-      ProgressBarUpdateStrategiesForTests.addAnyBarStrategy(1);
-      const customProgressBar = new CustomProgressBar();
-      callProgressBarAndExecuteDescriptor(Title.Overall, customProgressBar, descriptor());
-      await new Promise((f) => setTimeout(f, 1));
-      callProgressBarAndExecuteDescriptor("any bar", customProgressBar, descriptor());
-      await new Promise((f) => setTimeout(f, 1));
-
-      callProgressBarAndExecuteDescriptor("any bar", customProgressBar, descriptor());
-      await new Promise((f) => setTimeout(f, 1));
-
-      const overAllBar: CustomGenericBar = customProgressBar.bars.values().next().value.bar;
-      expect(overAllBar.getProgress()).toEqual(1);
-      expect(overAllBar["stopCalled" as keyof CustomGenericBar]).toBeTruthy();
-      const anyBar: CustomGenericBar = customProgressBar.bars.values().next().value.bar;
-      expect(anyBar.getProgress()).toEqual(1);
-      expect(anyBar["stopCalled" as keyof CustomGenericBar]).toBeTruthy();
-    });
-  });
 });
-
-class ProgressBarCreateStrategiesForTests extends ProgressBarCreateStrategies {
-  static addAnyBarStrategy(total = 5) {
-    this.strategies.set(
-      "any bar",
-      new (class implements ProgressBarCreateStrategy {
-        apply(progressBar: ProgressBar, param: { args?: any[]; title: string | Title }) {
-          progressBar.add("any bar", { total: total, startValue: 0 }, { title: "any bar", total: 40, value: 0 });
-        }
-      })()
-    );
-  }
-}
-
-class ProgressBarUpdateStrategiesForTests extends ProgressBarUpdateStrategies {
-  static addAnyBarStrategy(value = 4) {
-    this.strategies.set(
-      "any bar",
-      new (class implements ProgressBarUpdateStrategy {
-        apply(bar: CustomGenericBar, parameters?: { title: string | Title; args: any[] }) {
-          bar.update(value);
-          return Promise.resolve();
-        }
-      })()
-    );
-  }
-}

@@ -15,6 +15,7 @@ interface GitStatistics {
 }
 
 type StatisticsAggregate = { [key: string]: GitStatistics };
+
 const gitStatistics = (
   requestParameter: RequestParameters,
   repository: MergeEventRepository

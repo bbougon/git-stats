@@ -1,4 +1,4 @@
 export enum Title {
   Paginate = "Paginate",
-  Overall = "Overall",
+  Generate_CSV = "Generate CSV",
 }
