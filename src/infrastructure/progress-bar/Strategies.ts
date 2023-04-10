@@ -49,7 +49,7 @@ interface ProgressBarCreateStrategy {
 class PaginationProgressBarCreateStrategy implements ProgressBarCreateStrategy {
   apply(progressBar: ProgressBar, param: { args?: any[]; title: string | Title }): void {
     const links: Links = param.args[0];
-    if (links["next"] !== undefined) {
+    if (links !== null && links["next"] !== undefined) {
       getLinkHeaderPageValue(links, "next");
       const totalPages = getLinkHeaderPageValue(links, "last");
       progressBar.add(

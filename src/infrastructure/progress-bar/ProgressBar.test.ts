@@ -108,5 +108,13 @@ describe("Progress Bar decorator", () => {
 
       expect(customProgressBar.bars.size).toEqual(0);
     });
+
+    it("should not display progress if no links in pagination", async () => {
+      const customProgressBar = new CustomProgressBar();
+      callProgressBarAndExecuteDescriptor(Title.Paginate, customProgressBar, descriptor(), null);
+      await new Promise((f) => setTimeout(f, 1));
+
+      expect(customProgressBar.bars.size).toEqual(0);
+    });
   });
 });
