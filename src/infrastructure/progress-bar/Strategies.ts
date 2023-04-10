@@ -30,6 +30,9 @@ class PaginationProgressBarUpdateStrategy implements ProgressBarStrategy {
       value: currentPageNumber,
       total: totalPages,
     });
+    if (bar.getTotal() === currentPageNumber) {
+      bar.stop();
+    }
   }
 }
 
@@ -46,16 +49,19 @@ interface ProgressBarCreateStrategy {
 class PaginationProgressBarCreateStrategy implements ProgressBarCreateStrategy {
   apply(progressBar: ProgressBar, param: { args?: any[]; title: string | Title }): void {
     const links: Links = param.args[0];
-    const totalPages = getLinkHeaderPageValue(links, "last");
-    progressBar.add(
-      param.title,
-      { total: totalPages, startValue: 0 },
-      {
-        title: param.title,
-        value: 0,
-        total: totalPages,
-      }
-    );
+    if (links["next"] !== undefined) {
+      getLinkHeaderPageValue(links, "next");
+      const totalPages = getLinkHeaderPageValue(links, "last");
+      progressBar.add(
+        param.title,
+        { total: totalPages, startValue: 0 },
+        {
+          title: param.title,
+          value: 0,
+          total: totalPages,
+        }
+      );
+    }
   }
 }
 

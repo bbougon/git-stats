@@ -1,9 +1,8 @@
-import { progressBar } from "./ProgressBar";
-import { CustomProgressBar } from "../../__tests__/CustomProgressBar";
-import { SingleBar } from "cli-progress";
+import { progressBar } from "./ProgressBar.js";
+import { CustomProgressBar } from "../../__tests__/CustomProgressBar.js";
 import parseLinkHeader from "parse-link-header";
-import { Title } from "./Title";
-import { CustomGenericBar } from "./CustomMultiBar";
+import { Title } from "./Title.js";
+import { CustomGenericBar } from "./CustomMultiBar.js";
 
 describe("Progress Bar decorator", () => {
   const descriptor = (): PropertyDescriptor => {
@@ -42,7 +41,7 @@ describe("Progress Bar decorator", () => {
 
     expect(customProgressBar.bars.size).toEqual(1);
     const bar: CustomGenericBar = customProgressBar.bars.values().next().value.bar;
-    expect(bar.getProgress()).toEqual(0.01);
+    expect(bar.getProgress()).toEqual(1);
   });
 
   describe("Pagination", () => {
@@ -53,7 +52,8 @@ describe("Progress Bar decorator", () => {
         };
       });
     });
-    it("should adapt when paginating", async () => {
+
+    it("should progress when paginating", async () => {
       const customProgressBar = new CustomProgressBar();
       const firstPagination = parseLinkHeader(
         '<http://gitlab/merge_requests?order_by=created_at&page=2>; rel="next", <http://gitlab/merge_requests?order_by=created_at&page=1>; rel="first", <http://gitlab/merge_requests?order_by=created_at&page=5>; rel="last"'
@@ -73,8 +73,40 @@ describe("Progress Bar decorator", () => {
       await new Promise((f) => setTimeout(f, 1));
 
       expect(customProgressBar.bars.size).toEqual(1);
-      const bar: SingleBar = customProgressBar.bars.values().next().value.bar;
-      expect(bar.getTotal()).toEqual(100);
+      const bar: CustomGenericBar = customProgressBar.bars.values().next().value.bar;
+      expect(bar.getTotal()).toEqual(5);
+      expect(bar.getProgress()).toEqual(4);
+    });
+
+    it("should stop when pagination ends", async () => {
+      const customProgressBar = new CustomProgressBar();
+      const firstPagination = parseLinkHeader(
+        '<http://gitlab/merge_requests?order_by=created_at&page=2>; rel="next", <http://gitlab/merge_requests?order_by=created_at&page=1>; rel="first", <http://gitlab/merge_requests?order_by=created_at&page=3>; rel="last"'
+      );
+      callProgressBarAndExecuteDescriptor(Title.Paginate, customProgressBar, descriptor(), firstPagination);
+      await new Promise((f) => setTimeout(f, 1));
+      const secondPagination = parseLinkHeader(
+        '<http://gitlab/merge_requests?order_by=created_at&page=3>; rel="next", <http://gitlab/merge_requests?order_by=created_at&page=1>; rel="first", <http://gitlab/merge_requests?order_by=created_at&page=3>; rel="last"'
+      );
+      callProgressBarAndExecuteDescriptor(Title.Paginate, customProgressBar, descriptor(), secondPagination);
+      await new Promise((f) => setTimeout(f, 1));
+
+      expect(customProgressBar.bars.size).toEqual(1);
+      const bar: CustomGenericBar = customProgressBar.bars.values().next().value.bar;
+      expect(bar.getTotal()).toEqual(3);
+      expect(bar.getProgress()).toEqual(3);
+      expect(bar["stopCalled" as keyof CustomGenericBar]).toBeTruthy();
+    });
+
+    it("should not display progress if no next links in pagination", async () => {
+      const customProgressBar = new CustomProgressBar();
+      const firstPagination = parseLinkHeader(
+        '<http://gitlab/merge_requests?order_by=created_at&page=1>; rel="first", <http://gitlab/merge_requests?order_by=created_at&page=3>; rel="last"'
+      );
+      callProgressBarAndExecuteDescriptor(Title.Paginate, customProgressBar, descriptor(), firstPagination);
+      await new Promise((f) => setTimeout(f, 1));
+
+      expect(customProgressBar.bars.size).toEqual(0);
     });
   });
 });

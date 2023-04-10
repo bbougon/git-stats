@@ -12,9 +12,9 @@ class ProgressBar {
     this._bar = customMultiBar;
   }
 
-  public static progressBar(): ProgressBar {
+  public static progressBar(multiBar: CustomMultiBar = new CliProgressMultiBar()): ProgressBar {
     if (this._progressBar === undefined) {
-      this._progressBar = new ProgressBar();
+      this._progressBar = new ProgressBar(multiBar);
     }
     return this._progressBar;
   }
@@ -29,7 +29,6 @@ class ProgressBar {
     }
   ): void {
     const bar = this._bar.create(initialParameter.total, initialParameter.startValue, payload);
-    //console.log(`Total: ${bar.getTotal()}, initial parameter: ${JSON.stringify(initialParameter)}, payload: ${JSON.stringify(payload)}`)
     this._bars.add({ title, bar });
   }
 

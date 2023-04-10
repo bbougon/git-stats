@@ -14,3 +14,8 @@ repos:
     rev: "v8.38.0"
     hooks:
       - id: eslint
+  - repo: https://github.com/awebdeveloper/pre-commit-tslint/
+    rev: "v0.0.2"
+    hooks:
+      - id: tslint
+        additional_dependencies: ["tslint@5.0.0"]

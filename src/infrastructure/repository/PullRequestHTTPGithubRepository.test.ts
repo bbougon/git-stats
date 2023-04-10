@@ -5,11 +5,11 @@ jest.mock("../progress-bar/ProgressBar", () => {
   return { progressBar: (_title: string) => jest.fn() };
 });
 
-import { MergeEventBuilderForPR } from "../../__tests__/builder";
+import { MergeEventBuilderForPR } from "../../__tests__/builder.js";
 import { formatISO, parseISO } from "date-fns";
-import { PullRequestDTO, PullRequestHTTPGithubRepository } from "./PullRequestHTTPGithubRepository";
-import { MergeEvent } from "../../statistics/merge-events/MergeEvent";
-import { PullRequestsStatsParameter } from "../../statistics/Github";
+import { PullRequestDTO, PullRequestHTTPGithubRepository } from "./PullRequestHTTPGithubRepository.js";
+import { MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
+import { PullRequestsStatsParameter } from "../../statistics/Github.js";
 
 describe("Github repository", () => {
   let firstPullRequest: MergeEvent;

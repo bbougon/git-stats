@@ -1,6 +1,6 @@
 import * as crypto from "crypto";
 import { addDays, differenceInCalendarDays, getWeek, parseISO } from "date-fns";
-import { MergeEvent } from "../statistics/merge-events/MergeEvent";
+import { MergeEvent } from "../statistics/merge-events/MergeEvent.js";
 
 export class MergeEventBuilderForMR {
   private projectId: number;
