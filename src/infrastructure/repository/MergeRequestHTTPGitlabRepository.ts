@@ -1,6 +1,6 @@
 import { parseISO } from "date-fns";
-import { GitHTTPRepository, HTTPInit, MergeEventDTO } from "./GitHTTPRepository.js";
-import { MergeEvent, MergeEventRepository } from "../../statistics/merge-events/MergeEvent.js";
+import { MergeEventHTTPRepository, HTTPInit, MergeEventDTO } from "./MergeEventHTTPRepository.js";
+import { MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
 import { MergeRequestsStatsParameters } from "../../statistics/Gitlab.js";
 import { AxiosHeaders } from "axios";
 
@@ -25,7 +25,7 @@ const fromDTO = (mergeRequestDTO: GitlabMergeRequestDTO): MergeEvent => {
   };
 };
 
-export class MergedRequestHTTPGitlabRepository extends GitHTTPRepository<MergeEvent> implements MergeEventRepository {
+export class MergedRequestHTTPGitlabRepository extends MergeEventHTTPRepository {
   constructor(private readonly token: string, readonly repositoryUrl = "https://gitlab.com/api/v4/") {
     super();
   }

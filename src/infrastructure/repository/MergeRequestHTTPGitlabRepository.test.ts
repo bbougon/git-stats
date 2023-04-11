@@ -1,7 +1,7 @@
 import { formatISO, parseISO } from "date-fns";
 import { MergedRequestHTTPGitlabRepository } from "./MergeRequestHTTPGitlabRepository.js";
 import { MergeEventBuilderForMR } from "../../__tests__/builder.js";
-import { MergeEventDTO } from "./GitHTTPRepository.js";
+import { MergeEventDTO } from "./MergeEventHTTPRepository";
 import { MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
 import { MergeRequestsStatsParameters } from "../../statistics/Gitlab.js";
 import MockAdapter from "axios-mock-adapter";

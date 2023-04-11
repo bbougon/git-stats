@@ -1,15 +1,14 @@
-import { Repository } from "../../Repository.js";
 import parseLinkHeader, { Links } from "parse-link-header";
 import { compareAsc, compareDesc } from "date-fns";
 import { RequestParameters } from "../../../index.js";
-import { MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
+import { MergeEvent, MergeEventRepository } from "../../statistics/merge-events/MergeEvent.js";
 import { progressBar } from "../progress-bar/ProgressBar.js";
 import { AxiosRequestConfig, AxiosResponse } from "axios";
 import { axiosInstance } from "./axios.js";
 
 export type HTTPInit = { url: string; headers: Record<string, string>; config: AxiosRequestConfig };
 
-export abstract class GitHTTPRepository<T> implements Repository<T> {
+export abstract class MergeEventHTTPRepository implements MergeEventRepository {
   protected readonly repositoryUrl: string;
 
   getMergeEventsForPeriod(requestParameters: RequestParameters): Promise<MergeEvent[]> {
@@ -23,7 +22,7 @@ export abstract class GitHTTPRepository<T> implements Repository<T> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  persist(entity: T) {
+  persist(entity: MergeEvent) {
     throw new Error("Not implemented");
   }
 

@@ -1,6 +1,6 @@
-import { GitHTTPRepository, HTTPInit, MergeEventDTO } from "./GitHTTPRepository.js";
+import { MergeEventHTTPRepository, HTTPInit, MergeEventDTO } from "./MergeEventHTTPRepository.js";
 import { parseISO } from "date-fns";
-import { MergeEvent, MergeEventRepository } from "../../statistics/merge-events/MergeEvent.js";
+import { MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
 import { PullRequestsStatsParameter } from "../../statistics/Github.js";
 import { AxiosHeaders } from "axios";
 
@@ -24,7 +24,7 @@ const fromDTO = (pullRequestDTO: PullRequestDTO): MergeEvent => {
   };
 };
 
-export class PullRequestHTTPGithubRepository extends GitHTTPRepository<MergeEvent> implements MergeEventRepository {
+export class PullRequestHTTPGithubRepository extends MergeEventHTTPRepository {
   constructor(private readonly token: string, readonly repositoryUrl = "https://api.github.com/repos") {
     super();
   }
