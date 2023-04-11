@@ -1,14 +1,13 @@
 import { formatISO, parseISO } from "date-fns";
 import { MergedRequestHTTPGitlabRepository } from "./MergeRequestHTTPGitlabRepository.js";
 import { MergeEventBuilderForMR } from "../../__tests__/builder.js";
-import { MergeEventDTO } from "./GitHTTPRepository.js";
+import { MergeEventDTO } from "./MergeEventHTTPRepository";
 import { MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
 import { MergeRequestsStatsParameters } from "../../statistics/Gitlab.js";
 import MockAdapter from "axios-mock-adapter";
 import { axiosInstance } from "./axios";
 
 jest.mock("../progress-bar/ProgressBar", () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return { progressBar: (_title: string) => jest.fn() };
 });
 
@@ -246,5 +245,29 @@ describe("Gitlab Repository", () => {
     );
 
     expect(mergeRequests).toEqual([firstMergeRequest, thirdMergeRequest]);
+  });
+
+  it("should handle HTTP Not Found error", () => {
+    expect.assertions(1);
+    const fromDate = parseISO("2021-11-03T00:00:00");
+    mock
+      .onGet(
+        `https://gitlab.com/api/v4/projects/666/merge_requests?created_after=${fromDate.toISOString()}&per_page=100`,
+        "",
+        expect.objectContaining({ "PRIVATE-TOKEN": "a-token" })
+      )
+      .reply(404, "we could not find");
+    const mergeRequestsParameters = {
+      projectId: 666,
+      fromDate,
+      toDate: parseISO("2021-11-04T00:00:00"),
+    } as MergeRequestsStatsParameters;
+
+    new MergedRequestHTTPGitlabRepository("a-token").getMergeEventsForPeriod(mergeRequestsParameters).catch((reason) =>
+      expect(reason).toEqual({
+        rationale: "We were unable to retrieve some informations on your project '666'",
+        additionalInfo: "we could not find",
+      })
+    );
   });
 });

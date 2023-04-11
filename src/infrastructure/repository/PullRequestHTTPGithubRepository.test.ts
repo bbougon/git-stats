@@ -7,7 +7,6 @@ import MockAdapter from "axios-mock-adapter";
 import { axiosInstance } from "./axios";
 
 jest.mock("../progress-bar/ProgressBar", () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return { progressBar: (_title: string) => jest.fn() };
 });
 
