@@ -47,4 +47,8 @@ export class PullRequestHTTPGithubRepository extends MergeEventHTTPRepository {
   protected mergeRequestsMapper(): (payload: MergeEventDTO[]) => MergeEvent[] {
     return (payload: MergeEventDTO[]): MergeEvent[] => (payload as PullRequestDTO[]).map((mr) => fromDTO(mr));
   }
+
+  protected projectInfos(requestParameters: PullRequestsStatsParameter): string {
+    return `owner: ${requestParameters.owner} - repository: ${requestParameters.repo}`;
+  }
 }

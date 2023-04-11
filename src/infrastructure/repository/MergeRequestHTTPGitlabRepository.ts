@@ -42,4 +42,8 @@ export class MergedRequestHTTPGitlabRepository extends MergeEventHTTPRepository 
   protected mergeRequestsMapper = (): ((payload: MergeEventDTO[]) => MergeEvent[]) => {
     return (payload: MergeEventDTO[]): MergeEvent[] => (payload as GitlabMergeRequestDTO[]).map((mr) => fromDTO(mr));
   };
+
+  protected projectInfos(requestParameters: MergeRequestsStatsParameters): string {
+    return String(requestParameters.projectId);
+  }
 }

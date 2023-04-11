@@ -11,7 +11,8 @@ import { MergeEventRepository } from "./src/statistics/merge-events/MergeEvent.j
 import { MergeRequestsStatsParameters } from "./src/statistics/Gitlab.js";
 import { PullRequestsStatsParameter } from "./src/statistics/Github.js";
 import { ProgressBar } from "./src/infrastructure/progress-bar/ProgressBar.js";
-import { Title } from "./src/infrastructure/progress-bar/Title.js";
+import * as chalk from "./src/infrastructure/progress-bar/Chalk.js";
+import { HTTPError } from "./src/infrastructure/repository/MergeEventHTTPRepository.js";
 
 const commaSeparatedList = (list: string) => {
   return list.split(",");
@@ -39,6 +40,10 @@ type CommandParameters = {
   options: any;
   token: string;
 };
+
+function isHTTPError(reason: HTTPError | string | never): reason is HTTPError {
+  return (reason as HTTPError).rationale !== undefined;
+}
 
 const gitlabCommand = program
   .command("gitlab")
@@ -77,10 +82,24 @@ const proceedCommand = (
     )
     .action((...args: any[]) => {
       const parameters = commandParameters(...args);
-      gitStatistics(parameters.requestParameters, repository(parameters.token)).then((stats) => {
-        parameters.options.format.write(stats);
-        ProgressBar.progressBar().clear();
-      });
+      gitStatistics(parameters.requestParameters, repository(parameters.token))
+        .then((stats) => {
+          parameters.options.format.write(stats);
+          ProgressBar.progressBar().clear();
+        })
+        .catch((reason: HTTPError | string | never) => {
+          ProgressBar.progressBar().clear();
+          const error = new chalk.chalk.Chalk().red;
+          let errorMessage = reason;
+          if (isHTTPError(reason)) {
+            const additionalInfo = Object.entries(reason.additionalInfo as object).reduce(
+              (accumulator, currentValue) => accumulator.concat(`- ${currentValue[0]}: ${currentValue[1]}\n\t`),
+              ""
+            );
+            errorMessage = `${reason.rationale}.\nBelow are some additional information:\n\t${additionalInfo}`;
+          }
+          console.log(error(`Something wrong happened:\n${errorMessage}`));
+        });
     });
 };
 

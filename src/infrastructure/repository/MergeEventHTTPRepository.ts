@@ -3,10 +3,11 @@ import { compareAsc, compareDesc } from "date-fns";
 import { RequestParameters } from "../../../index.js";
 import { MergeEvent, MergeEventRepository } from "../../statistics/merge-events/MergeEvent.js";
 import { progressBar } from "../progress-bar/ProgressBar.js";
-import { AxiosRequestConfig, AxiosResponse } from "axios";
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { axiosInstance } from "./axios.js";
 
 export type HTTPInit = { url: string; headers: Record<string, string>; config: AxiosRequestConfig };
+export type HTTPError = { rationale: string; additionalInfo: unknown };
 
 export abstract class MergeEventHTTPRepository implements MergeEventRepository {
   protected readonly repositoryUrl: string;
@@ -18,11 +19,18 @@ export abstract class MergeEventHTTPRepository implements MergeEventRepository {
       requestParameters.fromDate,
       requestParameters.toDate,
       this.mergeRequestsMapper()
-    );
+    ).catch((reason: AxiosError) => {
+      const httpError: HTTPError = {
+        rationale: `We were unable to retrieve some informations on your project '${this.projectInfos(
+          requestParameters
+        )}'`,
+        additionalInfo: reason.response.data,
+      };
+      return Promise.reject(httpError);
+    });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  persist(entity: MergeEvent) {
+  persist(_entity: MergeEvent) {
     throw new Error("Not implemented");
   }
 
@@ -65,6 +73,8 @@ export abstract class MergeEventHTTPRepository implements MergeEventRepository {
   protected abstract httpInit(requestParameters: RequestParameters): HTTPInit;
 
   protected abstract mergeRequestsMapper(): (payload: MergeEventDTO[]) => MergeEvent[];
+
+  protected abstract projectInfos(requestParameters: RequestParameters): string;
 }
 
 export type MergeEventDTO = object;

@@ -33,8 +33,8 @@ class ProgressBar {
   }
 
   clear() {
-    this._bars.clear();
     this._bars.forEach((value) => value.bar.stop());
+    this._bars.clear();
   }
 
   hasBar(title: string | Title): Promise<CustomGenericBar> {
