@@ -4,10 +4,12 @@ import { compareAsc, compareDesc } from "date-fns";
 import { RequestParameters } from "../../../index.js";
 import { MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
 import { progressBar } from "../progress-bar/ProgressBar.js";
+import { AxiosRequestConfig, AxiosResponse } from "axios";
+import { axiosInstance } from "./axios.js";
 
-export type HTTPInit = { url: string; headers: [string, string][] | Record<string, string> | Headers };
+export type HTTPInit = { url: string; headers: Record<string, string>; config: AxiosRequestConfig };
 
-export abstract class GitRepository<T> implements Repository<T> {
+export abstract class GitHTTPRepository<T> implements Repository<T> {
   protected readonly repositoryUrl: string;
 
   getMergeEventsForPeriod(requestParameters: RequestParameters): Promise<MergeEvent[]> {
@@ -29,15 +31,14 @@ export abstract class GitRepository<T> implements Repository<T> {
   private paginate(
     links: Links,
     result: MergeEvent[],
-    headers: [string, string][] | Record<string, string> | Headers,
+    config: AxiosRequestConfig,
     mergeRequests: (payload: MergeEventDTO[]) => MergeEvent[]
   ): Promise<MergeEvent[]> {
     if (links !== null && links["next"] !== undefined) {
-      return fetch(links["next"].url, { headers }).then(async (response) => {
-        const links = parseLinkHeader(response.headers.get("link"));
-        const payload = await response.json();
-        result.push(...mergeRequests(payload));
-        return this.paginate(links, result, headers, mergeRequests).then((mrs) => mrs);
+      return axiosInstance.get(links["next"].url, config).then((response: AxiosResponse<MergeEventDTO[]>) => {
+        const links = parseLinkHeader(response.headers["link"]);
+        result.push(...mergeRequests(response.data));
+        return this.paginate(links, result, config, mergeRequests).then((mrs) => mrs);
       });
     }
     return Promise.resolve(result);
@@ -53,11 +54,10 @@ export abstract class GitRepository<T> implements Repository<T> {
     toDate: Date,
     mergeRequests: (payload: MergeEventDTO[]) => MergeEvent[]
   ): Promise<MergeEvent[]> => {
-    return fetch(init.url, { headers: init.headers }).then(async (response) => {
-      const links = parseLinkHeader(response.headers.get("link"));
-      const payload = await response.json();
-      const requests = mergeRequests(payload);
-      return this.paginate(links, requests, init.headers, mergeRequests).then((mrs) =>
+    return axiosInstance.get(init.url, init.config).then((response: AxiosResponse<MergeEventDTO[]>) => {
+      const links = parseLinkHeader(response.headers["link"]);
+      const requests = mergeRequests(response.data);
+      return this.paginate(links, requests, init.config, mergeRequests).then((mrs) =>
         mrs.filter((mr) => this.isMergeRequestInExpectedPeriod(mr, fromDate, toDate))
       );
     });

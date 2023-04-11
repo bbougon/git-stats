@@ -1,7 +1,8 @@
-import { GitRepository, HTTPInit, MergeEventDTO } from "./GitRepository.js";
+import { GitHTTPRepository, HTTPInit, MergeEventDTO } from "./GitHTTPRepository.js";
 import { parseISO } from "date-fns";
 import { MergeEvent, MergeEventRepository } from "../../statistics/merge-events/MergeEvent.js";
 import { PullRequestsStatsParameter } from "../../statistics/Github.js";
+import { AxiosHeaders } from "axios";
 
 export type PullRequestDTO = MergeEventDTO & {
   created_at: string;
@@ -23,7 +24,7 @@ const fromDTO = (pullRequestDTO: PullRequestDTO): MergeEvent => {
   };
 };
 
-export class PullRequestHTTPGithubRepository extends GitRepository<MergeEvent> implements MergeEventRepository {
+export class PullRequestHTTPGithubRepository extends GitHTTPRepository<MergeEvent> implements MergeEventRepository {
   constructor(private readonly token: string, readonly repositoryUrl = "https://api.github.com/repos") {
     super();
   }
@@ -34,8 +35,13 @@ export class PullRequestHTTPGithubRepository extends GitRepository<MergeEvent> i
       Authorization: `Bearer ${this.token}`,
       "X-GitHub-Api-Version": "2022-11-28",
     };
+    const axiosHeaders = new AxiosHeaders({
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${this.token}`,
+      "X-GitHub-Api-Version": "2022-11-28",
+    });
     const url = `${this.repositoryUrl}/${requestParameters.owner}/${requestParameters.repo}/pulls?state=all&sort=created&per_page=100`;
-    return { headers, url };
+    return { headers, url, config: { headers: axiosHeaders } };
   }
 
   protected mergeRequestsMapper(): (payload: MergeEventDTO[]) => MergeEvent[] {

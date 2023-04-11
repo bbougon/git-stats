@@ -1,26 +1,32 @@
-import { enableFetchMocks } from "jest-fetch-mock";
+import { formatISO, parseISO } from "date-fns";
+import { MergedRequestHTTPGitlabRepository } from "./MergeRequestHTTPGitlabRepository.js";
+import { MergeEventBuilderForMR } from "../../__tests__/builder.js";
+import { MergeEventDTO } from "./GitHTTPRepository.js";
+import { MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
+import { MergeRequestsStatsParameters } from "../../statistics/Gitlab.js";
+import MockAdapter from "axios-mock-adapter";
+import { axiosInstance } from "./axios";
 
 jest.mock("../progress-bar/ProgressBar", () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return { progressBar: (_title: string) => jest.fn() };
 });
 
-import { formatISO, parseISO } from "date-fns";
-import { MergedRequestHTTPGitlabRepository } from "./MergeRequestHTTPGitlabRepository.js";
-import { MergeEventBuilderForMR } from "../../__tests__/builder.js";
-import { MergeEventDTO } from "./GitRepository.js";
-import { MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
-import { MergeRequestsStatsParameters } from "../../statistics/Gitlab.js";
-
 describe("Gitlab Repository", () => {
+  const mock = new MockAdapter(axiosInstance);
+
+  afterEach(() => {
+    mock.reset();
+  });
+
   let firstMergeRequest: MergeEvent;
   let secondMergeRequest: MergeEvent;
   let thirdMergeRequest: MergeEvent;
 
   afterAll(() => jest.resetAllMocks());
   beforeEach(() => {
-    enableFetchMocks();
-    fetchMock.resetMocks();
+    //enableFetchMocks();
+    //fetchMock.resetMocks();
     firstMergeRequest = new MergeEventBuilderForMR(1)
       .createdAt(parseISO("2021-11-03T12:45:12"))
       .mergedAt(parseISO("2021-11-04T13:24:12"))
@@ -48,113 +54,95 @@ describe("Gitlab Repository", () => {
   };
 
   test("should paginate results", async () => {
-    fetchMock.mockResponses(
-      [
-        JSON.stringify([toGitlabDTO(firstMergeRequest)]),
-        {
-          status: 200,
-          headers: {
-            link: '<http://gitlab/merge_requests?order_by=created_at&page=2>; rel="next", <http://gitlab/merge_requests?order_by=created_at&page=1>; rel="first", <http://gitlab/merge_requests?order_by=created_at&page=3>; rel="last"',
-          },
-        },
-      ],
-      [
-        JSON.stringify([toGitlabDTO(secondMergeRequest)]),
-        {
-          status: 200,
-          headers: {
-            link: '<http://gitlab/merge_requests?order_by=created_at&page=3>; rel="next", <http://gitlab/merge_requests?order_by=created_at&page=1>; rel="first", <http://gitlab/merge_requests?order_by=created_at&page=3>; rel="last"',
-          },
-        },
-      ],
-      [
-        JSON.stringify([toGitlabDTO(thirdMergeRequest)]),
-        {
-          status: 200,
-          headers: {
-            link: '<http://gitlab/merge_requests?order_by=created_at&page=1>; rel="first", <http://gitlab/merge_requests?order_by=created_at&page=1>; rel="last"',
-          },
-        },
-      ]
-    );
+    const fromDate = parseISO("2021-11-03T00:00:00Z");
+    mock
+      .onGet(
+        `https://gitlab.com/api/v4/projects/1/merge_requests?created_after=${fromDate.toISOString()}&per_page=100`,
+        "",
+        expect.objectContaining({ "PRIVATE-TOKEN": "my-token" })
+      )
+      .reply(200, JSON.stringify([toGitlabDTO(firstMergeRequest)]), {
+        link: '<http://gitlab/merge_requests?order_by=created_at&page=2>; rel="next", <http://gitlab/merge_requests?order_by=created_at&page=1>; rel="first", <http://gitlab/merge_requests?order_by=created_at&page=3>; rel="last"',
+      });
+    mock
+      .onGet(
+        "http://gitlab/merge_requests?order_by=created_at&page=2",
+        "",
+        expect.objectContaining({ "PRIVATE-TOKEN": "my-token" })
+      )
+      .reply(200, JSON.stringify([toGitlabDTO(secondMergeRequest)]), {
+        link: '<http://gitlab/merge_requests?order_by=created_at&page=3>; rel="next", <http://gitlab/merge_requests?order_by=created_at&page=1>; rel="first", <http://gitlab/merge_requests?order_by=created_at&page=3>; rel="last"',
+      });
+    mock
+      .onGet(
+        "http://gitlab/merge_requests?order_by=created_at&page=3",
+        "",
+        expect.objectContaining({ "PRIVATE-TOKEN": "my-token" })
+      )
+      .reply(200, JSON.stringify([toGitlabDTO(thirdMergeRequest)]), {
+        link: '<http://gitlab/merge_requests?order_by=created_at&page=1>; rel="first", <http://gitlab/merge_requests?order_by=created_at&page=1>; rel="last"',
+      });
 
     const mergeRequestParameters = {
       projectId: 1,
-      fromDate: parseISO("2021-11-03T00:00:00Z"),
+      fromDate: fromDate,
       toDate: parseISO("2021-11-10T00:00:00Z"),
     } as MergeRequestsStatsParameters;
     const mergeRequests = await new MergedRequestHTTPGitlabRepository("my-token").getMergeEventsForPeriod(
       mergeRequestParameters
     );
 
-    expect(fetch).toHaveBeenNthCalledWith(
-      1,
-      "https://gitlab.com/api/v4/projects/1/merge_requests?created_after=2021-11-03T00:00:00.000Z&per_page=100",
-      { headers: { "PRIVATE-TOKEN": "my-token" } }
-    );
-    expect(fetch).toHaveBeenNthCalledWith(2, "http://gitlab/merge_requests?order_by=created_at&page=2", {
-      headers: { "PRIVATE-TOKEN": "my-token" },
-    });
-    expect(fetch).toHaveBeenNthCalledWith(3, "http://gitlab/merge_requests?order_by=created_at&page=3", {
-      headers: { "PRIVATE-TOKEN": "my-token" },
-    });
     expect(mergeRequests).toEqual([firstMergeRequest, secondMergeRequest, thirdMergeRequest]);
   });
 
   test("should not paginate if only one result page", async () => {
-    fetchMock.mockResponses([
-      JSON.stringify([toGitlabDTO(firstMergeRequest), toGitlabDTO(secondMergeRequest)]),
-      {
-        status: 200,
-        headers: {
-          link: "<http://gitlab/merge_requests?order_by=created_at&page=1>; rel='first', <http://gitlab/merge_requests?order_by=created_at&page=1>; rel='last'",
-        },
-      },
-    ]);
+    const fromDate = parseISO("2021-11-03T00:00:00Z");
+    mock
+      .onGet(
+        `https://gitlab.com/api/v4/projects/1/merge_requests?created_after=${fromDate.toISOString()}&per_page=100`,
+        "",
+        expect.objectContaining({ "PRIVATE-TOKEN": "my-token" })
+      )
+      .reply(200, JSON.stringify([toGitlabDTO(firstMergeRequest), toGitlabDTO(secondMergeRequest)]), {
+        link: "<http://gitlab/merge_requests?order_by=created_at&page=1>; rel='first', <http://gitlab/merge_requests?order_by=created_at&page=1>; rel='last'",
+      });
 
     const mergeRequestsParameters = {
       projectId: 1,
-      fromDate: parseISO("2021-11-03T00:00:00Z"),
+      fromDate: fromDate,
       toDate: parseISO("2021-11-10T00:00:00Z"),
     } as MergeRequestsStatsParameters;
     const mergeRequests = await new MergedRequestHTTPGitlabRepository("my-token").getMergeEventsForPeriod(
       mergeRequestsParameters
     );
 
-    expect(fetch).toBeCalledTimes(1);
-    expect(fetch).toHaveBeenNthCalledWith(
-      1,
-      "https://gitlab.com/api/v4/projects/1/merge_requests?created_after=2021-11-03T00:00:00.000Z&per_page=100",
-      { headers: { "PRIVATE-TOKEN": "my-token" } }
-    );
     expect(mergeRequests).toEqual([firstMergeRequest, secondMergeRequest]);
   });
 
   test("should retrieve merge requests that are in the given period", async () => {
-    fetchMock.mockResponses(
-      [
-        JSON.stringify([toGitlabDTO(firstMergeRequest)]),
-        {
-          status: 200,
-          headers: {
-            link: "<http://gitlab/merge_requests?order_by=created_at&page=2>; rel='next', <http://gitlab/merge_requests?order_by=created_at&page=1>; rel='first', <http://gitlab/merge_requests?order_by=created_at&page=2>; rel='last'",
-          },
-        },
-      ],
-      [
-        JSON.stringify([toGitlabDTO(secondMergeRequest)]),
-        {
-          status: 200,
-          headers: {
-            link: "<http://gitlab/merge_requests?order_by=created_at&page=1>; rel='first', <http://gitlab/merge_requests?order_by=created_at&page=2>; rel='last'",
-          },
-        },
-      ]
-    );
+    const fromDate = parseISO("2021-11-03T00:00:00");
+    mock
+      .onGet(
+        `https://gitlab.com/api/v4/projects/1/merge_requests?created_after=${fromDate.toISOString()}&per_page=100`,
+        "",
+        expect.objectContaining({ "PRIVATE-TOKEN": "a-token" })
+      )
+      .reply(200, JSON.stringify([toGitlabDTO(firstMergeRequest)]), {
+        link: "<http://gitlab/merge_requests?order_by=created_at&page=2>; rel='next', <http://gitlab/merge_requests?order_by=created_at&page=1>; rel='first', <http://gitlab/merge_requests?order_by=created_at&page=2>; rel='last'",
+      });
+    mock
+      .onGet(
+        "http://gitlab/merge_requests?order_by=created_at&page=2",
+        "",
+        expect.objectContaining({ "PRIVATE-TOKEN": "my-token" })
+      )
+      .reply(200, JSON.stringify([toGitlabDTO(secondMergeRequest)]), {
+        link: "<http://gitlab/merge_requests?order_by=created_at&page=1>; rel='first', <http://gitlab/merge_requests?order_by=created_at&page=2>; rel='last'",
+      });
 
     const mergeRequestsParameters = {
       projectId: 1,
-      fromDate: parseISO("2021-11-03T00:00:00"),
+      fromDate: fromDate,
       toDate: parseISO("2021-11-04T00:00:00"),
     } as MergeRequestsStatsParameters;
     const mergeRequests = await new MergedRequestHTTPGitlabRepository("a-token").getMergeEventsForPeriod(
@@ -165,15 +153,16 @@ describe("Gitlab Repository", () => {
   });
 
   test("should retrieve merge requests in the period if there is only one result page", async () => {
-    fetchMock.mockResponses([
-      JSON.stringify([toGitlabDTO(firstMergeRequest), toGitlabDTO(secondMergeRequest)]),
-      {
-        status: 200,
-        headers: {
-          link: "<http://gitlab/merge_requests?order_by=created_at&page=1>; rel='first', <http://gitlab/merge_requests?order_by=created_at&page=1>; rel='last'",
-        },
-      },
-    ]);
+    const fromDate = parseISO("2021-11-03T00:00:00");
+    mock
+      .onGet(
+        `https://gitlab.com/api/v4/projects/1/merge_requests?created_after=${fromDate.toISOString()}&per_page=100`,
+        "",
+        expect.objectContaining({ "PRIVATE-TOKEN": "a-token" })
+      )
+      .reply(200, JSON.stringify([toGitlabDTO(firstMergeRequest)]), {
+        link: "<http://gitlab/merge_requests?order_by=created_at&page=1>; rel='first', <http://gitlab/merge_requests?order_by=created_at&page=1>; rel='last'",
+      });
 
     const mergeRequestsParameters = {
       projectId: 1,
@@ -192,15 +181,24 @@ describe("Gitlab Repository", () => {
       .createdAt(parseISO("2021-11-03T12:45:12"))
       .notYetMerged()
       .build();
-    fetchMock.mockResponses([
-      JSON.stringify([toGitlabDTO(firstMergeRequest), toGitlabDTO(secondMergeRequest), toGitlabDTO(thirdMergeRequest)]),
-      {
-        status: 200,
-        headers: {
+    const fromDate = parseISO("2021-11-03T00:00:00");
+    mock
+      .onGet(
+        `https://gitlab.com/api/v4/projects/1/merge_requests?created_after=${fromDate.toISOString()}&per_page=100`,
+        "",
+        expect.objectContaining({ "PRIVATE-TOKEN": "a-token" })
+      )
+      .reply(
+        200,
+        JSON.stringify([
+          toGitlabDTO(firstMergeRequest),
+          toGitlabDTO(secondMergeRequest),
+          toGitlabDTO(thirdMergeRequest),
+        ]),
+        {
           link: "<http://gitlab/merge_requests?order_by=created_at&page=1>; rel='first', <http://gitlab/merge_requests?order_by=created_at&page=1>; rel='last'",
-        },
-      },
-    ]);
+        }
+      );
 
     const mergeRequestsParameters = {
       projectId: 1,
@@ -219,15 +217,24 @@ describe("Gitlab Repository", () => {
       .createdAt(parseISO("2021-11-03T12:45:12"))
       .closedAt(parseISO("2021-11-03T18:15:27"))
       .build();
-    fetchMock.mockResponses([
-      JSON.stringify([toGitlabDTO(firstMergeRequest), toGitlabDTO(secondMergeRequest), toGitlabDTO(thirdMergeRequest)]),
-      {
-        status: 200,
-        headers: {
+    const fromDate = parseISO("2021-11-03T00:00:00");
+    mock
+      .onGet(
+        `https://gitlab.com/api/v4/projects/1/merge_requests?created_after=${fromDate.toISOString()}&per_page=100`,
+        "",
+        expect.objectContaining({ "PRIVATE-TOKEN": "a-token" })
+      )
+      .reply(
+        200,
+        JSON.stringify([
+          toGitlabDTO(firstMergeRequest),
+          toGitlabDTO(secondMergeRequest),
+          toGitlabDTO(thirdMergeRequest),
+        ]),
+        {
           link: "<http://gitlab/merge_requests?order_by=created_at&page=1>; rel='first', <http://gitlab/merge_requests?order_by=created_at&page=1>; rel='last'",
-        },
-      },
-    ]);
+        }
+      );
 
     const mergeRequestsParameters = {
       projectId: 1,

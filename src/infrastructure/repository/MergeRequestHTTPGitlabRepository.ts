@@ -1,7 +1,8 @@
 import { parseISO } from "date-fns";
-import { GitRepository, HTTPInit, MergeEventDTO } from "./GitRepository.js";
+import { GitHTTPRepository, HTTPInit, MergeEventDTO } from "./GitHTTPRepository.js";
 import { MergeEvent, MergeEventRepository } from "../../statistics/merge-events/MergeEvent.js";
 import { MergeRequestsStatsParameters } from "../../statistics/Gitlab.js";
+import { AxiosHeaders } from "axios";
 
 type GitlabMergeRequestDTO = MergeEventDTO & {
   id: number;
@@ -24,17 +25,18 @@ const fromDTO = (mergeRequestDTO: GitlabMergeRequestDTO): MergeEvent => {
   };
 };
 
-export class MergedRequestHTTPGitlabRepository extends GitRepository<MergeEvent> implements MergeEventRepository {
+export class MergedRequestHTTPGitlabRepository extends GitHTTPRepository<MergeEvent> implements MergeEventRepository {
   constructor(private readonly token: string, readonly repositoryUrl = "https://gitlab.com/api/v4/") {
     super();
   }
 
   protected httpInit = (requestParameters: MergeRequestsStatsParameters): HTTPInit => {
-    const headers = { "PRIVATE-TOKEN": this.token };
+    const _headers = { "PRIVATE-TOKEN": this.token };
     const url = `${this.repositoryUrl}projects/${
       requestParameters.projectId
     }/merge_requests?created_after=${requestParameters.fromDate.toISOString()}&per_page=100`;
-    return { headers, url };
+    const axiosHeaders = new AxiosHeaders({ "PRIVATE-TOKEN": this.token });
+    return { headers: _headers, url, config: { headers: axiosHeaders } };
   };
 
   protected mergeRequestsMapper = (): ((payload: MergeEventDTO[]) => MergeEvent[]) => {

@@ -6,6 +6,15 @@ Provide MR/PR statistics for your Gitlab/GitHub projects
 
 Run `npm install -g gitflows-stats`
 
+### Prerequisite
+
+**Generate a token to use the API:**
+
+- [Gitlab](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html)
+  - Have a token with enough privilege (`read_api`)
+- [GitHub](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic)
+  - Generate a personal access token
+
 ## Usage
 
 - `gitflows-stats --help` will print:
