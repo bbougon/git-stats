@@ -1,5 +1,5 @@
 import { MergeEventRepository, mergeEventsStatistics } from "./merge-events/MergeEvent.js";
-import { getMonth, getWeek, intervalToDuration } from "date-fns";
+import { getMonth, getWeek, getYear, intervalToDuration } from "date-fns";
 import { RequestParameters } from "../../index.js";
 
 type GitEvent = object;
@@ -54,7 +54,7 @@ const gitEventsByPeriod = (
     start: gitEventStatistics.period.start,
     end: gitEventStatistics.period.end,
   });
-  const moreThan2Months = duration.months > 1 && duration.months + duration.days > 2;
+  const moreThan2Months = (duration.months > 1 && duration.months + duration.days > 2) || duration.years > 0;
   const unit = moreThan2Months ? "Month" : "Week";
 
   gitEventStatistics
@@ -92,8 +92,14 @@ const fillEmptyPeriodsAndSortChronologically = (
   const completeStatistics = stats;
   const periodEndIndex = unit === "Week" ? getWeek(period.end) : getMonth(period.end);
 
-  function fillEmptyPeriodsInInterval(stat: [number, [PeriodIndex, Dimension][]], lastPeriodIndex: number) {
+  function fillEmptyPeriodsInInterval(stat: [Year, [PeriodIndex, Dimension][]], lastPeriodIndex: number) {
     let firstPeriodIndex = unit === "Week" ? getWeek(period.start) : getMonth(period.start);
+    if (stat[0] !== period.end.getFullYear()) {
+      lastPeriodIndex = unit === "Week" ? getWeek(new Date(stat[0], 11, 31)) : 12;
+    }
+    if (stat[0] !== period.start.getFullYear()) {
+      firstPeriodIndex = 0;
+    }
     while (firstPeriodIndex < lastPeriodIndex) {
       const currentPeriodIndex = firstPeriodIndex;
       if (stat[1].find((currentStat) => currentStat[0] === currentPeriodIndex) === undefined) {
@@ -103,7 +109,7 @@ const fillEmptyPeriodsAndSortChronologically = (
     }
   }
 
-  function fillPeriodTail(stat: [number, [PeriodIndex, Dimension][]], lastPeriodIndex: number) {
+  function fillPeriodTail(stat: [Year, [PeriodIndex, Dimension][]], lastPeriodIndex: number) {
     let postPeriodIndex = lastPeriodIndex + 1;
     while (postPeriodIndex <= periodEndIndex) {
       stat[1].push([postPeriodIndex, Dimension.empty(unit, postPeriodIndex)]);

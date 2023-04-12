@@ -277,6 +277,40 @@ describe("Git Statistics", () => {
         expect(eventsPeriodFlattenFieldValues(eventsByPeriod, "index")).toStrictEqual([32, 33, 34, 35, 36]);
         expect(eventsPeriodFlattenFieldValues(eventsByPeriod, "unit")).toStrictEqual(Array(5).fill("Week"));
       });
+
+      it("should create period in months if it does exactly one year", () => {
+        const start = parseISO("2021-03-01T00:00:00");
+        const end = parseISO("2022-03-02T00:00:00");
+        const mergeRequests = [
+          {
+            closedAt: parseISO("2021-03-02T09:44:24.000Z"),
+            createdAt: parseISO("2021-03-01T09:44:16.000Z"),
+            id: 702124235,
+            mergedAt: parseISO("2021-03-02T09:44:24.000Z"),
+            project: "crm-pilates",
+          },
+          {
+            closedAt: parseISO("2022-02-28T10:09:15.000Z"),
+            createdAt: parseISO("2022-02-26T10:06:35.000Z"),
+            id: 717283366,
+            mergedAt: parseISO("2022-02-28T10:09:15.000Z"),
+            project: "crm-pilates",
+          },
+        ];
+
+        const eventsByPeriod = gitEventsByPeriod(
+          new MergedEventStatistics(mergeRequests, {
+            start,
+            end,
+          }),
+          (mr: MergeEvent) => mr.mergedAt
+        );
+
+        expect(eventsPeriodFlattenFieldValues(eventsByPeriod, "index")).toStrictEqual([
+          2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 1, 2,
+        ]);
+        expect(eventsPeriodFlattenFieldValues(eventsByPeriod, "unit")).toStrictEqual(Array(13).fill("Month"));
+      });
     });
   });
 
