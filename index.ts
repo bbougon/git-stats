@@ -14,8 +14,20 @@ import { ProgressBar } from "./src/infrastructure/progress-bar/ProgressBar.js";
 import * as chalk from "./src/infrastructure/progress-bar/Chalk.js";
 import { HTTPError } from "./src/infrastructure/repository/MergeEventHTTPRepository.js";
 
-const commaSeparatedList = (list: string) => {
-  return list.split(",");
+type Period = {
+  start: Date;
+  end: Date;
+};
+
+const commaSeparatedList = (list: string): Period => {
+  const period = list.split(",");
+  if (period.length === 1) {
+    return {
+      end: new Date(),
+      start: parseISO(period[0]),
+    };
+  }
+  return { end: parseISO(period[1]), start: parseISO(period[0]) };
 };
 
 const writer = (format: string): Writer => {
@@ -52,7 +64,7 @@ const gitlabCommand = program
   .argument("<projectId>", "gitlab project id for which you want to have statistics")
   .argument(
     "<period>",
-    "the period you want to analyse (ISO formatted date separated by comma, e.g: 2021-11-02,2021-11-03)",
+    "the period you want to analyse (ISO formatted date with\nthe start period, e.g: 2021-11-02\nor separated by comma, e.g: 2021-11-02,2021-11-03 to retrieve merged events between these 2 dates)",
     commaSeparatedList
   );
 
@@ -64,7 +76,7 @@ const githubCommand = program
   .argument("<repo>", "The name of the repository. The name is not case sensitive.")
   .argument(
     "<period>",
-    "the period you want to analyse (ISO formatted date separated by comma, e.g: 2021-11-02,2021-11-03)",
+    "the period you want to analyse (ISO formatted date with\nthe start period, e.g: 2021-11-02\nor separated by comma, e.g: 2021-11-02,2021-11-03 to retrieve merged events between these 2 dates)",
     commaSeparatedList
   );
 
@@ -105,11 +117,11 @@ const proceedCommand = (
 
 proceedCommand(
   gitlabCommand,
-  (token: string, projectId: number, period: string[], options) => ({
+  (token: string, projectId: number, period: Period, options) => ({
     requestParameters: {
-      fromDate: parseISO(period[0]),
+      fromDate: period.start,
       projectId: projectId,
-      toDate: parseISO(period[1]),
+      toDate: period.end,
     } as MergeRequestsStatsParameters,
     options,
     token,
@@ -119,12 +131,12 @@ proceedCommand(
 
 proceedCommand(
   githubCommand,
-  (token: string, owner: string, repo: string, period: string[], options) => ({
+  (token: string, owner: string, repo: string, period: Period, options) => ({
     requestParameters: {
       repo,
       owner,
-      fromDate: parseISO(period[0]),
-      toDate: parseISO(period[1]),
+      fromDate: period.start,
+      toDate: period.end,
     } as PullRequestsStatsParameter,
     options,
     token,

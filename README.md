@@ -31,6 +31,11 @@ Run `npm install -g gitflows-stats`
   help [command]                                    display help for command
   ```
 
+- the `<period>` parameter has an optional end and may be in the following format:
+
+  - `2023-01-01,2023-01-31` will retrieve all the merged events between these 2 dates
+  - `2023-01-01` will retrieve all the merged events between the given date and now
+
 - `gitflows-stats gitlab <TOKEN> <PROJECT_ID> <PERIOD>` (<PERIOD> in the following format `2023-01-01,2023-01-31`) will print:
   ```json
   {
