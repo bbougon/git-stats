@@ -1,10 +1,14 @@
-name: Gitstats CI
+name: Gitflows stats CI
 
 on:
   push:
   pull_request:
     branches:
       - main
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   test:
@@ -25,25 +29,7 @@ jobs:
         run: |
           npm run test
 
-  bump:
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    outputs:
-      bump-performed: ${{ steps.bumping-version.outputs.bump-performed }}
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
-      - name: Bumping version
-        id: bumping-version
-        uses: jpb06/bump-package@latest
-        with:
-          major-keywords: BREAKING CHANGE
-          minor-keywords: feat,Feat,minor
-          patch-keywords: fix,Fix
-    needs: test
-
   build:
-    if: needs.bump.outputs.bump-performed == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -62,34 +48,31 @@ jobs:
       - name: Build module
         run: |
           npm run build
-      - name: Compress build
-        run: |
-          zip -r gitflows-stats-build.zip .
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: gitflows-stats-build
-          path: gitflows-stats-build.zip
-    needs: bump
+    needs: test
 
-  publish:
+  release-please:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18.15.x]
     steps:
-      - name: Download gitflows-stats artifact
-        uses: actions/download-artifact@v3
+      - uses: google-github-actions/release-please-action@v3
+        id: release
         with:
-          name: gitflows-stats-build
-      - name: Uncompress build
-        run: |
-          unzip gitflows-stats-build.zip
+          release-type: node
+          package-name: gitflows-stats
+          changelog-types: '[{"type":"feat","section":"Features","hidden":false},{"type":"fix","section":"Bug Fixes","hidden":false},{"type":"chore","section":"Miscellaneous","hidden":false}]'
+      - uses: actions/checkout@v3
+        if: ${{ steps.release.outputs.release_created }}
       - name: Set up Node js
+        if: ${{ steps.release.outputs.release_created }}
         uses: actions/setup-node@v3
         with:
           registry-url: "https://registry.npmjs.org"
+      - name: Install and build
+        if: ${{ steps.release.outputs.release_created }}
+        run: |
+          npm ci
+          npm run build
       - run: npm publish
+        if: ${{ steps.release.outputs.release_created }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     needs: build
