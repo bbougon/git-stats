@@ -29,14 +29,14 @@ export type Year = number;
 export class StatisticFlow {
   events: Date[] = [];
 
-  constructor(eventDate: Date | undefined, public readonly index: number, public total: number) {
+  constructor(eventDate: Date | undefined, public readonly index: number) {
     if (eventDate !== undefined) {
       this.events.push(eventDate);
     }
   }
 
-  increase() {
-    this.total = this.total + 1;
+  total() {
+    return this.events.length;
   }
 
   addEvent(eventDate: Date) {
@@ -44,15 +44,15 @@ export class StatisticFlow {
   }
 
   static month(eventDate: Date): StatisticFlow {
-    return new StatisticFlow(eventDate, getMonth(eventDate), 1);
+    return new StatisticFlow(eventDate, getMonth(eventDate));
   }
 
   static week(eventDate: Date): StatisticFlow {
-    return new StatisticFlow(eventDate, getWeek(eventDate), 1);
+    return new StatisticFlow(eventDate, getWeek(eventDate));
   }
 
   static empty(index: number) {
-    return new StatisticFlow(undefined, index, 0);
+    return new StatisticFlow(undefined, index);
   }
 }
 export const gitEventsByPeriod = (
@@ -67,7 +67,7 @@ export const gitEventsByPeriod = (
       const _eventDate = eventDate(event);
       const year = _eventDate.getFullYear();
       const monthFlow = StatisticFlow.month(_eventDate);
-      const weekDFlow = StatisticFlow.week(_eventDate) as StatisticFlow;
+      const weekFlow = StatisticFlow.week(_eventDate) as StatisticFlow;
       const yearStats = stats.get(year);
 
       function addFlow(flows: StatisticFlow[], flow: StatisticFlow) {
@@ -77,12 +77,11 @@ export const gitEventsByPeriod = (
         }
         existingFlow.forEach((flow: StatisticFlow) => {
           flow.addEvent(_eventDate);
-          flow.increase();
         });
       }
 
       if (yearStats === undefined) {
-        stats.set(year, [{ Month: [monthFlow] }, { Week: [weekDFlow] }] as { [key: Unit]: StatisticFlow[] }[]);
+        stats.set(year, [{ Month: [monthFlow] }, { Week: [weekFlow] }] as { [key: Unit]: StatisticFlow[] }[]);
       } else {
         yearStats.forEach((period) => {
           Object.entries(period).forEach(([key, flows]) => {
@@ -90,7 +89,7 @@ export const gitEventsByPeriod = (
               addFlow(flows, monthFlow);
             }
             if (key === "Week") {
-              addFlow(flows, weekDFlow);
+              addFlow(flows, weekFlow);
             }
           });
         });

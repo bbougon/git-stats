@@ -38,17 +38,17 @@ class HTMLContentBuilder {
     const weeksData: number[] = [];
     stats.forEach((stat) => {
       stat.forEach((period) => {
-        Object.entries(period).forEach(([unit, dimensions]) => {
+        Object.entries(period).forEach(([unit, flows]) => {
           if (unit === "Month") {
-            dimensions.forEach((dimension) => {
-              monthsLabels.push(HUMAN_READABLE_MONTHS[dimension.index]);
-              monthsData.push(dimension.total);
+            flows.forEach((flow) => {
+              monthsLabels.push(HUMAN_READABLE_MONTHS[flow.index]);
+              monthsData.push(flow.total());
             });
           }
           if (unit === "Week") {
-            dimensions.forEach((dimension) => {
-              weeksLabels.push(`Week ${dimension.index}`);
-              weeksData.push(dimension.total);
+            flows.forEach((flow) => {
+              weeksLabels.push(`Week ${flow.index}`);
+              weeksData.push(flow.total());
             });
           }
         });
