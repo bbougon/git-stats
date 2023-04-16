@@ -6,6 +6,10 @@ import { MergeRequestsStatsParameters } from "./Gitlab.js";
 import { Repository } from "../Repository.js";
 
 describe("Git Statistics", () => {
+  function getEventDate() {
+    return (mr: MergeEvent) => ({ end: mr.mergedAt, start: mr.createdAt });
+  }
+
   describe("Merge events", () => {
     describe("Aggregated statistics", () => {
       it("should have merge events average", async () => {
@@ -151,7 +155,7 @@ describe("Git Statistics", () => {
             start,
             end,
           }),
-          (mr: MergeEvent) => mr.mergedAt
+          getEventDate()
         );
 
         const month = eventsByPeriod.get(2022)[0].Month[0];
@@ -172,7 +176,7 @@ describe("Git Statistics", () => {
             start,
             end,
           }),
-          (mr: MergeEvent) => mr.mergedAt
+          getEventDate()
         );
 
         const months = eventsByPeriod.get(2023)[0].Month;
@@ -195,7 +199,7 @@ describe("Git Statistics", () => {
             start,
             end,
           }),
-          (mr: MergeEvent) => mr.mergedAt
+          getEventDate()
         );
 
         const monthsIn2022 = eventsByPeriod.get(2022)[0].Month;
@@ -233,7 +237,7 @@ describe("Git Statistics", () => {
             start,
             end,
           }),
-          (mr: MergeEvent) => mr.mergedAt
+          getEventDate()
         );
 
         const monthsIn2020 = eventsByPeriod.get(2020)[0].Month;
@@ -265,7 +269,7 @@ describe("Git Statistics", () => {
             start,
             end,
           }),
-          (mr: MergeEvent) => mr.mergedAt
+          getEventDate()
         );
 
         const months = eventsByPeriod.get(2021)[0].Month;
@@ -299,7 +303,7 @@ describe("Git Statistics", () => {
             start,
             end,
           }),
-          (mr: MergeEvent) => mr.mergedAt
+          getEventDate()
         );
 
         const monthsIn2021 = eventsByPeriod.get(2021)[0].Month;

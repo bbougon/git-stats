@@ -31,7 +31,10 @@ class HTMLContentBuilder {
         .replace(/>/g, "\\u003E")
         .replace(/\//g, "\\u002F");
     };
-    const stats = gitEventsByPeriod(this.stats.mergedEvents as MergedEventStatistics, (mr: MergeEvent) => mr.mergedAt);
+    const stats = gitEventsByPeriod(this.stats.mergedEvents as MergedEventStatistics, (mr: MergeEvent) => ({
+      end: mr.mergedAt,
+      start: mr.createdAt,
+    }));
     const monthsLabels: string[] = [];
     const monthsData: number[] = [];
     const weeksLabels: string[] = [];
