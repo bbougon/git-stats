@@ -1,5 +1,5 @@
 import { MergeEventRepository, mergeEventsStatistics } from "./merge-events/MergeEvent.js";
-import { getMonth, getWeek, getYear, intervalToDuration } from "date-fns";
+import { getMonth, getWeek } from "date-fns";
 import { RequestParameters } from "../../index.js";
 
 type GitEvent = object;
@@ -40,91 +40,139 @@ class Dimension {
   static empty(unit: Unit, index: number) {
     return new Dimension(unit, index, 0);
   }
+
+  static month(eventDate: Date): Dimension {
+    return new Dimension("Month", getMonth(eventDate), 0);
+  }
+
+  static week(eventDate: Date) {
+    return new Dimension("Week", getWeek(eventDate), 0);
+  }
 }
 
-type Year = number;
-type PeriodIndex = number;
+export type Year = number;
+export class Dimension2 {
+  events: Date[] = [];
 
-const gitEventsByPeriod = (
+  constructor(eventDate: Date | undefined, public readonly index: number, public total: number) {
+    if (eventDate !== undefined) {
+      this.events.push(eventDate);
+    }
+  }
+
+  increase() {
+    this.total = this.total + 1;
+  }
+
+  addEvent(eventDate: Date) {
+    this.events.push(eventDate);
+  }
+
+  static month(eventDate: Date): Dimension2 {
+    return new Dimension2(eventDate, getMonth(eventDate), 1);
+  }
+
+  static week(eventDate: Date): Dimension2 {
+    return new Dimension2(eventDate, getWeek(eventDate), 1);
+  }
+
+  static empty(index: number) {
+    return new Dimension2(undefined, index, 0);
+  }
+}
+export const gitEventsByPeriod3 = (
   gitEventStatistics: GitStatistics,
   eventDate: (event: GitEvent) => Date
-): [Year, [PeriodIndex, Dimension][]][] => {
-  const stats: [Year, [PeriodIndex, Dimension][]][] = [];
-  const duration = intervalToDuration({
-    start: gitEventStatistics.period.start,
-    end: gitEventStatistics.period.end,
-  });
-  const moreThan2Months = (duration.months > 1 && duration.months + duration.days > 2) || duration.years > 0;
-  const unit = moreThan2Months ? "Month" : "Week";
-
+): Map<Year, { [key: Unit]: Dimension2[] }[]> => {
+  const stats: Map<Year, { [key: Unit]: Dimension2[] }[]> = new Map<Year, { [key: Unit]: Dimension2[] }[]>();
   gitEventStatistics
     .sortedEvents()
     .filter((event) => eventDate(event) !== null)
     .forEach((event) => {
       const _eventDate = eventDate(event);
       const year = _eventDate.getFullYear();
-      const dimension = Dimension.create(unit, moreThan2Months ? getMonth(_eventDate) : getWeek(_eventDate));
-      if (stats.length === 0) {
-        stats.push([year, [[dimension.index, dimension]]]);
+      const monthDimension = Dimension2.month(_eventDate);
+      const weekDimension = Dimension2.week(_eventDate) as Dimension2;
+      const yearStats = stats.get(year);
+      if (yearStats === undefined) {
+        stats.set(year, [{ Month: [monthDimension] }, { Week: [weekDimension] }] as { [key: Unit]: Dimension2[] }[]);
       } else {
-        const yearStats = stats.filter((stat) => stat[0] === year);
-        if (yearStats.length === 0) {
-          stats.push([year, [[dimension.index, dimension]]]);
-        } else {
-          const periodStats = yearStats[0][1].filter((stat) => stat[0] === dimension.index);
-          if (periodStats.length === 0) {
-            yearStats[0][1].push([dimension.index, dimension]);
-          } else {
-            const dimension = periodStats[0][1];
-            dimension.increase();
-          }
-        }
+        yearStats.forEach((period) => {
+          Object.entries(period).forEach(([key, dimensions]) => {
+            if (key === "Month") {
+              const filter = dimensions.filter((dimension: Dimension2) => dimension.index === monthDimension.index);
+              if (filter.length === 0) {
+                dimensions.push(monthDimension);
+              }
+              filter.forEach((dimension: Dimension2) => {
+                dimension.addEvent(_eventDate);
+                dimension.increase();
+              });
+            }
+            if (key === "Week") {
+              const filter = dimensions.filter((dimension: Dimension2) => dimension.index === weekDimension.index);
+              if (filter.length === 0) {
+                dimensions.push(weekDimension);
+              }
+              filter.forEach((dimension: Dimension2) => {
+                dimension.addEvent(_eventDate);
+                dimension.increase();
+              });
+            }
+          });
+        });
       }
     });
-  return fillEmptyPeriodsAndSortChronologically(stats, unit, gitEventStatistics.period);
+  return fillEmptyPeriodsAndSortChronologically2(stats, gitEventStatistics.period);
 };
 
-const fillEmptyPeriodsAndSortChronologically = (
-  stats: [Year, [PeriodIndex, Dimension][]][],
-  unit: string,
+const fillEmptyPeriodsAndSortChronologically2 = (
+  stats: Map<Year, { [key: Unit]: Dimension2[] }[]>,
   period: Period
-): [Year, [PeriodIndex, Dimension][]][] => {
+): Map<Year, { [key: Unit]: Dimension2[] }[]> => {
   const completeStatistics = stats;
-  const periodEndIndex = unit === "Week" ? getWeek(period.end) : getMonth(period.end);
 
-  function fillEmptyPeriodsInInterval(stat: [Year, [PeriodIndex, Dimension][]], lastPeriodIndex: number) {
-    let firstPeriodIndex = unit === "Week" ? getWeek(period.start) : getMonth(period.start);
-    if (stat[0] !== period.end.getFullYear()) {
-      lastPeriodIndex = unit === "Week" ? getWeek(new Date(stat[0], 11, 31)) : 12;
-    }
-    if (stat[0] !== period.start.getFullYear()) {
-      firstPeriodIndex = 0;
-    }
-    while (firstPeriodIndex < lastPeriodIndex) {
-      const currentPeriodIndex = firstPeriodIndex;
-      if (stat[1].find((currentStat) => currentStat[0] === currentPeriodIndex) === undefined) {
-        stat[1].push([currentPeriodIndex, Dimension.empty(unit, currentPeriodIndex)]);
+  function fillEmptyPeriodsInInterval(_stat: { [p: Unit]: Dimension2[] }, year: Year) {
+    Object.entries(_stat).forEach(([unit, dimensions]) => {
+      let firstPeriodIndex = 0;
+      let lastPeriodIndex = 0;
+      if (unit === "Month") {
+        firstPeriodIndex = getMonth(period.start);
+        lastPeriodIndex = getMonth(period.end) + 1;
+        if (year !== period.end.getFullYear()) {
+          lastPeriodIndex = 12;
+        }
+        if (year !== period.start.getFullYear()) {
+          firstPeriodIndex = 0;
+        }
       }
-      firstPeriodIndex++;
-    }
+      if (unit === "Week") {
+        firstPeriodIndex = getWeek(period.start);
+        lastPeriodIndex = getWeek(period.end) + 1;
+        if (year !== period.end.getFullYear()) {
+          lastPeriodIndex = getWeek(new Date(year, 11, 31));
+        }
+        if (year !== period.start.getFullYear()) {
+          firstPeriodIndex = 1;
+        }
+      }
+      while (firstPeriodIndex < lastPeriodIndex) {
+        const currentPeriodIndex = firstPeriodIndex;
+        if (dimensions.find((currentStat) => currentStat.index === currentPeriodIndex) === undefined) {
+          dimensions.push(Dimension2.empty(currentPeriodIndex));
+        }
+        firstPeriodIndex++;
+      }
+      dimensions.sort((current, next) => (current.index > next.index ? 1 : -1));
+    });
   }
 
-  function fillPeriodTail(stat: [Year, [PeriodIndex, Dimension][]], lastPeriodIndex: number) {
-    let postPeriodIndex = lastPeriodIndex + 1;
-    while (postPeriodIndex <= periodEndIndex) {
-      stat[1].push([postPeriodIndex, Dimension.empty(unit, postPeriodIndex)]);
-      postPeriodIndex++;
-    }
-  }
-
-  completeStatistics.forEach((stat) => {
-    const lastPeriodIndex = stat[1].slice(-1)[0][1].index;
-    fillEmptyPeriodsInInterval(stat, lastPeriodIndex);
-    fillPeriodTail(stat, lastPeriodIndex);
-    stat[1].sort((stat, nextStat) => (stat[0] > nextStat[0] ? 1 : -1));
+  completeStatistics.forEach((dimensions, year) => {
+    dimensions.forEach((period) => {
+      fillEmptyPeriodsInInterval(period, year);
+    });
   });
   return completeStatistics;
 };
-
 export { Dimension, Unit, StatisticsAggregate, GitStatistics, Period, GitEventsStatisticsResult, GitEvent };
-export { gitStatistics, gitEventsByPeriod };
+export { gitStatistics };

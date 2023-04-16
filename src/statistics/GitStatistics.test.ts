@@ -1,7 +1,7 @@
 import { compareAsc, compareDesc, parseISO } from "date-fns";
 import { MergedEventStatistics, MergeEvent, MergeEventRepository } from "./merge-events/MergeEvent.js";
 import { MergeEventBuilderForMR, MergeEventsBuilderForMR } from "../__tests__/builder.js";
-import { Dimension, gitEventsByPeriod, gitStatistics } from "./GitStatistics.js";
+import { gitEventsByPeriod3, gitStatistics } from "./GitStatistics.js";
 import { MergeRequestsStatsParameters } from "./Gitlab.js";
 import { Repository } from "../Repository.js";
 
@@ -141,12 +141,12 @@ describe("Git Statistics", () => {
     });
 
     describe("Statistics by period", () => {
-      it("should sort by weeks", () => {
+      it("should sort the periods", () => {
         const start = parseISO("2022-02-01T00:00:00");
         const end = parseISO("2022-02-28T00:00:00");
         const mergeRequests = new MergeEventsBuilderForMR(1).total(20).forPeriod(start, end).withEmptyPeriod(7).build();
 
-        const eventsByPeriod = gitEventsByPeriod(
+        const eventsByPeriod = gitEventsByPeriod3(
           new MergedEventStatistics(mergeRequests, {
             start,
             end,
@@ -154,17 +154,20 @@ describe("Git Statistics", () => {
           (mr: MergeEvent) => mr.mergedAt
         );
 
-        expect(eventsPeriodFlattenFieldValues(eventsByPeriod, "index")).toStrictEqual([6, 7, 8, 9, 10]);
-        const weekSeven = eventsByPeriod[0][1][1];
-        expect(weekSeven[1].total).toEqual(0);
+        const month = eventsByPeriod.get(2022)[0].Month[0];
+        expect(month.index).toEqual(1);
+        expect(month.events).toHaveLength(mergeRequests.length);
+        const weeks = eventsByPeriod.get(2022)[1].Week;
+        expect(weeks.flatMap((week) => week.index)).toStrictEqual([6, 7, 8, 9, 10]);
+        expect(weeks[1].total).toEqual(0);
       });
 
-      it("should sort by weeks with all expected weeks", () => {
+      it("should sort by period unit with all expected period units", () => {
         const start = parseISO("2023-01-01T00:00:00");
         const end = parseISO("2023-02-10T00:00:00");
         const mergeRequests = new MergeEventsBuilderForMR(1).total(78).forPeriod(start, end).build();
 
-        const eventsByPeriod = gitEventsByPeriod(
+        const eventsByPeriod = gitEventsByPeriod3(
           new MergedEventStatistics(mergeRequests, {
             start,
             end,
@@ -172,28 +175,13 @@ describe("Git Statistics", () => {
           (mr: MergeEvent) => mr.mergedAt
         );
 
-        expect(eventsPeriodFlattenFieldValues(eventsByPeriod, "index")).toStrictEqual([1, 2, 3, 4, 5, 6]);
-        expect(eventsPeriodFlattenFieldValues(eventsByPeriod, "unit")).toStrictEqual(Array(6).fill("Week"));
+        const months = eventsByPeriod.get(2023)[0].Month;
+        expect(months.flatMap((month) => month.index)).toStrictEqual([0, 1]);
+        const weeks = eventsByPeriod.get(2023)[1].Week;
+        expect(weeks.flatMap((week) => week.index)).toStrictEqual([1, 2, 3, 4, 5, 6]);
       });
 
-      it("should move to month period when duration between 2 dates are over 2 months", () => {
-        const start = parseISO("2023-01-01T00:00:00");
-        const end = parseISO("2023-03-24T00:00:00");
-        const mergeRequests = new MergeEventsBuilderForMR(1).total(78).forPeriod(start, end).build();
-
-        const eventsByPeriod = gitEventsByPeriod(
-          new MergedEventStatistics(mergeRequests, {
-            start,
-            end,
-          }),
-          (mr: MergeEvent) => mr.mergedAt
-        );
-
-        expect(eventsPeriodFlattenFieldValues(eventsByPeriod, "index")).toStrictEqual([0, 1, 2]);
-        expect(eventsPeriodFlattenFieldValues(eventsByPeriod, "unit")).toStrictEqual(Array(3).fill("Month"));
-      });
-
-      it("should sort period for months according to year overlap", () => {
+      it("should sort period when year overlaps", () => {
         const start = parseISO("2022-10-01T00:00:00");
         const end = parseISO("2023-03-28T00:00:00");
         const mergeRequests = new MergeEventsBuilderForMR(1)
@@ -202,7 +190,7 @@ describe("Git Statistics", () => {
           .randomlyNotMerged()
           .build();
 
-        const eventsByPeriod = gitEventsByPeriod(
+        const eventsByPeriod = gitEventsByPeriod3(
           new MergedEventStatistics(mergeRequests, {
             start,
             end,
@@ -210,8 +198,16 @@ describe("Git Statistics", () => {
           (mr: MergeEvent) => mr.mergedAt
         );
 
-        expect(eventsPeriodFlattenFieldValues(eventsByPeriod, "index")).toStrictEqual([9, 10, 11, 0, 1, 2]);
-        expect(eventsPeriodFlattenFieldValues(eventsByPeriod, "unit")).toStrictEqual(Array(6).fill("Month"));
+        const monthsIn2022 = eventsByPeriod.get(2022)[0].Month;
+        expect(monthsIn2022.flatMap((month) => month.index)).toStrictEqual([9, 10, 11]);
+        const weeksIn2022 = eventsByPeriod.get(2022)[1].Week;
+        expect(weeksIn2022.flatMap((week) => week.index)).toStrictEqual([
+          40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
+        ]);
+        const monthsIn2023 = eventsByPeriod.get(2023)[0].Month;
+        expect(monthsIn2023.flatMap((month) => month.index)).toStrictEqual([0, 1, 2]);
+        const weeksIn2023 = eventsByPeriod.get(2023)[1].Week;
+        expect(weeksIn2023.flatMap((week) => week.index)).toStrictEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]);
       });
 
       it("should fill empty periods", () => {
@@ -232,7 +228,7 @@ describe("Git Statistics", () => {
             .build(),
         ];
 
-        const eventsByPeriod = gitEventsByPeriod(
+        const eventsByPeriod = gitEventsByPeriod3(
           new MergedEventStatistics(mergeRequests, {
             start,
             end,
@@ -240,10 +236,8 @@ describe("Git Statistics", () => {
           (mr: MergeEvent) => mr.mergedAt
         );
 
-        expect(eventsPeriodFlattenFieldValues(eventsByPeriod, "index")).toStrictEqual([
-          0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-        ]);
-        expect(eventsPeriodFlattenFieldValues(eventsByPeriod, "unit")).toStrictEqual(Array(12).fill("Month"));
+        const monthsIn2020 = eventsByPeriod.get(2020)[0].Month;
+        expect(monthsIn2020.flatMap((month) => month.index)).toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
       });
 
       it("should fill empty periods in the middle of a year", () => {
@@ -266,7 +260,7 @@ describe("Git Statistics", () => {
           },
         ];
 
-        const eventsByPeriod = gitEventsByPeriod(
+        const eventsByPeriod = gitEventsByPeriod3(
           new MergedEventStatistics(mergeRequests, {
             start,
             end,
@@ -274,11 +268,13 @@ describe("Git Statistics", () => {
           (mr: MergeEvent) => mr.mergedAt
         );
 
-        expect(eventsPeriodFlattenFieldValues(eventsByPeriod, "index")).toStrictEqual([32, 33, 34, 35, 36]);
-        expect(eventsPeriodFlattenFieldValues(eventsByPeriod, "unit")).toStrictEqual(Array(5).fill("Week"));
+        const months = eventsByPeriod.get(2021)[0].Month;
+        expect(months.flatMap((month) => month.index)).toStrictEqual([7]);
+        const weeks = eventsByPeriod.get(2021)[1].Week;
+        expect(weeks.flatMap((month) => month.index)).toStrictEqual([32, 33, 34, 35, 36]);
       });
 
-      it("should create period in months if it does exactly one year", () => {
+      it("should create all periods if it does exactly one year", () => {
         const start = parseISO("2021-03-01T00:00:00");
         const end = parseISO("2022-03-02T00:00:00");
         const mergeRequests = [
@@ -298,7 +294,7 @@ describe("Git Statistics", () => {
           },
         ];
 
-        const eventsByPeriod = gitEventsByPeriod(
+        const eventsByPeriod = gitEventsByPeriod3(
           new MergedEventStatistics(mergeRequests, {
             start,
             end,
@@ -306,20 +302,13 @@ describe("Git Statistics", () => {
           (mr: MergeEvent) => mr.mergedAt
         );
 
-        expect(eventsPeriodFlattenFieldValues(eventsByPeriod, "index")).toStrictEqual([
-          2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 1, 2,
-        ]);
-        expect(eventsPeriodFlattenFieldValues(eventsByPeriod, "unit")).toStrictEqual(Array(13).fill("Month"));
+        const monthsIn2021 = eventsByPeriod.get(2021)[0].Month;
+        expect(monthsIn2021.flatMap((month) => month.index)).toStrictEqual([2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+        const monthsIn2022 = eventsByPeriod.get(2022)[0].Month;
+        expect(monthsIn2022.flatMap((month) => month.index)).toStrictEqual([0, 1, 2]);
       });
     });
   });
-
-  const eventsPeriodFlattenFieldValues = (
-    eventsByPeriod: [number, [number, Dimension][]][],
-    field = "index" as keyof Dimension
-  ): (string | number | (() => void))[] => {
-    return eventsByPeriod.flatMap((stat) => stat[1]).map((stat) => stat[1][field]);
-  };
 });
 
 abstract class MemoryRepository<T> implements Repository<T> {
