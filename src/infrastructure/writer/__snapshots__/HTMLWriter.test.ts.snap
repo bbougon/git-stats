@@ -110,16 +110,15 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
           }];
       }
       const mergeRequestChartType = 'line'
-
-
+      
       const monthsMergeRequestContext = document.getElementById('merged-events');
       const monthsMergeRequestChartDatasets = initializeDataSet([3]);
       const monthsMergeRequestChartLabels = ["Feb"]
-
+      
       const weeksMergeRequestContext = document.getElementById('merged-events-weeks');
       const weeksMergeRequestChartDatasets = initializeDataSet([1,2]);
       const weeksMergeRequestChartLabels = ["Week 7","Week 8"]
-
+      
       const aggregatedMergeRequestContext = document.getElementById("aggregated-statistics")
       const aggregatedMergeRequestChartType = 'doughnut'
       const aggregatedMergeRequestChartLabels = ['Merged', 'Opened', 'Closed', 'All']
@@ -133,7 +132,7 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
           ],
           hoverOffset: 4
       }]
-
+      
       function renderChart(context, type, labels, datasets) {
           new Chart(context, {
               type: type,
@@ -144,7 +143,7 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
               options: {}
           });
       }
-
+      
       renderChart(monthsMergeRequestContext, mergeRequestChartType, monthsMergeRequestChartLabels, monthsMergeRequestChartDatasets);
       renderChart(weeksMergeRequestContext, mergeRequestChartType, weeksMergeRequestChartLabels, weeksMergeRequestChartDatasets);
       renderChart(aggregatedMergeRequestContext, aggregatedMergeRequestChartType, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets);
@@ -263,16 +262,15 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
           }];
       }
       const mergeRequestChartType = 'line'
-
-
+      
       const monthsMergeRequestContext = document.getElementById('merged-events');
       const monthsMergeRequestChartDatasets = initializeDataSet([2]);
       const monthsMergeRequestChartLabels = ["Feb"]
-
+      
       const weeksMergeRequestContext = document.getElementById('merged-events-weeks');
       const weeksMergeRequestChartDatasets = initializeDataSet([0,2]);
       const weeksMergeRequestChartLabels = ["Week 7","Week 8"]
-
+      
       const aggregatedMergeRequestContext = document.getElementById("aggregated-statistics")
       const aggregatedMergeRequestChartType = 'doughnut'
       const aggregatedMergeRequestChartLabels = ['Merged', 'Opened', 'Closed', 'All']
@@ -286,7 +284,7 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
           ],
           hoverOffset: 4
       }]
-
+      
       function renderChart(context, type, labels, datasets) {
           new Chart(context, {
               type: type,
@@ -297,7 +295,7 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
               options: {}
           });
       }
-
+      
       renderChart(monthsMergeRequestContext, mergeRequestChartType, monthsMergeRequestChartLabels, monthsMergeRequestChartDatasets);
       renderChart(weeksMergeRequestContext, mergeRequestChartType, weeksMergeRequestChartLabels, weeksMergeRequestChartDatasets);
       renderChart(aggregatedMergeRequestContext, aggregatedMergeRequestChartType, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets);
@@ -416,16 +414,15 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
           }];
       }
       const mergeRequestChartType = 'line'
-
-
+      
       const monthsMergeRequestContext = document.getElementById('merged-events');
       const monthsMergeRequestChartDatasets = initializeDataSet([1,2,0]);
       const monthsMergeRequestChartLabels = ["Jan","Feb","Mar"]
-
+      
       const weeksMergeRequestContext = document.getElementById('merged-events-weeks');
       const weeksMergeRequestChartDatasets = initializeDataSet([0,0,0,0,1,0,0,2,0,0]);
       const weeksMergeRequestChartLabels = ["Week 1","Week 2","Week 3","Week 4","Week 5","Week 6","Week 7","Week 8","Week 9","Week 10"]
-
+      
       const aggregatedMergeRequestContext = document.getElementById("aggregated-statistics")
       const aggregatedMergeRequestChartType = 'doughnut'
       const aggregatedMergeRequestChartLabels = ['Merged', 'Opened', 'Closed', 'All']
@@ -439,7 +436,7 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
           ],
           hoverOffset: 4
       }]
-
+      
       function renderChart(context, type, labels, datasets) {
           new Chart(context, {
               type: type,
@@ -450,7 +447,7 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
               options: {}
           });
       }
-
+      
       renderChart(monthsMergeRequestContext, mergeRequestChartType, monthsMergeRequestChartLabels, monthsMergeRequestChartDatasets);
       renderChart(weeksMergeRequestContext, mergeRequestChartType, weeksMergeRequestChartLabels, weeksMergeRequestChartDatasets);
       renderChart(aggregatedMergeRequestContext, aggregatedMergeRequestChartType, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets);

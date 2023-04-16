@@ -27,11 +27,11 @@ export class ConsoleWriter implements Writer {
         const records: PeriodUnitRecord[] = [];
         period.forEach((statistics) => {
           const record: PeriodUnitRecord = {};
-          Object.entries(statistics).forEach(([key, dimensions]) => {
+          Object.entries(statistics).forEach(([key, flows]) => {
             const unitRecords: UnitRecord[] = [];
-            dimensions.forEach((dimension) => {
+            flows.forEach((flow) => {
               const unitRecord: UnitRecord = {};
-              unitRecord[String(dimension.index)] = dimension.total;
+              unitRecord[String(flow.index)] = flow.total();
               unitRecords.push(unitRecord);
             });
             record[key] = unitRecords;
