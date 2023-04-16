@@ -1,7 +1,7 @@
 import { compareAsc, compareDesc, parseISO } from "date-fns";
 import { MergedEventStatistics, MergeEvent, MergeEventRepository } from "./merge-events/MergeEvent.js";
 import { MergeEventBuilderForMR, MergeEventsBuilderForMR } from "../__tests__/builder.js";
-import { gitEventsByPeriod3, gitStatistics } from "./GitStatistics.js";
+import { gitEventsByPeriod, gitStatistics } from "./GitStatistics.js";
 import { MergeRequestsStatsParameters } from "./Gitlab.js";
 import { Repository } from "../Repository.js";
 
@@ -146,7 +146,7 @@ describe("Git Statistics", () => {
         const end = parseISO("2022-02-28T00:00:00");
         const mergeRequests = new MergeEventsBuilderForMR(1).total(20).forPeriod(start, end).withEmptyPeriod(7).build();
 
-        const eventsByPeriod = gitEventsByPeriod3(
+        const eventsByPeriod = gitEventsByPeriod(
           new MergedEventStatistics(mergeRequests, {
             start,
             end,
@@ -167,7 +167,7 @@ describe("Git Statistics", () => {
         const end = parseISO("2023-02-10T00:00:00");
         const mergeRequests = new MergeEventsBuilderForMR(1).total(78).forPeriod(start, end).build();
 
-        const eventsByPeriod = gitEventsByPeriod3(
+        const eventsByPeriod = gitEventsByPeriod(
           new MergedEventStatistics(mergeRequests, {
             start,
             end,
@@ -190,7 +190,7 @@ describe("Git Statistics", () => {
           .randomlyNotMerged()
           .build();
 
-        const eventsByPeriod = gitEventsByPeriod3(
+        const eventsByPeriod = gitEventsByPeriod(
           new MergedEventStatistics(mergeRequests, {
             start,
             end,
@@ -228,7 +228,7 @@ describe("Git Statistics", () => {
             .build(),
         ];
 
-        const eventsByPeriod = gitEventsByPeriod3(
+        const eventsByPeriod = gitEventsByPeriod(
           new MergedEventStatistics(mergeRequests, {
             start,
             end,
@@ -260,7 +260,7 @@ describe("Git Statistics", () => {
           },
         ];
 
-        const eventsByPeriod = gitEventsByPeriod3(
+        const eventsByPeriod = gitEventsByPeriod(
           new MergedEventStatistics(mergeRequests, {
             start,
             end,
@@ -294,7 +294,7 @@ describe("Git Statistics", () => {
           },
         ];
 
-        const eventsByPeriod = gitEventsByPeriod3(
+        const eventsByPeriod = gitEventsByPeriod(
           new MergedEventStatistics(mergeRequests, {
             start,
             end,

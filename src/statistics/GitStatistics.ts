@@ -51,7 +51,7 @@ class Dimension {
 }
 
 export type Year = number;
-export class Dimension2 {
+export class StatisticFlow {
   events: Date[] = [];
 
   constructor(eventDate: Date | undefined, public readonly index: number, public total: number) {
@@ -68,107 +68,133 @@ export class Dimension2 {
     this.events.push(eventDate);
   }
 
-  static month(eventDate: Date): Dimension2 {
-    return new Dimension2(eventDate, getMonth(eventDate), 1);
+  static month(eventDate: Date): StatisticFlow {
+    return new StatisticFlow(eventDate, getMonth(eventDate), 1);
   }
 
-  static week(eventDate: Date): Dimension2 {
-    return new Dimension2(eventDate, getWeek(eventDate), 1);
+  static week(eventDate: Date): StatisticFlow {
+    return new StatisticFlow(eventDate, getWeek(eventDate), 1);
   }
 
   static empty(index: number) {
-    return new Dimension2(undefined, index, 0);
+    return new StatisticFlow(undefined, index, 0);
   }
 }
-export const gitEventsByPeriod3 = (
+export const gitEventsByPeriod = (
   gitEventStatistics: GitStatistics,
   eventDate: (event: GitEvent) => Date
-): Map<Year, { [key: Unit]: Dimension2[] }[]> => {
-  const stats: Map<Year, { [key: Unit]: Dimension2[] }[]> = new Map<Year, { [key: Unit]: Dimension2[] }[]>();
+): Map<Year, { [key: Unit]: StatisticFlow[] }[]> => {
+  const stats: Map<Year, { [key: Unit]: StatisticFlow[] }[]> = new Map<Year, { [key: Unit]: StatisticFlow[] }[]>();
   gitEventStatistics
     .sortedEvents()
     .filter((event) => eventDate(event) !== null)
     .forEach((event) => {
       const _eventDate = eventDate(event);
       const year = _eventDate.getFullYear();
-      const monthDimension = Dimension2.month(_eventDate);
-      const weekDimension = Dimension2.week(_eventDate) as Dimension2;
+      const monthFlow = StatisticFlow.month(_eventDate);
+      const weekDFlow = StatisticFlow.week(_eventDate) as StatisticFlow;
       const yearStats = stats.get(year);
+
+      function addFlow(flows: StatisticFlow[], flow: StatisticFlow) {
+        const existingFlow = flows.filter((existingFlow: StatisticFlow) => existingFlow.index === flow.index);
+        if (existingFlow.length === 0) {
+          flows.push(flow);
+        }
+        existingFlow.forEach((flow: StatisticFlow) => {
+          flow.addEvent(_eventDate);
+          flow.increase();
+        });
+      }
+
       if (yearStats === undefined) {
-        stats.set(year, [{ Month: [monthDimension] }, { Week: [weekDimension] }] as { [key: Unit]: Dimension2[] }[]);
+        stats.set(year, [{ Month: [monthFlow] }, { Week: [weekDFlow] }] as { [key: Unit]: StatisticFlow[] }[]);
       } else {
         yearStats.forEach((period) => {
-          Object.entries(period).forEach(([key, dimensions]) => {
+          Object.entries(period).forEach(([key, flows]) => {
             if (key === "Month") {
-              const filter = dimensions.filter((dimension: Dimension2) => dimension.index === monthDimension.index);
-              if (filter.length === 0) {
-                dimensions.push(monthDimension);
-              }
-              filter.forEach((dimension: Dimension2) => {
-                dimension.addEvent(_eventDate);
-                dimension.increase();
-              });
+              addFlow(flows, monthFlow);
             }
             if (key === "Week") {
-              const filter = dimensions.filter((dimension: Dimension2) => dimension.index === weekDimension.index);
-              if (filter.length === 0) {
-                dimensions.push(weekDimension);
-              }
-              filter.forEach((dimension: Dimension2) => {
-                dimension.addEvent(_eventDate);
-                dimension.increase();
-              });
+              addFlow(flows, weekDFlow);
             }
           });
         });
       }
     });
-  return fillEmptyPeriodsAndSortChronologically2(stats, gitEventStatistics.period);
+  return fillEmptyPeriodsAndSortChronologically(stats, gitEventStatistics.period);
 };
 
-const fillEmptyPeriodsAndSortChronologically2 = (
-  stats: Map<Year, { [key: Unit]: Dimension2[] }[]>,
+type PeriodIndexes = {
+  firstPeriodIndex: number;
+  lastPeriodIndex: number;
+};
+
+abstract class PeriodIndexesBuilder {
+  static periodIndexes = new Map<Unit, PeriodIndexesBuilder>([
+    [
+      "Month",
+      new (class extends PeriodIndexesBuilder {
+        protected build(currentYear: Year, period: Period): PeriodIndexes {
+          const periodIndex = this.initialize(period, getMonth);
+          if (currentYear !== period.end.getFullYear()) {
+            periodIndex.lastPeriodIndex = 12;
+          }
+          if (currentYear !== period.start.getFullYear()) {
+            periodIndex.firstPeriodIndex = 0;
+          }
+          return periodIndex;
+        }
+      })(),
+    ],
+    [
+      "Week",
+      new (class extends PeriodIndexesBuilder {
+        protected build(currentYear: Year, period: Period): PeriodIndexes {
+          const periodIndex = this.initialize(period, getWeek);
+          if (currentYear !== period.end.getFullYear()) {
+            periodIndex.lastPeriodIndex = getWeek(new Date(currentYear, 11, 31)) + 1;
+          }
+          if (currentYear !== period.start.getFullYear()) {
+            periodIndex.firstPeriodIndex = 1;
+          }
+          return periodIndex;
+        }
+      })(),
+    ],
+  ]);
+
+  static for(currentYear: Year, period: Period, unit: Unit): PeriodIndexes {
+    return this.periodIndexes.get(unit).build(currentYear, period);
+  }
+
+  protected abstract build(year: Year, period: Period): PeriodIndexes;
+  protected initialize(period: Period, getDate: (date: Date) => number): PeriodIndexes {
+    return { firstPeriodIndex: getDate(period.start), lastPeriodIndex: getDate(period.end) + 1 };
+  }
+}
+
+const fillEmptyPeriodsAndSortChronologically = (
+  stats: Map<Year, { [key: Unit]: StatisticFlow[] }[]>,
   period: Period
-): Map<Year, { [key: Unit]: Dimension2[] }[]> => {
+): Map<Year, { [key: Unit]: StatisticFlow[] }[]> => {
   const completeStatistics = stats;
 
-  function fillEmptyPeriodsInInterval(_stat: { [p: Unit]: Dimension2[] }, year: Year) {
-    Object.entries(_stat).forEach(([unit, dimensions]) => {
-      let firstPeriodIndex = 0;
-      let lastPeriodIndex = 0;
-      if (unit === "Month") {
-        firstPeriodIndex = getMonth(period.start);
-        lastPeriodIndex = getMonth(period.end) + 1;
-        if (year !== period.end.getFullYear()) {
-          lastPeriodIndex = 12;
+  function fillEmptyPeriodsInInterval(_stat: { [p: Unit]: StatisticFlow[] }, year: Year) {
+    Object.entries(_stat).forEach(([unit, statisticFlows]) => {
+      const periodIndexes = PeriodIndexesBuilder.for(year, period, unit);
+      while (periodIndexes.firstPeriodIndex < periodIndexes.lastPeriodIndex) {
+        const currentPeriodIndex = periodIndexes.firstPeriodIndex;
+        if (statisticFlows.find((currentStat) => currentStat.index === currentPeriodIndex) === undefined) {
+          statisticFlows.push(StatisticFlow.empty(currentPeriodIndex));
         }
-        if (year !== period.start.getFullYear()) {
-          firstPeriodIndex = 0;
-        }
+        periodIndexes.firstPeriodIndex++;
       }
-      if (unit === "Week") {
-        firstPeriodIndex = getWeek(period.start);
-        lastPeriodIndex = getWeek(period.end) + 1;
-        if (year !== period.end.getFullYear()) {
-          lastPeriodIndex = getWeek(new Date(year, 11, 31));
-        }
-        if (year !== period.start.getFullYear()) {
-          firstPeriodIndex = 1;
-        }
-      }
-      while (firstPeriodIndex < lastPeriodIndex) {
-        const currentPeriodIndex = firstPeriodIndex;
-        if (dimensions.find((currentStat) => currentStat.index === currentPeriodIndex) === undefined) {
-          dimensions.push(Dimension2.empty(currentPeriodIndex));
-        }
-        firstPeriodIndex++;
-      }
-      dimensions.sort((current, next) => (current.index > next.index ? 1 : -1));
+      statisticFlows.sort((current, next) => (current.index > next.index ? 1 : -1));
     });
   }
 
-  completeStatistics.forEach((dimensions, year) => {
-    dimensions.forEach((period) => {
+  completeStatistics.forEach((flows, year) => {
+    flows.forEach((period) => {
       fillEmptyPeriodsInInterval(period, year);
     });
   });
