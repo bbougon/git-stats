@@ -4,6 +4,7 @@ import { MergeEventBuilderForMR, MergeEventsBuilderForMR } from "../__tests__/bu
 import { gitEventsByPeriod, gitStatistics } from "./GitStatistics.js";
 import { MergeRequestsStatsParameters } from "./Gitlab.js";
 import { Repository } from "../Repository.js";
+import Duration from "./Duration.js";
 
 describe("Git Statistics", () => {
   function getEventDate() {
@@ -310,6 +311,55 @@ describe("Git Statistics", () => {
         expect(monthsIn2021.flatMap((month) => month.index)).toStrictEqual([2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
         const monthsIn2022 = eventsByPeriod.get(2022)[0].Month;
         expect(monthsIn2022.flatMap((month) => month.index)).toStrictEqual([0, 1, 2]);
+      });
+
+      it("should have average duration per period", () => {
+        const start = parseISO("2021-03-01T00:00:00");
+        const end = parseISO("2021-03-15T00:00:00");
+        const firstMergeRequest = new MergeEventBuilderForMR(3)
+          .createdAt(parseISO("2021-03-01T09:00:00.000Z"))
+          .mergedAt(parseISO("2021-03-02T09:00:00.000Z"))
+          .build();
+        const secondMergeRequest = new MergeEventBuilderForMR(3)
+          .createdAt(parseISO("2021-03-02T10:00:00.000Z"))
+          .mergedAt(parseISO("2021-03-02T15:00:00.000Z"))
+          .build();
+        const thirdMergeRequest = new MergeEventBuilderForMR(3)
+          .createdAt(parseISO("2021-03-06T11:00:00.000Z"))
+          .mergedAt(parseISO("2021-03-06T13:00:00.000Z"))
+          .build();
+        const fourthMergeRequest = new MergeEventBuilderForMR(3)
+          .createdAt(parseISO("2021-03-11T09:00:00.000Z"))
+          .mergedAt(parseISO("2021-03-13T11:00:00.000Z"))
+          .build();
+        const fifthMergeRequest = new MergeEventBuilderForMR(3)
+          .createdAt(parseISO("2021-03-13T09:00:00.000Z"))
+          .mergedAt(parseISO("2021-03-13T12:00:00.000Z"))
+          .build();
+        const mergeRequests = [
+          firstMergeRequest,
+          secondMergeRequest,
+          thirdMergeRequest,
+          fourthMergeRequest,
+          fifthMergeRequest,
+        ];
+
+        const eventsByPeriod = gitEventsByPeriod(
+          new MergedEventStatistics(mergeRequests, {
+            start,
+            end,
+          }),
+          getEventDate()
+        );
+
+        const months = eventsByPeriod.get(2021)[0].Month;
+        const expectedMonthAverageDuration: Duration = { days: 0, hours: 16, minutes: 48, months: 0, seconds: 0 };
+        expect(months[0].average()).toStrictEqual(expectedMonthAverageDuration);
+        const weeks = eventsByPeriod.get(2021)[1].Week;
+        const expectedFirstWeekAverageDuration: Duration = { days: 0, hours: 10, minutes: 20, months: 0, seconds: 0 };
+        expect(weeks[0].average()).toStrictEqual(expectedFirstWeekAverageDuration);
+        const expectedSecondtWeekAverageDuration: Duration = { days: 1, hours: 2, minutes: 30, months: 0, seconds: 0 };
+        expect(weeks[1].average()).toStrictEqual(expectedSecondtWeekAverageDuration);
       });
     });
   });

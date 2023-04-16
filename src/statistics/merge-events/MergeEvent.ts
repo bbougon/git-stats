@@ -3,6 +3,7 @@ import moment from "moment";
 import { GitEvent, GitEventsStatisticsResult, GitStatistics, Period } from "../GitStatistics.js";
 import { Repository } from "../../Repository.js";
 import { RequestParameters } from "../../../index.js";
+import Duration from "../Duration.js";
 
 type MergeEvent = GitEvent & {
   project: number | string | undefined;
@@ -17,13 +18,7 @@ interface MergeEventRepository extends Repository<MergeEvent> {
 }
 
 type MergeEventsStatisticsResult = GitEventsStatisticsResult & {
-  average: {
-    months: number;
-    days: number;
-    hours: number;
-    minutes: number;
-    seconds: number;
-  };
+  average: Duration;
   total: {
     merged: number;
     closed: number;

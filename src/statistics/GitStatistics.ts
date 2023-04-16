@@ -1,6 +1,8 @@
 import { MergeEventRepository, mergeEventsStatistics } from "./merge-events/MergeEvent.js";
-import { getMonth, getWeek } from "date-fns";
+import { differenceInHours, getMonth, getWeek } from "date-fns";
 import { RequestParameters } from "../../index.js";
+import moment from "moment/moment.js";
+import Duration from "./Duration.js";
 
 type GitEvent = object;
 type GitEventsStatisticsResult = object;
@@ -53,6 +55,21 @@ export class StatisticFlow {
 
   static empty(index: number) {
     return new StatisticFlow(undefined, index);
+  }
+
+  average(): Duration {
+    const hoursSpent = this.events.reduce(
+      (accumulator, currentValue) => accumulator + differenceInHours(currentValue.end, currentValue.start),
+      0
+    );
+    const duration = moment.duration(hoursSpent / this.events.length, "hours");
+    return {
+      months: parseInt(duration.months().toFixed()),
+      days: parseInt(duration.days().toFixed()),
+      hours: parseInt(duration.hours().toFixed()),
+      minutes: parseInt(duration.minutes().toFixed()),
+      seconds: parseInt(duration.seconds().toFixed()),
+    };
   }
 }
 export const gitEventsByPeriod = (
