@@ -20,7 +20,10 @@ export class ConsoleWriter implements Writer {
       type UnitRecord = Record<string, number>;
       type PeriodUnitRecord = Record<string, UnitRecord[]>;
       type PeriodRecord = Record<string, PeriodUnitRecord[]>;
-      const events = gitEventsByPeriod(value as MergedEventStatistics, (mr: MergeEvent) => mr.mergedAt);
+      const events = gitEventsByPeriod(value as MergedEventStatistics, (mr: MergeEvent) => ({
+        end: mr.mergedAt,
+        start: mr.createdAt,
+      }));
       const data: PeriodRecord[] = [];
       events.forEach((period, year) => {
         const periodRecord: PeriodRecord = {};
