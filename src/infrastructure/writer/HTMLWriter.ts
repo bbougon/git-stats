@@ -5,11 +5,11 @@ import { openBrowser } from "./OpenBrowser.js";
 import * as pug from "pug";
 import * as path from "path";
 import { __dirname } from "./FilePathConstant.js";
-import { gitEventsByPeriod, StatisticsAggregate } from "../../statistics/GitStatistics.js";
+import { gitEventsByPeriod3, StatisticsAggregate } from "../../statistics/GitStatistics.js";
 import { MergedEventStatistics, MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
-import { buildLabel } from "./HumanReadableLabels.js";
 import { progressBar } from "../progress-bar/ProgressBar.js";
 import { Title } from "../progress-bar/Title.js";
+import { HUMAN_READABLE_MONTHS } from "./HumanReadableLabels.js";
 
 class HTMLContentBuilder {
   constructor(private readonly stats: StatisticsAggregate) {}
@@ -31,15 +31,29 @@ class HTMLContentBuilder {
         .replace(/>/g, "\\u003E")
         .replace(/\//g, "\\u002F");
     };
-    const stats = gitEventsByPeriod(this.stats.mergedEvents as MergedEventStatistics, (mr: MergeEvent) => mr.mergedAt);
-    const labels: string[] = [];
-    const data: number[] = [];
-    for (const stat of stats) {
-      stat[1].map((stat) => {
-        labels.push(buildLabel(stat[1]));
-        data.push(stat[1].total);
+    const stats = gitEventsByPeriod3(this.stats.mergedEvents as MergedEventStatistics, (mr: MergeEvent) => mr.mergedAt);
+    const monthsLabels: string[] = [];
+    const monthsData: number[] = [];
+    const weeksLabels: string[] = [];
+    const weeksData: number[] = [];
+    stats.forEach((stat) => {
+      stat.forEach((period) => {
+        Object.entries(period).forEach(([unit, dimensions]) => {
+          if (unit === "Month") {
+            dimensions.forEach((dimension) => {
+              monthsLabels.push(HUMAN_READABLE_MONTHS[dimension.index]);
+              monthsData.push(dimension.total);
+            });
+          }
+          if (unit === "Week") {
+            dimensions.forEach((dimension) => {
+              weeksLabels.push(`Week ${dimension.index}`);
+              weeksData.push(dimension.total);
+            });
+          }
+        });
       });
-    }
+    });
 
     const aggregatedStats = this.stats.mergedEvents.result();
     const start = humanizeDate(this.stats.mergedEvents.period.start);
@@ -49,7 +63,10 @@ class HTMLContentBuilder {
     return fn({
       stringify,
       period: { start, end },
-      stats: { mr: { data, labels }, ...aggregatedStats },
+      stats: {
+        mr: { months: { data: monthsData, labels: monthsLabels }, weeks: { data: weeksData, labels: weeksLabels } },
+        ...aggregatedStats,
+      },
     });
   };
 }
