@@ -1,5 +1,5 @@
 import { Writer } from "../../../index.js";
-import { gitEventsByPeriod3, StatisticsAggregate } from "../../statistics/GitStatistics.js";
+import { gitEventsByPeriod, StatisticsAggregate } from "../../statistics/GitStatistics.js";
 import { MergedEventStatistics, MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
 
 export interface GitFlowsConsole {
@@ -20,7 +20,7 @@ export class ConsoleWriter implements Writer {
       type UnitRecord = Record<string, number>;
       type PeriodUnitRecord = Record<string, UnitRecord[]>;
       type PeriodRecord = Record<string, PeriodUnitRecord[]>;
-      const events = gitEventsByPeriod3(value as MergedEventStatistics, (mr: MergeEvent) => mr.mergedAt);
+      const events = gitEventsByPeriod(value as MergedEventStatistics, (mr: MergeEvent) => mr.mergedAt);
       const data: PeriodRecord[] = [];
       events.forEach((period, year) => {
         const periodRecord: PeriodRecord = {};

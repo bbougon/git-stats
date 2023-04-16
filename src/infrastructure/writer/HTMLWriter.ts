@@ -5,7 +5,7 @@ import { openBrowser } from "./OpenBrowser.js";
 import * as pug from "pug";
 import * as path from "path";
 import { __dirname } from "./FilePathConstant.js";
-import { gitEventsByPeriod3, StatisticsAggregate } from "../../statistics/GitStatistics.js";
+import { gitEventsByPeriod, StatisticsAggregate } from "../../statistics/GitStatistics.js";
 import { MergedEventStatistics, MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
 import { progressBar } from "../progress-bar/ProgressBar.js";
 import { Title } from "../progress-bar/Title.js";
@@ -31,7 +31,7 @@ class HTMLContentBuilder {
         .replace(/>/g, "\\u003E")
         .replace(/\//g, "\\u002F");
     };
-    const stats = gitEventsByPeriod3(this.stats.mergedEvents as MergedEventStatistics, (mr: MergeEvent) => mr.mergedAt);
+    const stats = gitEventsByPeriod(this.stats.mergedEvents as MergedEventStatistics, (mr: MergeEvent) => mr.mergedAt);
     const monthsLabels: string[] = [];
     const monthsData: number[] = [];
     const weeksLabels: string[] = [];
