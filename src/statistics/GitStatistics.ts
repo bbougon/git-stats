@@ -25,31 +25,6 @@ const gitStatistics = (
   );
 };
 type Unit = string | "Week" | "Month";
-
-class Dimension {
-  constructor(public readonly unit: Unit, public readonly index: number, public total: number) {}
-
-  static create(unit: Unit, index: number) {
-    return new Dimension(unit, index, 1);
-  }
-
-  increase() {
-    this.total = this.total + 1;
-  }
-
-  static empty(unit: Unit, index: number) {
-    return new Dimension(unit, index, 0);
-  }
-
-  static month(eventDate: Date): Dimension {
-    return new Dimension("Month", getMonth(eventDate), 0);
-  }
-
-  static week(eventDate: Date) {
-    return new Dimension("Week", getWeek(eventDate), 0);
-  }
-}
-
 export type Year = number;
 export class StatisticFlow {
   events: Date[] = [];
@@ -200,5 +175,5 @@ const fillEmptyPeriodsAndSortChronologically = (
   });
   return completeStatistics;
 };
-export { Dimension, Unit, StatisticsAggregate, GitStatistics, Period, GitEventsStatisticsResult, GitEvent };
+export { Unit, StatisticsAggregate, GitStatistics, Period, GitEventsStatisticsResult, GitEvent };
 export { gitStatistics };
