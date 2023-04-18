@@ -62,35 +62,41 @@ export class StatisticFlow {
       (accumulator, currentValue) => accumulator + differenceInHours(currentValue.end, currentValue.start),
       0
     );
-    const duration = moment.duration(hoursSpent / this.events.length, "hours");
-    return {
-      months: parseInt(duration.months().toFixed()),
-      days: parseInt(duration.days().toFixed()),
-      hours: parseInt(duration.hours().toFixed()),
-      minutes: parseInt(duration.minutes().toFixed()),
-      seconds: parseInt(duration.seconds().toFixed()),
-    };
+    if (this.events.length > 0) {
+      const duration = moment.duration(hoursSpent / this.events.length, "hours");
+      return {
+        months: parseInt(duration.months().toFixed()),
+        days: parseInt(duration.days().toFixed()),
+        hours: parseInt(duration.hours().toFixed()),
+        minutes: parseInt(duration.minutes().toFixed()),
+        seconds: parseInt(duration.seconds().toFixed()),
+      };
+    }
+    return { days: 0, hours: 0, minutes: 0, months: 0, seconds: 0 };
   }
 
   median(): Duration {
     const hoursSeries = this.events.map((period) => ({ hours: differenceInHours(period.end, period.start) }));
-    hoursSeries.sort((current, next) => (current.hours > next.hours ? 1 : -1));
-    const seriesIndex = (hoursSeries.length + 1) / 2 - 1;
-    const isHourSeriesEvent = (hoursSeries.length + 1) % 2 === 0;
-    let duration = {} as moment.Duration;
-    if (isHourSeriesEvent) {
-      duration = moment.duration(hoursSeries[seriesIndex].hours, "hours");
-    } else {
-      const hours = (hoursSeries[Math.floor(seriesIndex)].hours + hoursSeries[Math.ceil(seriesIndex)].hours) / 2;
-      duration = moment.duration(hours, "hours");
+    if (hoursSeries.length > 0) {
+      hoursSeries.sort((current, next) => (current.hours > next.hours ? 1 : -1));
+      const seriesIndex = (hoursSeries.length + 1) / 2 - 1;
+      const isHourSeriesEvent = (hoursSeries.length + 1) % 2 === 0;
+      let duration = {} as moment.Duration;
+      if (isHourSeriesEvent) {
+        duration = moment.duration(hoursSeries[seriesIndex].hours, "hours");
+      } else {
+        const hours = (hoursSeries[Math.floor(seriesIndex)].hours + hoursSeries[Math.ceil(seriesIndex)].hours) / 2;
+        duration = moment.duration(hours, "hours");
+      }
+      return {
+        months: parseInt(duration.months().toFixed()),
+        days: parseInt(duration.days().toFixed()),
+        hours: parseInt(duration.hours().toFixed()),
+        minutes: parseInt(duration.minutes().toFixed()),
+        seconds: parseInt(duration.seconds().toFixed()),
+      };
     }
-    return {
-      months: parseInt(duration.months().toFixed()),
-      days: parseInt(duration.days().toFixed()),
-      hours: parseInt(duration.hours().toFixed()),
-      minutes: parseInt(duration.minutes().toFixed()),
-      seconds: parseInt(duration.seconds().toFixed()),
-    };
+    return { days: 0, hours: 0, minutes: 0, months: 0, seconds: 0 };
   }
 }
 export const gitEventsByPeriod = (

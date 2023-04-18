@@ -362,6 +362,36 @@ describe("Git Statistics", () => {
         expect(weeks[1].average()).toStrictEqual(expectedSecondtWeekAverageDuration);
       });
 
+      it("should have average duration per period with empty period", () => {
+        const start = parseISO("2021-03-01T00:00:00");
+        const end = parseISO("2021-03-15T00:00:00");
+        const firstMergeRequest = new MergeEventBuilderForMR(3)
+          .createdAt(parseISO("2021-03-01T09:00:00.000Z"))
+          .mergedAt(parseISO("2021-03-02T09:00:00.000Z"))
+          .build();
+        const secondMergeRequest = new MergeEventBuilderForMR(3)
+          .createdAt(parseISO("2021-03-02T10:00:00.000Z"))
+          .mergedAt(parseISO("2021-03-02T15:00:00.000Z"))
+          .build();
+        const mergeRequests = [firstMergeRequest, secondMergeRequest];
+
+        const eventsByPeriod = gitEventsByPeriod(
+          new MergedEventStatistics(mergeRequests, {
+            start,
+            end,
+          }),
+          getEventDate()
+        );
+
+        const months = eventsByPeriod.get(2021)[0].Month;
+        const expectedMonthAverageDuration: Duration = { days: 0, hours: 14, minutes: 30, months: 0, seconds: 0 };
+        expect(months[0].average()).toStrictEqual(expectedMonthAverageDuration);
+        const weeks = eventsByPeriod.get(2021)[1].Week;
+        const expectedFirstWeekAverageDuration: Duration = { days: 0, hours: 14, minutes: 30, months: 0, seconds: 0 };
+        expect(weeks[0].average()).toStrictEqual(expectedFirstWeekAverageDuration);
+        expect(weeks[1].average()).toStrictEqual({ days: 0, hours: 0, minutes: 0, months: 0, seconds: 0 });
+      });
+
       it("should have median duration per period", () => {
         const start = parseISO("2021-03-01T00:00:00");
         const end = parseISO("2021-03-15T00:00:00");
@@ -409,6 +439,36 @@ describe("Git Statistics", () => {
         expect(weeks[0].median()).toStrictEqual(expectedFirstWeekMedianDuration);
         const expectedSecondtWeekMedianDuration: Duration = { days: 1, hours: 2, minutes: 30, months: 0, seconds: 0 };
         expect(weeks[1].median()).toStrictEqual(expectedSecondtWeekMedianDuration);
+      });
+
+      it("should have median duration per period with empty period", () => {
+        const start = parseISO("2021-03-01T00:00:00");
+        const end = parseISO("2021-03-15T00:00:00");
+        const firstMergeRequest = new MergeEventBuilderForMR(3)
+          .createdAt(parseISO("2021-03-01T09:00:00.000Z"))
+          .mergedAt(parseISO("2021-03-02T09:00:00.000Z"))
+          .build();
+        const secondMergeRequest = new MergeEventBuilderForMR(3)
+          .createdAt(parseISO("2021-03-02T10:00:00.000Z"))
+          .mergedAt(parseISO("2021-03-02T15:00:00.000Z"))
+          .build();
+        const mergeRequests = [firstMergeRequest, secondMergeRequest];
+
+        const eventsByPeriod = gitEventsByPeriod(
+          new MergedEventStatistics(mergeRequests, {
+            start,
+            end,
+          }),
+          getEventDate()
+        );
+
+        const months = eventsByPeriod.get(2021)[0].Month;
+        const expectedMonthAverageDuration: Duration = { days: 0, hours: 14, minutes: 30, months: 0, seconds: 0 };
+        expect(months[0].average()).toStrictEqual(expectedMonthAverageDuration);
+        const weeks = eventsByPeriod.get(2021)[1].Week;
+        const expectedFirstWeekAverageDuration: Duration = { days: 0, hours: 14, minutes: 30, months: 0, seconds: 0 };
+        expect(weeks[0].median()).toStrictEqual(expectedFirstWeekAverageDuration);
+        expect(weeks[1].median()).toStrictEqual({ days: 0, hours: 0, minutes: 0, months: 0, seconds: 0 });
       });
     });
   });
