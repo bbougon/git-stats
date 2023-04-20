@@ -28,16 +28,30 @@ const gitStatistics = (
 };
 type Unit = string | "Week" | "Month";
 export type Year = number;
-export class StatisticFlow {
-  public readonly events: Period[] = [];
 
-  constructor(period: Period | undefined, public readonly index: number) {
+interface StatisticFlow {
+  events: Period[];
+  readonly index: number;
+
+  total(): number;
+
+  addEvent(period: Period): void;
+
+  average(): Duration;
+
+  median(): Duration;
+}
+
+class AbstractStatisticFlow implements StatisticFlow {
+  readonly events: Period[] = [];
+
+  constructor(period: Period | undefined, readonly index: number) {
     if (period !== undefined) {
       this.events.push(period);
     }
   }
 
-  total() {
+  total(): number {
     return this.events.length;
   }
 
@@ -46,15 +60,15 @@ export class StatisticFlow {
   }
 
   static month(period: Period): StatisticFlow {
-    return new StatisticFlow(period, getMonth(period.end));
+    return new MonthStatisticFlow(period, getMonth(period.end));
   }
 
   static week(period: Period): StatisticFlow {
-    return new StatisticFlow(period, getWeek(period.end));
+    return new WeekStatisticFlow(period, getWeek(period.end));
   }
 
   static empty(index: number) {
-    return new StatisticFlow(undefined, index);
+    return new AbstractStatisticFlow(undefined, index);
   }
 
   average(): Duration {
@@ -99,33 +113,49 @@ export class StatisticFlow {
     return { days: 0, hours: 0, minutes: 0, months: 0, seconds: 0 };
   }
 }
+
+class MonthStatisticFlow extends AbstractStatisticFlow {
+  constructor(period: Period, index: number) {
+    super(period, index);
+  }
+}
+
+class WeekStatisticFlow extends AbstractStatisticFlow {
+  constructor(period: Period, index: number) {
+    super(period, index);
+  }
+}
+
 export const gitEventsByPeriod = (
   gitEventStatistics: GitStatistics,
   eventDate: (event: GitEvent) => Period
-): Map<Year, { [p: Unit]: StatisticFlow[] }[]> => {
-  const stats: Map<Year, { [key: Unit]: StatisticFlow[] }[]> = new Map<Year, { [key: Unit]: StatisticFlow[] }[]>();
+): Map<Year, { [p: Unit]: AbstractStatisticFlow[] }[]> => {
+  const stats: Map<Year, { [key: Unit]: AbstractStatisticFlow[] }[]> = new Map<
+    Year,
+    { [key: Unit]: AbstractStatisticFlow[] }[]
+  >();
   gitEventStatistics
     .sortedEvents()
     .filter((event) => eventDate(event).end !== null)
     .forEach((event) => {
       const period = eventDate(event);
       const year = period.end.getFullYear();
-      const monthFlow = StatisticFlow.month(period);
-      const weekFlow = StatisticFlow.week(period) as StatisticFlow;
+      const monthFlow = AbstractStatisticFlow.month(period);
+      const weekFlow = AbstractStatisticFlow.week(period) as AbstractStatisticFlow;
       const yearStats = stats.get(year);
 
-      function addFlow(flows: StatisticFlow[], flow: StatisticFlow) {
-        const existingFlow = flows.filter((existingFlow: StatisticFlow) => existingFlow.index === flow.index);
+      function addFlow(flows: AbstractStatisticFlow[], flow: AbstractStatisticFlow) {
+        const existingFlow = flows.filter((existingFlow: AbstractStatisticFlow) => existingFlow.index === flow.index);
         if (existingFlow.length === 0) {
           flows.push(flow);
         }
-        existingFlow.forEach((flow: StatisticFlow) => {
+        existingFlow.forEach((flow: AbstractStatisticFlow) => {
           flow.addEvent(period);
         });
       }
 
       if (yearStats === undefined) {
-        stats.set(year, [{ Month: [monthFlow] }, { Week: [weekFlow] }] as { [key: Unit]: StatisticFlow[] }[]);
+        stats.set(year, [{ Month: [monthFlow] }, { Week: [weekFlow] }] as { [key: Unit]: AbstractStatisticFlow[] }[]);
       } else {
         yearStats.forEach((period) => {
           Object.entries(period).forEach(([key, flows]) => {
@@ -192,18 +222,18 @@ abstract class PeriodIndexesBuilder {
 }
 
 const fillEmptyPeriodsAndSortChronologically = (
-  stats: Map<Year, { [key: Unit]: StatisticFlow[] }[]>,
+  stats: Map<Year, { [key: Unit]: AbstractStatisticFlow[] }[]>,
   period: Period
-): Map<Year, { [key: Unit]: StatisticFlow[] }[]> => {
+): Map<Year, { [key: Unit]: AbstractStatisticFlow[] }[]> => {
   const completeStatistics = stats;
 
-  function fillEmptyPeriodsInInterval(_stat: { [p: Unit]: StatisticFlow[] }, year: Year) {
+  function fillEmptyPeriodsInInterval(_stat: { [p: Unit]: AbstractStatisticFlow[] }, year: Year) {
     Object.entries(_stat).forEach(([unit, statisticFlows]) => {
       const periodIndexes = PeriodIndexesBuilder.for(year, period, unit);
       while (periodIndexes.firstPeriodIndex < periodIndexes.lastPeriodIndex) {
         const currentPeriodIndex = periodIndexes.firstPeriodIndex;
         if (statisticFlows.find((currentStat) => currentStat.index === currentPeriodIndex) === undefined) {
-          statisticFlows.push(StatisticFlow.empty(currentPeriodIndex));
+          statisticFlows.push(AbstractStatisticFlow.empty(currentPeriodIndex));
         }
         periodIndexes.firstPeriodIndex++;
       }
