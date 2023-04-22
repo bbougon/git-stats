@@ -1,6 +1,7 @@
 import { compareAsc, compareDesc, parseISO } from "date-fns";
 import { MergeEventStatistics, MergeEvent, MergeEventRepository } from "./merge-events/MergeEvent.js";
 import {
+  CumulativeMergeEventBuilder,
   MergeEventBuilderForMR,
   MergeEventsBuilderForMR,
   RandomInPeriodMergeEventsBuilder,
@@ -10,6 +11,8 @@ import {
   mergedEventsStatisticByPeriod,
   gitStatistics,
   cumulativeMergeEventsStatisticByPeriod,
+  TrendCalculator,
+  CumulativeMergeEvent,
 } from "./GitStatistics.js";
 import { MergeRequestsStatsParameters } from "./Gitlab.js";
 import { Repository } from "../Repository.js";
@@ -573,13 +576,10 @@ describe("Git Statistics", () => {
         const weeks = eventsByPeriod.get("Week");
         expect(weeks[0].opened).toBeGreaterThanOrEqual(7);
         expect(weeks[0].closed).toBe(6);
-        expect(weeks[0].trend).toBe(7);
         expect(weeks[1].opened).toBeGreaterThanOrEqual(11);
         expect(weeks[1].closed).toBe(8);
-        expect(weeks[1].trend).toBe(14);
         expect(weeks[2].opened).toBeGreaterThanOrEqual(12);
         expect(weeks[2].closed).toBe(9);
-        expect(weeks[2].trend).toBe(21);
       });
 
       it("should have total cumulative merged events in period greater than 1 month", () => {
@@ -608,17 +608,13 @@ describe("Git Statistics", () => {
         const months = eventsByPeriod.get("Month");
         expect(months[0].opened).toBeGreaterThanOrEqual(16);
         expect(months[0].closed).toBe(10);
-        expect(months[0].trend).toBe(24);
         expect(months[1].opened).toBeGreaterThanOrEqual(28);
         expect(months[1].closed).toBe(20);
-        expect(months[1].trend).toBe(48);
         const weeks = eventsByPeriod.get("Week");
         expect(weeks[0].opened).toBeGreaterThanOrEqual(5);
         expect(weeks[0].closed).toBe(2);
-        expect(weeks[0].trend).toBeCloseTo(5.33, 2);
         expect(weeks[7].opened).toBeGreaterThanOrEqual(28);
         expect(weeks[7].closed).toBe(20);
-        expect(weeks[8].trend).toBe(48);
       });
 
       it("should have total cumulative merged events for overlapping years", async () => {
@@ -644,20 +640,29 @@ describe("Git Statistics", () => {
         const months = eventsByPeriod.get("Month");
         expect(months[0].opened).toBe(12);
         expect(months[0].closed).toBe(8);
-        expect(months[0].trend).toBe(4);
         expect(months[12].opened).toBeGreaterThanOrEqual(32);
         expect(months[12].closed).toBe(21);
-        expect(months[12].trend).toBe(52);
         const weeks = eventsByPeriod.get("Week");
         expect(weeks[1].opened).toBeGreaterThanOrEqual(5);
         expect(weeks[1].closed).toBe(2);
-        expect(weeks[1].trend).toBeCloseTo(1.8181, 2);
         expect(weeks[2].opened).toBeGreaterThanOrEqual(12);
         expect(weeks[2].closed).toBe(8);
-        expect(weeks[2].trend).toBeCloseTo(2.7272, 2);
         expect(weeks[52].opened).toBeGreaterThanOrEqual(25);
         expect(weeks[52].closed).toBe(13);
-        expect(weeks[52].trend).toBeCloseTo(48.1818, 2);
+      });
+
+      describe("Trend calculator", () => {
+        it("should calculate trend", () => {
+          const firstCumulative = new CumulativeMergeEventBuilder().atIndex(0).opened(3).closed(3).build();
+          const secondCumulative = new CumulativeMergeEventBuilder().atIndex(1).opened(5).closed(5).build();
+          const thirdCumulative = new CumulativeMergeEventBuilder().atIndex(2).opened(6.5).closed(6.5).build();
+
+          TrendCalculator.calculate([firstCumulative, secondCumulative, thirdCumulative]);
+
+          expect(firstCumulative.trend).toBe(1.75 + 1.3);
+          expect(secondCumulative.trend).toBe(1.75 * 2 + 1.3);
+          expect(thirdCumulative.trend).toBe(1.75 * 3 + 1.3);
+        });
       });
     });
   });

@@ -1,6 +1,7 @@
 import * as crypto from "crypto";
 import { addDays, addWeeks, differenceInCalendarDays, eachWeekOfInterval, getWeek, parseISO } from "date-fns";
 import { MergeEvent } from "../statistics/merge-events/MergeEvent.js";
+import { CumulativeMergeEvent } from "../statistics/GitStatistics";
 
 export class MergeEventBuilderForMR {
   private projectId: number;
@@ -233,5 +234,29 @@ export class MergeEventBuilderForPR {
       project: this.project,
       id: this.id,
     };
+  };
+}
+
+export class CumulativeMergeEventBuilder {
+  private index: number;
+  private _opened: number;
+  private _closed: number;
+
+  atIndex = (index: number): CumulativeMergeEventBuilder => {
+    this.index = index;
+    return this;
+  };
+
+  opened = (opened: number): CumulativeMergeEventBuilder => {
+    this._opened = opened;
+    return this;
+  };
+  closed = (closed: number): CumulativeMergeEventBuilder => {
+    this._closed = closed;
+    return this;
+  };
+
+  build = (): CumulativeMergeEvent => {
+    return new CumulativeMergeEvent(this.index, { end: new Date(), start: new Date() }, this._opened, this._closed, 0);
   };
 }
