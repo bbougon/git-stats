@@ -5,7 +5,7 @@ import os from "os";
 import fs from "fs";
 import { parseISO } from "date-fns";
 import { CSVWriter } from "./CSVWriter.js";
-import { MergedEventStatistics } from "../../statistics/merge-events/MergeEvent.js";
+import { MergeEventStatistics } from "../../statistics/merge-events/MergeEvent.js";
 
 describe("CSV writer", () => {
   test("should generate a CSV report file with all merge events", async () => {
@@ -30,7 +30,7 @@ describe("CSV writer", () => {
     const toDate = parseISO("2022-02-17T00:00:00");
 
     new CSVWriter(tempDirectory).write({
-      mergedEvents: new MergedEventStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
+      mergedEvents: new MergeEventStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
         end: toDate,
         start: fromDate,
       }),
