@@ -96,6 +96,11 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
                     <canvas id="merged-events-months-avg-med"></canvas>
                   </div>
                 </div>
+                <div class="row">
+                  <div class="col-lg-6">
+                    <canvas id="cumulative-months-stats"></canvas>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -108,6 +113,11 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
                   </div>
                   <div class="col-lg-6">
                     <canvas id="merged-events-weeks-avg-med"></canvas>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-lg-6">
+                    <canvas id="cumulative-weeks-stats"></canvas>
                   </div>
                 </div>
               </div>
@@ -129,25 +139,16 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
       }
       
       
-      function initializeLinearDataSet(averageData, medianData) {
-          return [
+      function initializeLinearDataSet(charts) {
+          return charts.map((chart) => (
               {
-                  label: 'Average time to merge',
-                  data: averageData,
+                  label: chart.label,
+                  data: chart.data,
                   borderWidth: 3,
                   borderJoinStyle: "round",
                   tension: 0.2,
                   yAxisID: 'y',
-              },
-              {
-                  label: 'Median time to merge',
-                  data: medianData,
-                  borderWidth: 3,
-                  borderJoinStyle: "round",
-                  tension: 0.2,
-                  yAxisID: 'y',
-              }
-          ];
+              }));
       }
       
       const options = {
@@ -187,14 +188,30 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
       const monthsMergedEventsHistogramContext = document.getElementById('merged-events-months-histogram');
       const monthsMergedEventsHistogramDatasets = initializeHistogramDataSet([3]);
       const monthsMergedEventsAvgAndMedContext = document.getElementById('merged-events-months-avg-med');
-      const monthsMergedEventsAvgAndMedDatasets = initializeLinearDataSet([51.333333333333336], [71]);
+      const monthsMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [51.333333333333336], label: "Average time to merge"}, {data: [71], label: "Median time to merge"}]);
       const monthsMergedEventsLabels = ["Feb"]
       
       const weeksMergedEventsHistogramContext = document.getElementById('merged-events-weeks-histogram');
       const weeksMergedEventsHistogramDatasets = initializeHistogramDataSet([1,2]);
       const weeksMergedEventsAvgAndMedContext = document.getElementById('merged-events-weeks-avg-med');
-      const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([4,75], [4,75]);
+      const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [4,75], label: "Average time to merge"}, {data: [4,75], label: "Median time to merge"}]);
       const weeksMergedEventsLabels = ["Week 7","Week 8"]
+      
+      const monthsCumulativeContext = document.getElementById('cumulative-months-stats')
+      const monthsCumulativeDatasets = initializeLinearDataSet([
+          {data: [3], label: "Cumulative opened merged events"},
+          {data: [3], label: "Cumulative closed merged events"},
+          {data: [NaN], label: "Cumulative trend merged events"},
+      ])
+      const monthsCumulativeLabels = ["Feb"]
+      
+      const weeksCumulativeContext = document.getElementById('cumulative-weeks-stats')
+      const weeksCumulativeDatasets = initializeLinearDataSet([
+          {data: [2,3], label: "Cumulative opened merged events"},
+          {data: [1,3], label: "Cumulative closed merged events"},
+          {data: [2,3], label: "Cumulative trend merged events"},
+      ])
+      const weeksCumulativeLabels = ["Week 7","Week 8"]
       
       const aggregatedMergeRequestContext = document.getElementById("aggregated-statistics")
       const aggregatedMergeRequestChartLabels = ['Merged', 'Opened', 'Closed', 'All']
@@ -224,6 +241,8 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
       renderChart('line', monthsMergedEventsAvgAndMedContext, monthsMergedEventsLabels, monthsMergedEventsAvgAndMedDatasets, options);
       renderChart('bar', weeksMergedEventsHistogramContext, weeksMergedEventsLabels, weeksMergedEventsHistogramDatasets, {});
       renderChart('line', weeksMergedEventsAvgAndMedContext, weeksMergedEventsLabels, weeksMergedEventsAvgAndMedDatasets, options);
+      renderChart('line', monthsCumulativeContext, monthsCumulativeLabels, monthsCumulativeDatasets, {});
+      renderChart('line', weeksCumulativeContext, weeksCumulativeLabels, weeksCumulativeDatasets, {});
       renderChart('doughnut', aggregatedMergeRequestContext, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets, {});
     </script>
   </body>
@@ -326,6 +345,11 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
                     <canvas id="merged-events-months-avg-med"></canvas>
                   </div>
                 </div>
+                <div class="row">
+                  <div class="col-lg-6">
+                    <canvas id="cumulative-months-stats"></canvas>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -338,6 +362,11 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
                   </div>
                   <div class="col-lg-6">
                     <canvas id="merged-events-weeks-avg-med"></canvas>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-lg-6">
+                    <canvas id="cumulative-weeks-stats"></canvas>
                   </div>
                 </div>
               </div>
@@ -359,25 +388,16 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
       }
       
       
-      function initializeLinearDataSet(averageData, medianData) {
-          return [
+      function initializeLinearDataSet(charts) {
+          return charts.map((chart) => (
               {
-                  label: 'Average time to merge',
-                  data: averageData,
+                  label: chart.label,
+                  data: chart.data,
                   borderWidth: 3,
                   borderJoinStyle: "round",
                   tension: 0.2,
                   yAxisID: 'y',
-              },
-              {
-                  label: 'Median time to merge',
-                  data: medianData,
-                  borderWidth: 3,
-                  borderJoinStyle: "round",
-                  tension: 0.2,
-                  yAxisID: 'y',
-              }
-          ];
+              }));
       }
       
       const options = {
@@ -417,14 +437,30 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
       const monthsMergedEventsHistogramContext = document.getElementById('merged-events-months-histogram');
       const monthsMergedEventsHistogramDatasets = initializeHistogramDataSet([2]);
       const monthsMergedEventsAvgAndMedContext = document.getElementById('merged-events-months-avg-med');
-      const monthsMergedEventsAvgAndMedDatasets = initializeLinearDataSet([75], [75]);
+      const monthsMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [75], label: "Average time to merge"}, {data: [75], label: "Median time to merge"}]);
       const monthsMergedEventsLabels = ["Feb"]
       
       const weeksMergedEventsHistogramContext = document.getElementById('merged-events-weeks-histogram');
       const weeksMergedEventsHistogramDatasets = initializeHistogramDataSet([0,2]);
       const weeksMergedEventsAvgAndMedContext = document.getElementById('merged-events-weeks-avg-med');
-      const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([0,75], [0,75]);
+      const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [0,75], label: "Average time to merge"}, {data: [0,75], label: "Median time to merge"}]);
       const weeksMergedEventsLabels = ["Week 7","Week 8"]
+      
+      const monthsCumulativeContext = document.getElementById('cumulative-months-stats')
+      const monthsCumulativeDatasets = initializeLinearDataSet([
+          {data: [3], label: "Cumulative opened merged events"},
+          {data: [2], label: "Cumulative closed merged events"},
+          {data: [NaN], label: "Cumulative trend merged events"},
+      ])
+      const monthsCumulativeLabels = ["Feb"]
+      
+      const weeksCumulativeContext = document.getElementById('cumulative-weeks-stats')
+      const weeksCumulativeDatasets = initializeLinearDataSet([
+          {data: [2,3], label: "Cumulative opened merged events"},
+          {data: [0,2], label: "Cumulative closed merged events"},
+          {data: [2,3], label: "Cumulative trend merged events"},
+      ])
+      const weeksCumulativeLabels = ["Week 7","Week 8"]
       
       const aggregatedMergeRequestContext = document.getElementById("aggregated-statistics")
       const aggregatedMergeRequestChartLabels = ['Merged', 'Opened', 'Closed', 'All']
@@ -454,6 +490,8 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
       renderChart('line', monthsMergedEventsAvgAndMedContext, monthsMergedEventsLabels, monthsMergedEventsAvgAndMedDatasets, options);
       renderChart('bar', weeksMergedEventsHistogramContext, weeksMergedEventsLabels, weeksMergedEventsHistogramDatasets, {});
       renderChart('line', weeksMergedEventsAvgAndMedContext, weeksMergedEventsLabels, weeksMergedEventsAvgAndMedDatasets, options);
+      renderChart('line', monthsCumulativeContext, monthsCumulativeLabels, monthsCumulativeDatasets, {});
+      renderChart('line', weeksCumulativeContext, weeksCumulativeLabels, weeksCumulativeDatasets, {});
       renderChart('doughnut', aggregatedMergeRequestContext, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets, {});
     </script>
   </body>
@@ -556,6 +594,11 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
                     <canvas id="merged-events-months-avg-med"></canvas>
                   </div>
                 </div>
+                <div class="row">
+                  <div class="col-lg-6">
+                    <canvas id="cumulative-months-stats"></canvas>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -568,6 +611,11 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
                   </div>
                   <div class="col-lg-6">
                     <canvas id="merged-events-weeks-avg-med"></canvas>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-lg-6">
+                    <canvas id="cumulative-weeks-stats"></canvas>
                   </div>
                 </div>
               </div>
@@ -589,25 +637,16 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
       }
       
       
-      function initializeLinearDataSet(averageData, medianData) {
-          return [
+      function initializeLinearDataSet(charts) {
+          return charts.map((chart) => (
               {
-                  label: 'Average time to merge',
-                  data: averageData,
+                  label: chart.label,
+                  data: chart.data,
                   borderWidth: 3,
                   borderJoinStyle: "round",
                   tension: 0.2,
                   yAxisID: 'y',
-              },
-              {
-                  label: 'Median time to merge',
-                  data: medianData,
-                  borderWidth: 3,
-                  borderJoinStyle: "round",
-                  tension: 0.2,
-                  yAxisID: 'y',
-              }
-          ];
+              }));
       }
       
       const options = {
@@ -647,14 +686,30 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
       const monthsMergedEventsHistogramContext = document.getElementById('merged-events-months-histogram');
       const monthsMergedEventsHistogramDatasets = initializeHistogramDataSet([1,2,0]);
       const monthsMergedEventsAvgAndMedContext = document.getElementById('merged-events-months-avg-med');
-      const monthsMergedEventsAvgAndMedDatasets = initializeLinearDataSet([408,75,0], [408,75,0]);
+      const monthsMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [408,75,0], label: "Average time to merge"}, {data: [408,75,0], label: "Median time to merge"}]);
       const monthsMergedEventsLabels = ["Jan","Feb","Mar"]
       
       const weeksMergedEventsHistogramContext = document.getElementById('merged-events-weeks-histogram');
       const weeksMergedEventsHistogramDatasets = initializeHistogramDataSet([0,0,0,0,1,0,0,2,0,0]);
       const weeksMergedEventsAvgAndMedContext = document.getElementById('merged-events-weeks-avg-med');
-      const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([0,0,0,0,408,0,0,75,0,0], [0,0,0,0,408,0,0,75,0,0]);
+      const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [0,0,0,0,408,0,0,75,0,0], label: "Average time to merge"}, {data: [0,0,0,0,408,0,0,75,0,0], label: "Median time to merge"}]);
       const weeksMergedEventsLabels = ["Week 1","Week 2","Week 3","Week 4","Week 5","Week 6","Week 7","Week 8","Week 9","Week 10"]
+      
+      const monthsCumulativeContext = document.getElementById('cumulative-months-stats')
+      const monthsCumulativeDatasets = initializeLinearDataSet([
+          {data: [1,3,3], label: "Cumulative opened merged events"},
+          {data: [1,3,3], label: "Cumulative closed merged events"},
+          {data: [1.3,2.3,3.3], label: "Cumulative trend merged events"},
+      ])
+      const monthsCumulativeLabels = ["Jan","Feb","Mar"]
+      
+      const weeksCumulativeContext = document.getElementById('cumulative-weeks-stats')
+      const weeksCumulativeDatasets = initializeLinearDataSet([
+          {data: [0,0,1,1,1,1,2,3,3,3], label: "Cumulative opened merged events"},
+          {data: [0,0,0,0,1,1,1,3,3,3], label: "Cumulative closed merged events"},
+          {data: [-0.1303030303030303,0.23939393939393938,0.6090909090909091,0.9787878787878788,1.3484848484848484,1.7181818181818183,2.087878787878788,2.4575757575757575,2.827272727272727,3.196969696969697], label: "Cumulative trend merged events"},
+      ])
+      const weeksCumulativeLabels = ["Week 1","Week 2","Week 3","Week 4","Week 5","Week 6","Week 7","Week 8","Week 9","Week 10"]
       
       const aggregatedMergeRequestContext = document.getElementById("aggregated-statistics")
       const aggregatedMergeRequestChartLabels = ['Merged', 'Opened', 'Closed', 'All']
@@ -684,6 +739,8 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
       renderChart('line', monthsMergedEventsAvgAndMedContext, monthsMergedEventsLabels, monthsMergedEventsAvgAndMedDatasets, options);
       renderChart('bar', weeksMergedEventsHistogramContext, weeksMergedEventsLabels, weeksMergedEventsHistogramDatasets, {});
       renderChart('line', weeksMergedEventsAvgAndMedContext, weeksMergedEventsLabels, weeksMergedEventsAvgAndMedDatasets, options);
+      renderChart('line', monthsCumulativeContext, monthsCumulativeLabels, monthsCumulativeDatasets, {});
+      renderChart('line', weeksCumulativeContext, weeksCumulativeLabels, weeksCumulativeDatasets, {});
       renderChart('doughnut', aggregatedMergeRequestContext, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets, {});
     </script>
   </body>
