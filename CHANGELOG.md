@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.2](https://github.com/bbougon/git-stats/compare/v0.2.1...v0.2.2) (2023-04-22)
+
+
+### Features
+
+* display burnup in HTML format ([bf43f0c](https://github.com/bbougon/git-stats/commit/bf43f0c6e162cfb4a2e61fa30f6cf57e135fc47c))
+* generate cumulative statistics ([c4618e6](https://github.com/bbougon/git-stats/commit/c4618e6966c199f37d87506ac80b1323744b596f))
+
+
+### Bug Fixes
+
+* trend calculation ([872c0ad](https://github.com/bbougon/git-stats/commit/872c0adc45e07079a09417aa4ee9b038178444fc))
+
 ## [0.2.1](https://github.com/bbougon/git-stats/compare/v0.2.0...v0.2.1) (2023-04-19)
 
 
