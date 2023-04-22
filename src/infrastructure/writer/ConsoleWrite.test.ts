@@ -1,5 +1,5 @@
 import { ConsoleWriter, GitFlowsConsole } from "./ConsoleWriter";
-import { MergedEventStatistics } from "../../statistics/merge-events/MergeEvent";
+import { MergeEventStatistics } from "../../statistics/merge-events/MergeEvent";
 import { MergeEventBuilderForMR } from "../../__tests__/builder";
 import { parseISO } from "date-fns";
 
@@ -31,7 +31,7 @@ describe("Console writer", () => {
     const consoleWriter = new ConsoleWriter(console);
 
     consoleWriter.write({
-      mergedEvents: new MergedEventStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
+      mergedEvents: new MergeEventStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
         end: toDate,
         start: fromDate,
       }),

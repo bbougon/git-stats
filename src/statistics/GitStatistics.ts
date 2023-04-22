@@ -1,5 +1,14 @@
 import { MergeEventRepository, mergeEventsStatistics } from "./merge-events/MergeEvent.js";
-import { differenceInHours, getMonth, getWeek } from "date-fns";
+import {
+  differenceInHours,
+  eachMonthOfInterval,
+  eachWeekOfInterval,
+  endOfMonth,
+  endOfWeek,
+  getMonth,
+  getWeek,
+  getYear,
+} from "date-fns";
 import { RequestParameters } from "../../index.js";
 import moment from "moment/moment.js";
 import Duration from "./Duration.js";
@@ -42,7 +51,7 @@ interface StatisticFlow {
   median(): Duration;
 }
 
-class AbstractStatisticFlow implements StatisticFlow {
+class MergedEventsStatisticFlow implements StatisticFlow {
   readonly events: Period[] = [];
 
   constructor(period: Period | undefined, readonly index: number) {
@@ -68,7 +77,7 @@ class AbstractStatisticFlow implements StatisticFlow {
   }
 
   static empty(index: number) {
-    return new AbstractStatisticFlow(undefined, index);
+    return new MergedEventsStatisticFlow(undefined, index);
   }
 
   average(): Duration {
@@ -114,25 +123,25 @@ class AbstractStatisticFlow implements StatisticFlow {
   }
 }
 
-class MonthStatisticFlow extends AbstractStatisticFlow {
+class MonthStatisticFlow extends MergedEventsStatisticFlow {
   constructor(period: Period, index: number) {
     super(period, index);
   }
 }
 
-class WeekStatisticFlow extends AbstractStatisticFlow {
+class WeekStatisticFlow extends MergedEventsStatisticFlow {
   constructor(period: Period, index: number) {
     super(period, index);
   }
 }
 
-export const gitEventsByPeriod = (
+export const mergedEventsStatisticByPeriod = (
   gitEventStatistics: GitStatistics,
   eventDate: (event: GitEvent) => Period
-): Map<Year, { [p: Unit]: AbstractStatisticFlow[] }[]> => {
-  const stats: Map<Year, { [key: Unit]: AbstractStatisticFlow[] }[]> = new Map<
+): Map<Year, { [p: Unit]: StatisticFlow[] }[]> => {
+  const stats: Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]> = new Map<
     Year,
-    { [key: Unit]: AbstractStatisticFlow[] }[]
+    { [key: Unit]: MergedEventsStatisticFlow[] }[]
   >();
   gitEventStatistics
     .sortedEvents()
@@ -140,22 +149,26 @@ export const gitEventsByPeriod = (
     .forEach((event) => {
       const period = eventDate(event);
       const year = period.end.getFullYear();
-      const monthFlow = AbstractStatisticFlow.month(period);
-      const weekFlow = AbstractStatisticFlow.week(period) as AbstractStatisticFlow;
+      const monthFlow = MergedEventsStatisticFlow.month(period);
+      const weekFlow = MergedEventsStatisticFlow.week(period) as MergedEventsStatisticFlow;
       const yearStats = stats.get(year);
 
-      function addFlow(flows: AbstractStatisticFlow[], flow: AbstractStatisticFlow) {
-        const existingFlow = flows.filter((existingFlow: AbstractStatisticFlow) => existingFlow.index === flow.index);
+      function addFlow(flows: MergedEventsStatisticFlow[], flow: MergedEventsStatisticFlow) {
+        const existingFlow = flows.filter(
+          (existingFlow: MergedEventsStatisticFlow) => existingFlow.index === flow.index
+        );
         if (existingFlow.length === 0) {
           flows.push(flow);
         }
-        existingFlow.forEach((flow: AbstractStatisticFlow) => {
+        existingFlow.forEach((flow: MergedEventsStatisticFlow) => {
           flow.addEvent(period);
         });
       }
 
       if (yearStats === undefined) {
-        stats.set(year, [{ Month: [monthFlow] }, { Week: [weekFlow] }] as { [key: Unit]: AbstractStatisticFlow[] }[]);
+        stats.set(year, [{ Month: [monthFlow] }, { Week: [weekFlow] }] as {
+          [key: Unit]: MergedEventsStatisticFlow[];
+        }[]);
       } else {
         yearStats.forEach((period) => {
           Object.entries(period).forEach(([key, flows]) => {
@@ -170,6 +183,98 @@ export const gitEventsByPeriod = (
       }
     });
   return fillEmptyPeriodsAndSortChronologically(stats, gitEventStatistics.period);
+};
+
+interface CumulativeStatistics {
+  readonly period: Period;
+  readonly opened: number;
+  readonly closed: number;
+  readonly trend: number;
+}
+
+class CumulativeMergeEvent implements CumulativeStatistics {
+  constructor(
+    public readonly period: Period,
+    public readonly opened: number,
+    public readonly closed: number,
+    public readonly trend: number
+  ) {}
+
+  static month(period: Period, opened: number, closed: number, trend: number): CumulativeStatistics {
+    return new CumulativeMergeEvent(period, opened, closed, trend);
+  }
+
+  static week(period: Period, opened: number, closed: number, trend: number): CumulativeStatistics {
+    return new CumulativeMergeEvent(period, opened, closed, trend);
+  }
+}
+
+export const cumulativeMergeEventsStatisticByPeriod = (
+  gitEventStatistics: GitStatistics,
+  eventDate: (event: GitEvent) => Period
+): Map<Unit, CumulativeStatistics[]> => {
+  const stats = new Map<Unit, CumulativeStatistics[]>();
+
+  function cumulativeStatistics(
+    periodsInInterval: Date[],
+    periodKey: Unit,
+    comparingDate: (date: Date, compareTo: Date) => boolean,
+    endOfPeriod: (date: Date) => Date
+  ) {
+    const initialTrend = gitEventStatistics.sortedEvents().length / periodsInInterval.length;
+    periodsInInterval.forEach((date, index) => {
+      const opened = gitEventStatistics.sortedEvents().filter((event) => {
+        return comparingDate(date, eventDate(event).start);
+      }).length;
+      const closed = gitEventStatistics.sortedEvents().filter((event) => {
+        return comparingDate(date, eventDate(event).end);
+      }).length;
+      const trend = initialTrend * (index + 1);
+      const period = stats.get(periodKey);
+      if (period === undefined) {
+        const cumulativeStatistics = new CumulativeMergeEvent(
+          {
+            end: endOfPeriod(date),
+            start: date,
+          },
+          opened,
+          closed,
+          trend
+        );
+        stats.set(periodKey, [cumulativeStatistics]);
+      } else {
+        const cumulativeResults = period[index - 1];
+        const cumulativeStatistics = new CumulativeMergeEvent(
+          {
+            end: endOfPeriod(date),
+            start: date,
+          },
+          cumulativeResults.opened + opened,
+          cumulativeResults.closed + closed,
+          trend
+        );
+        period.push(cumulativeStatistics);
+      }
+    });
+  }
+
+  cumulativeStatistics(
+    eachWeekOfInterval({ end: gitEventStatistics.period.end, start: gitEventStatistics.period.start }),
+    "Week",
+    (date, compareTo) => getWeek(date) === getWeek(compareTo) && getYear(date) === getYear(compareTo),
+    (week) => endOfWeek(week)
+  );
+
+  cumulativeStatistics(
+    eachMonthOfInterval({
+      end: gitEventStatistics.period.end,
+      start: gitEventStatistics.period.start,
+    }),
+    "Month",
+    (date, compareTo) => getMonth(date) === getMonth(compareTo) && getYear(date) === getYear(compareTo),
+    (month) => endOfMonth(month)
+  );
+  return stats;
 };
 
 type PeriodIndexes = {
@@ -222,18 +327,18 @@ abstract class PeriodIndexesBuilder {
 }
 
 const fillEmptyPeriodsAndSortChronologically = (
-  stats: Map<Year, { [key: Unit]: AbstractStatisticFlow[] }[]>,
+  stats: Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>,
   period: Period
-): Map<Year, { [key: Unit]: AbstractStatisticFlow[] }[]> => {
+): Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]> => {
   const completeStatistics = stats;
 
-  function fillEmptyPeriodsInInterval(_stat: { [p: Unit]: AbstractStatisticFlow[] }, year: Year) {
+  function fillEmptyPeriodsInInterval(_stat: { [p: Unit]: MergedEventsStatisticFlow[] }, year: Year) {
     Object.entries(_stat).forEach(([unit, statisticFlows]) => {
       const periodIndexes = PeriodIndexesBuilder.for(year, period, unit);
       while (periodIndexes.firstPeriodIndex < periodIndexes.lastPeriodIndex) {
         const currentPeriodIndex = periodIndexes.firstPeriodIndex;
         if (statisticFlows.find((currentStat) => currentStat.index === currentPeriodIndex) === undefined) {
-          statisticFlows.push(AbstractStatisticFlow.empty(currentPeriodIndex));
+          statisticFlows.push(MergedEventsStatisticFlow.empty(currentPeriodIndex));
         }
         periodIndexes.firstPeriodIndex++;
       }

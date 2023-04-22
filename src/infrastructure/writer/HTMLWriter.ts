@@ -5,8 +5,8 @@ import { openBrowser } from "./OpenBrowser.js";
 import * as pug from "pug";
 import * as path from "path";
 import { __dirname } from "./FilePathConstant.js";
-import { gitEventsByPeriod, StatisticsAggregate } from "../../statistics/GitStatistics.js";
-import { MergedEventStatistics, MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
+import { mergedEventsStatisticByPeriod, StatisticsAggregate } from "../../statistics/GitStatistics.js";
+import { MergeEventStatistics, MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
 import { progressBar } from "../progress-bar/ProgressBar.js";
 import { Title } from "../progress-bar/Title.js";
 import { HUMAN_READABLE_MONTHS } from "./HumanReadableLabels.js";
@@ -33,7 +33,7 @@ class HTMLContentBuilder {
         .replace(/>/g, "\\u003E")
         .replace(/\//g, "\\u002F");
     };
-    const stats = gitEventsByPeriod(this.stats.mergedEvents as MergedEventStatistics, (mr: MergeEvent) => ({
+    const stats = mergedEventsStatisticByPeriod(this.stats.mergedEvents as MergeEventStatistics, (mr: MergeEvent) => ({
       end: mr.mergedAt,
       start: mr.createdAt,
     }));

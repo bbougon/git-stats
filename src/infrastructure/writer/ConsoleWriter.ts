@@ -1,6 +1,6 @@
 import { Writer } from "../../../index.js";
-import { gitEventsByPeriod, StatisticsAggregate } from "../../statistics/GitStatistics.js";
-import { MergedEventStatistics, MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
+import { mergedEventsStatisticByPeriod, StatisticsAggregate } from "../../statistics/GitStatistics.js";
+import { MergeEventStatistics, MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
 
 export interface GitFlowsConsole {
   log(message?: any, ...optionalParams: any[]): void;
@@ -20,7 +20,7 @@ export class ConsoleWriter implements Writer {
       type UnitRecord = Record<string, number>;
       type PeriodUnitRecord = Record<string, UnitRecord[]>;
       type PeriodRecord = Record<string, PeriodUnitRecord[]>;
-      const events = gitEventsByPeriod(value as MergedEventStatistics, (mr: MergeEvent) => ({
+      const events = mergedEventsStatisticByPeriod(value as MergeEventStatistics, (mr: MergeEvent) => ({
         end: mr.mergedAt,
         start: mr.createdAt,
       }));
