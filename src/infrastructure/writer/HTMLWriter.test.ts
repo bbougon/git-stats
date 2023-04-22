@@ -6,7 +6,7 @@ import * as os from "os";
 import * as fs from "fs";
 import { MergeEventBuilderForMR } from "../../__tests__/builder.js";
 import { parseISO } from "date-fns";
-import { MergedEventStatistics } from "../../statistics/merge-events/MergeEvent.js";
+import { MergeEventStatistics } from "../../statistics/merge-events/MergeEvent.js";
 
 jest.mock("./FilePathConstant", () => ({
   __dirname: "src/infrastructure/writer/",
@@ -35,7 +35,7 @@ describe("HTML writer", () => {
     const toDate = parseISO("2022-02-17T00:00:00");
 
     new HTMLWriter(tempDirectory).write({
-      mergedEvents: new MergedEventStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
+      mergedEvents: new MergeEventStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
         end: toDate,
         start: fromDate,
       }),
@@ -62,7 +62,7 @@ describe("HTML writer", () => {
     const toDate = parseISO("2022-02-17T00:00:00");
 
     new HTMLWriter(tempDirectory).write({
-      mergedEvents: new MergedEventStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
+      mergedEvents: new MergeEventStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
         end: toDate,
         start: fromDate,
       }),
@@ -87,7 +87,7 @@ describe("HTML writer", () => {
     const tempDirectory = await mkdtemp(path.join(os.tmpdir(), "report-"));
 
     new HTMLWriter(tempDirectory).write({
-      mergedEvents: new MergedEventStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
+      mergedEvents: new MergeEventStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
         end: parseISO("2022-03-02T00:00:00"),
         start: parseISO("2022-01-01T00:00:00"),
       }),

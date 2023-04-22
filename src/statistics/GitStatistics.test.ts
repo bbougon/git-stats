@@ -1,7 +1,16 @@
 import { compareAsc, compareDesc, parseISO } from "date-fns";
-import { MergedEventStatistics, MergeEvent, MergeEventRepository } from "./merge-events/MergeEvent.js";
-import { MergeEventBuilderForMR, MergeEventsBuilderForMR } from "../__tests__/builder.js";
-import { gitEventsByPeriod, gitStatistics } from "./GitStatistics.js";
+import { MergeEventStatistics, MergeEvent, MergeEventRepository } from "./merge-events/MergeEvent.js";
+import {
+  MergeEventBuilderForMR,
+  MergeEventsBuilderForMR,
+  RandomInPeriodMergeEventsBuilder,
+  WeekPeriodMergeEventsBuilder,
+} from "../__tests__/builder.js";
+import {
+  mergedEventsStatisticByPeriod,
+  gitStatistics,
+  cumulativeMergeEventsStatisticByPeriod,
+} from "./GitStatistics.js";
 import { MergeRequestsStatsParameters } from "./Gitlab.js";
 import { Repository } from "../Repository.js";
 import Duration from "./Duration.js";
@@ -145,14 +154,17 @@ describe("Git Statistics", () => {
       });
     });
 
-    describe("Statistics by period", () => {
+    describe("Merged Events Statistics by period", () => {
       it("should sort the periods", () => {
         const start = parseISO("2022-02-01T00:00:00");
         const end = parseISO("2022-02-28T00:00:00");
-        const mergeRequests = new MergeEventsBuilderForMR(1).total(20).forPeriod(start, end).withEmptyPeriod(7).build();
+        const mergeRequests = new MergeEventsBuilderForMR(1)
+          .randomly(new RandomInPeriodMergeEventsBuilder(20, 7))
+          .forPeriod(start, end)
+          .build();
 
-        const eventsByPeriod = gitEventsByPeriod(
-          new MergedEventStatistics(mergeRequests, {
+        const eventsByPeriod = mergedEventsStatisticByPeriod(
+          new MergeEventStatistics(mergeRequests, {
             start,
             end,
           }),
@@ -170,10 +182,13 @@ describe("Git Statistics", () => {
       it("should sort by period unit with all expected period units", () => {
         const start = parseISO("2023-01-01T00:00:00");
         const end = parseISO("2023-02-10T00:00:00");
-        const mergeRequests = new MergeEventsBuilderForMR(1).total(78).forPeriod(start, end).build();
+        const mergeRequests = new MergeEventsBuilderForMR(1)
+          .randomly(new RandomInPeriodMergeEventsBuilder(78))
+          .forPeriod(start, end)
+          .build();
 
-        const eventsByPeriod = gitEventsByPeriod(
-          new MergedEventStatistics(mergeRequests, {
+        const eventsByPeriod = mergedEventsStatisticByPeriod(
+          new MergeEventStatistics(mergeRequests, {
             start,
             end,
           }),
@@ -190,13 +205,12 @@ describe("Git Statistics", () => {
         const start = parseISO("2022-10-01T00:00:00");
         const end = parseISO("2023-03-28T00:00:00");
         const mergeRequests = new MergeEventsBuilderForMR(1)
-          .total(120)
+          .randomly(new RandomInPeriodMergeEventsBuilder(120, 0, true))
           .forPeriod(start, end)
-          .randomlyNotMerged()
           .build();
 
-        const eventsByPeriod = gitEventsByPeriod(
-          new MergedEventStatistics(mergeRequests, {
+        const eventsByPeriod = mergedEventsStatisticByPeriod(
+          new MergeEventStatistics(mergeRequests, {
             start,
             end,
           }),
@@ -233,8 +247,8 @@ describe("Git Statistics", () => {
             .build(),
         ];
 
-        const eventsByPeriod = gitEventsByPeriod(
-          new MergedEventStatistics(mergeRequests, {
+        const eventsByPeriod = mergedEventsStatisticByPeriod(
+          new MergeEventStatistics(mergeRequests, {
             start,
             end,
           }),
@@ -265,8 +279,8 @@ describe("Git Statistics", () => {
           },
         ];
 
-        const eventsByPeriod = gitEventsByPeriod(
-          new MergedEventStatistics(mergeRequests, {
+        const eventsByPeriod = mergedEventsStatisticByPeriod(
+          new MergeEventStatistics(mergeRequests, {
             start,
             end,
           }),
@@ -299,8 +313,8 @@ describe("Git Statistics", () => {
           },
         ];
 
-        const eventsByPeriod = gitEventsByPeriod(
-          new MergedEventStatistics(mergeRequests, {
+        const eventsByPeriod = mergedEventsStatisticByPeriod(
+          new MergeEventStatistics(mergeRequests, {
             start,
             end,
           }),
@@ -313,162 +327,337 @@ describe("Git Statistics", () => {
         expect(monthsIn2022.flatMap((month) => month.index)).toStrictEqual([0, 1, 2]);
       });
 
-      it("should have average duration per period", () => {
-        const start = parseISO("2021-03-01T00:00:00");
-        const end = parseISO("2021-03-15T00:00:00");
-        const firstMergeRequest = new MergeEventBuilderForMR(3)
-          .createdAt(parseISO("2021-03-01T09:00:00.000Z"))
-          .mergedAt(parseISO("2021-03-02T09:00:00.000Z"))
-          .build();
-        const secondMergeRequest = new MergeEventBuilderForMR(3)
-          .createdAt(parseISO("2021-03-02T10:00:00.000Z"))
-          .mergedAt(parseISO("2021-03-02T15:00:00.000Z"))
-          .build();
-        const thirdMergeRequest = new MergeEventBuilderForMR(3)
-          .createdAt(parseISO("2021-03-06T11:00:00.000Z"))
-          .mergedAt(parseISO("2021-03-06T13:00:00.000Z"))
-          .build();
-        const fourthMergeRequest = new MergeEventBuilderForMR(3)
-          .createdAt(parseISO("2021-03-11T09:00:00.000Z"))
-          .mergedAt(parseISO("2021-03-13T11:00:00.000Z"))
-          .build();
-        const fifthMergeRequest = new MergeEventBuilderForMR(3)
-          .createdAt(parseISO("2021-03-13T09:00:00.000Z"))
-          .mergedAt(parseISO("2021-03-13T12:00:00.000Z"))
-          .build();
-        const mergeRequests = [
-          firstMergeRequest,
-          secondMergeRequest,
-          thirdMergeRequest,
-          fourthMergeRequest,
-          fifthMergeRequest,
-        ];
+      describe("Average and median", () => {
+        it("should have average duration per period", () => {
+          const start = parseISO("2021-03-01T00:00:00");
+          const end = parseISO("2021-03-15T00:00:00");
+          const firstMergeRequest = new MergeEventBuilderForMR(3)
+            .createdAt(parseISO("2021-03-01T09:00:00.000Z"))
+            .mergedAt(parseISO("2021-03-02T09:00:00.000Z"))
+            .build();
+          const secondMergeRequest = new MergeEventBuilderForMR(3)
+            .createdAt(parseISO("2021-03-02T10:00:00.000Z"))
+            .mergedAt(parseISO("2021-03-02T15:00:00.000Z"))
+            .build();
+          const thirdMergeRequest = new MergeEventBuilderForMR(3)
+            .createdAt(parseISO("2021-03-06T11:00:00.000Z"))
+            .mergedAt(parseISO("2021-03-06T13:00:00.000Z"))
+            .build();
+          const fourthMergeRequest = new MergeEventBuilderForMR(3)
+            .createdAt(parseISO("2021-03-11T09:00:00.000Z"))
+            .mergedAt(parseISO("2021-03-13T11:00:00.000Z"))
+            .build();
+          const fifthMergeRequest = new MergeEventBuilderForMR(3)
+            .createdAt(parseISO("2021-03-13T09:00:00.000Z"))
+            .mergedAt(parseISO("2021-03-13T12:00:00.000Z"))
+            .build();
+          const mergeRequests = [
+            firstMergeRequest,
+            secondMergeRequest,
+            thirdMergeRequest,
+            fourthMergeRequest,
+            fifthMergeRequest,
+          ];
 
-        const eventsByPeriod = gitEventsByPeriod(
-          new MergedEventStatistics(mergeRequests, {
+          const eventsByPeriod = mergedEventsStatisticByPeriod(
+            new MergeEventStatistics(mergeRequests, {
+              start,
+              end,
+            }),
+            getEventDate()
+          );
+
+          const months = eventsByPeriod.get(2021)[0].Month;
+          const expectedMonthAverageDuration: Duration = {
+            days: 0,
+            hours: 16,
+            minutes: 48,
+            months: 0,
+            seconds: 0,
+          };
+          expect(months[0].average()).toStrictEqual(expectedMonthAverageDuration);
+          const weeks = eventsByPeriod.get(2021)[1].Week;
+          const expectedFirstWeekAverageDuration: Duration = {
+            days: 0,
+            hours: 10,
+            minutes: 20,
+            months: 0,
+            seconds: 0,
+          };
+          expect(weeks[0].average()).toStrictEqual(expectedFirstWeekAverageDuration);
+          const expectedSecondtWeekAverageDuration: Duration = {
+            days: 1,
+            hours: 2,
+            minutes: 30,
+            months: 0,
+            seconds: 0,
+          };
+          expect(weeks[1].average()).toStrictEqual(expectedSecondtWeekAverageDuration);
+        });
+
+        it("should have average duration per period with empty period", () => {
+          const start = parseISO("2021-03-01T00:00:00");
+          const end = parseISO("2021-03-15T00:00:00");
+          const firstMergeRequest = new MergeEventBuilderForMR(3)
+            .createdAt(parseISO("2021-03-01T09:00:00.000Z"))
+            .mergedAt(parseISO("2021-03-02T09:00:00.000Z"))
+            .build();
+          const secondMergeRequest = new MergeEventBuilderForMR(3)
+            .createdAt(parseISO("2021-03-02T10:00:00.000Z"))
+            .mergedAt(parseISO("2021-03-02T15:00:00.000Z"))
+            .build();
+          const mergeRequests = [firstMergeRequest, secondMergeRequest];
+
+          const eventsByPeriod = mergedEventsStatisticByPeriod(
+            new MergeEventStatistics(mergeRequests, {
+              start,
+              end,
+            }),
+            getEventDate()
+          );
+
+          const months = eventsByPeriod.get(2021)[0].Month;
+          const expectedMonthAverageDuration: Duration = {
+            days: 0,
+            hours: 14,
+            minutes: 30,
+            months: 0,
+            seconds: 0,
+          };
+          expect(months[0].average()).toStrictEqual(expectedMonthAverageDuration);
+          const weeks = eventsByPeriod.get(2021)[1].Week;
+          const expectedFirstWeekAverageDuration: Duration = {
+            days: 0,
+            hours: 14,
+            minutes: 30,
+            months: 0,
+            seconds: 0,
+          };
+          expect(weeks[0].average()).toStrictEqual(expectedFirstWeekAverageDuration);
+          expect(weeks[1].average()).toStrictEqual({ days: 0, hours: 0, minutes: 0, months: 0, seconds: 0 });
+        });
+
+        it("should have median duration per period", () => {
+          const start = parseISO("2021-03-01T00:00:00");
+          const end = parseISO("2021-03-15T00:00:00");
+          const firstMergeRequest = new MergeEventBuilderForMR(3)
+            .createdAt(parseISO("2021-03-01T09:00:00.000Z"))
+            .mergedAt(parseISO("2021-03-02T09:00:00.000Z"))
+            .build();
+          const secondMergeRequest = new MergeEventBuilderForMR(3)
+            .createdAt(parseISO("2021-03-02T10:00:00.000Z"))
+            .mergedAt(parseISO("2021-03-02T15:00:00.000Z"))
+            .build();
+          const thirdMergeRequest = new MergeEventBuilderForMR(3)
+            .createdAt(parseISO("2021-03-06T11:00:00.000Z"))
+            .mergedAt(parseISO("2021-03-06T13:00:00.000Z"))
+            .build();
+          const fourthMergeRequest = new MergeEventBuilderForMR(3)
+            .createdAt(parseISO("2021-03-11T09:00:00.000Z"))
+            .mergedAt(parseISO("2021-03-13T11:00:00.000Z"))
+            .build();
+          const fifthMergeRequest = new MergeEventBuilderForMR(3)
+            .createdAt(parseISO("2021-03-13T09:00:00.000Z"))
+            .mergedAt(parseISO("2021-03-13T12:00:00.000Z"))
+            .build();
+          const mergeRequests = [
+            firstMergeRequest,
+            secondMergeRequest,
+            thirdMergeRequest,
+            fourthMergeRequest,
+            fifthMergeRequest,
+          ];
+
+          const eventsByPeriod = mergedEventsStatisticByPeriod(
+            new MergeEventStatistics(mergeRequests, {
+              start,
+              end,
+            }),
+            getEventDate()
+          );
+
+          const months = eventsByPeriod.get(2021)[0].Month;
+          const expectedMonthMedianDuration: Duration = {
+            days: 0,
+            hours: 5,
+            minutes: 0,
+            months: 0,
+            seconds: 0,
+          };
+          expect(months[0].median()).toStrictEqual(expectedMonthMedianDuration);
+          const weeks = eventsByPeriod.get(2021)[1].Week;
+          const expectedFirstWeekMedianDuration: Duration = {
+            days: 0,
+            hours: 5,
+            minutes: 0,
+            months: 0,
+            seconds: 0,
+          };
+          expect(weeks[0].median()).toStrictEqual(expectedFirstWeekMedianDuration);
+          const expectedSecondtWeekMedianDuration: Duration = {
+            days: 1,
+            hours: 2,
+            minutes: 30,
+            months: 0,
+            seconds: 0,
+          };
+          expect(weeks[1].median()).toStrictEqual(expectedSecondtWeekMedianDuration);
+        });
+
+        it("should have median duration per period with empty period", () => {
+          const start = parseISO("2021-03-01T00:00:00");
+          const end = parseISO("2021-03-15T00:00:00");
+          const firstMergeRequest = new MergeEventBuilderForMR(3)
+            .createdAt(parseISO("2021-03-01T09:00:00.000Z"))
+            .mergedAt(parseISO("2021-03-02T09:00:00.000Z"))
+            .build();
+          const secondMergeRequest = new MergeEventBuilderForMR(3)
+            .createdAt(parseISO("2021-03-02T10:00:00.000Z"))
+            .mergedAt(parseISO("2021-03-02T15:00:00.000Z"))
+            .build();
+          const mergeRequests = [firstMergeRequest, secondMergeRequest];
+
+          const eventsByPeriod = mergedEventsStatisticByPeriod(
+            new MergeEventStatistics(mergeRequests, {
+              start,
+              end,
+            }),
+            getEventDate()
+          );
+
+          const months = eventsByPeriod.get(2021)[0].Month;
+          const expectedMonthAverageDuration: Duration = {
+            days: 0,
+            hours: 14,
+            minutes: 30,
+            months: 0,
+            seconds: 0,
+          };
+          expect(months[0].average()).toStrictEqual(expectedMonthAverageDuration);
+          const weeks = eventsByPeriod.get(2021)[1].Week;
+          const expectedFirstWeekAverageDuration: Duration = {
+            days: 0,
+            hours: 14,
+            minutes: 30,
+            months: 0,
+            seconds: 0,
+          };
+          expect(weeks[0].median()).toStrictEqual(expectedFirstWeekAverageDuration);
+          expect(weeks[1].median()).toStrictEqual({ days: 0, hours: 0, minutes: 0, months: 0, seconds: 0 });
+        });
+      });
+    });
+
+    describe("Cumulative merge events statistics", () => {
+      it("should have total cumulative merged events in period", () => {
+        const start = parseISO("2021-06-07T00:00:00");
+        const end = parseISO("2021-06-26T00:00:00");
+        const mergeRequests = new MergeEventsBuilderForMR(1)
+          .inWeek(new WeekPeriodMergeEventsBuilder(24, 7, 6))
+          .inWeek(new WeekPeriodMergeEventsBuilder(25, 4, 2))
+          .inWeek(new WeekPeriodMergeEventsBuilder(26, 1, 1))
+          .forPeriod(start, end)
+          .build();
+
+        const eventsByPeriod = cumulativeMergeEventsStatisticByPeriod(
+          new MergeEventStatistics(mergeRequests, {
             start,
             end,
           }),
-          getEventDate()
+          (mr: MergeEvent) => ({ end: mr.mergedAt || mr.closedAt, start: mr.createdAt })
         );
 
-        const months = eventsByPeriod.get(2021)[0].Month;
-        const expectedMonthAverageDuration: Duration = { days: 0, hours: 16, minutes: 48, months: 0, seconds: 0 };
-        expect(months[0].average()).toStrictEqual(expectedMonthAverageDuration);
-        const weeks = eventsByPeriod.get(2021)[1].Week;
-        const expectedFirstWeekAverageDuration: Duration = { days: 0, hours: 10, minutes: 20, months: 0, seconds: 0 };
-        expect(weeks[0].average()).toStrictEqual(expectedFirstWeekAverageDuration);
-        const expectedSecondtWeekAverageDuration: Duration = { days: 1, hours: 2, minutes: 30, months: 0, seconds: 0 };
-        expect(weeks[1].average()).toStrictEqual(expectedSecondtWeekAverageDuration);
+        const months = eventsByPeriod.get("Month");
+        expect(months[0].opened).toBeGreaterThanOrEqual(12);
+        expect(months[0].closed).toBe(9);
+        const weeks = eventsByPeriod.get("Week");
+        expect(weeks[0].opened).toBeGreaterThanOrEqual(7);
+        expect(weeks[0].closed).toBe(6);
+        expect(weeks[0].trend).toBe(7);
+        expect(weeks[1].opened).toBeGreaterThanOrEqual(11);
+        expect(weeks[1].closed).toBe(8);
+        expect(weeks[1].trend).toBe(14);
+        expect(weeks[2].opened).toBeGreaterThanOrEqual(12);
+        expect(weeks[2].closed).toBe(9);
+        expect(weeks[2].trend).toBe(21);
       });
 
-      it("should have average duration per period with empty period", () => {
-        const start = parseISO("2021-03-01T00:00:00");
-        const end = parseISO("2021-03-15T00:00:00");
-        const firstMergeRequest = new MergeEventBuilderForMR(3)
-          .createdAt(parseISO("2021-03-01T09:00:00.000Z"))
-          .mergedAt(parseISO("2021-03-02T09:00:00.000Z"))
+      it("should have total cumulative merged events in period greater than 1 month", () => {
+        const start = parseISO("2021-06-01T00:00:00");
+        const end = parseISO("2021-07-26T00:00:00");
+        const mergeRequests = new MergeEventsBuilderForMR(1)
+          .inWeek(new WeekPeriodMergeEventsBuilder(23, 5, 2))
+          .inWeek(new WeekPeriodMergeEventsBuilder(24, 7, 6))
+          .inWeek(new WeekPeriodMergeEventsBuilder(25, 4, 2))
+          .inWeek(new WeekPeriodMergeEventsBuilder(26, 0, 0))
+          .inWeek(new WeekPeriodMergeEventsBuilder(27, 0, 0))
+          .inWeek(new WeekPeriodMergeEventsBuilder(28, 5, 3))
+          .inWeek(new WeekPeriodMergeEventsBuilder(29, 4, 6))
+          .inWeek(new WeekPeriodMergeEventsBuilder(30, 3, 1))
+          .forPeriod(start, end)
           .build();
-        const secondMergeRequest = new MergeEventBuilderForMR(3)
-          .createdAt(parseISO("2021-03-02T10:00:00.000Z"))
-          .mergedAt(parseISO("2021-03-02T15:00:00.000Z"))
-          .build();
-        const mergeRequests = [firstMergeRequest, secondMergeRequest];
 
-        const eventsByPeriod = gitEventsByPeriod(
-          new MergedEventStatistics(mergeRequests, {
+        const eventsByPeriod = cumulativeMergeEventsStatisticByPeriod(
+          new MergeEventStatistics(mergeRequests, {
             start,
             end,
           }),
-          getEventDate()
+          (mr: MergeEvent) => ({ end: mr.mergedAt || mr.closedAt, start: mr.createdAt })
         );
 
-        const months = eventsByPeriod.get(2021)[0].Month;
-        const expectedMonthAverageDuration: Duration = { days: 0, hours: 14, minutes: 30, months: 0, seconds: 0 };
-        expect(months[0].average()).toStrictEqual(expectedMonthAverageDuration);
-        const weeks = eventsByPeriod.get(2021)[1].Week;
-        const expectedFirstWeekAverageDuration: Duration = { days: 0, hours: 14, minutes: 30, months: 0, seconds: 0 };
-        expect(weeks[0].average()).toStrictEqual(expectedFirstWeekAverageDuration);
-        expect(weeks[1].average()).toStrictEqual({ days: 0, hours: 0, minutes: 0, months: 0, seconds: 0 });
+        const months = eventsByPeriod.get("Month");
+        expect(months[0].opened).toBeGreaterThanOrEqual(16);
+        expect(months[0].closed).toBe(10);
+        expect(months[0].trend).toBe(24);
+        expect(months[1].opened).toBeGreaterThanOrEqual(28);
+        expect(months[1].closed).toBe(20);
+        expect(months[1].trend).toBe(48);
+        const weeks = eventsByPeriod.get("Week");
+        expect(weeks[0].opened).toBeGreaterThanOrEqual(5);
+        expect(weeks[0].closed).toBe(2);
+        expect(weeks[0].trend).toBeCloseTo(5.33, 2);
+        expect(weeks[7].opened).toBeGreaterThanOrEqual(28);
+        expect(weeks[7].closed).toBe(20);
+        expect(weeks[8].trend).toBe(48);
       });
 
-      it("should have median duration per period", () => {
-        const start = parseISO("2021-03-01T00:00:00");
-        const end = parseISO("2021-03-15T00:00:00");
-        const firstMergeRequest = new MergeEventBuilderForMR(3)
-          .createdAt(parseISO("2021-03-01T09:00:00.000Z"))
-          .mergedAt(parseISO("2021-03-02T09:00:00.000Z"))
+      it("should have total cumulative merged events for overlapping years", async () => {
+        const start = parseISO("2021-01-01T00:00:00");
+        const end = parseISO("2022-03-31T00:00:00");
+        const mergeRequests = new MergeEventsBuilderForMR(1)
+          .inWeek(new WeekPeriodMergeEventsBuilder(2, 5, 2))
+          .inWeek(new WeekPeriodMergeEventsBuilder(3, 7, 6))
+          .inWeek(new WeekPeriodMergeEventsBuilder(12, 4, 3))
+          .inWeek(new WeekPeriodMergeEventsBuilder(51, 4, 2))
+          .inWeek(new WeekPeriodMergeEventsBuilder(52, 0, 0))
+          .forPeriod(start, end)
           .build();
-        const secondMergeRequest = new MergeEventBuilderForMR(3)
-          .createdAt(parseISO("2021-03-02T10:00:00.000Z"))
-          .mergedAt(parseISO("2021-03-02T15:00:00.000Z"))
-          .build();
-        const thirdMergeRequest = new MergeEventBuilderForMR(3)
-          .createdAt(parseISO("2021-03-06T11:00:00.000Z"))
-          .mergedAt(parseISO("2021-03-06T13:00:00.000Z"))
-          .build();
-        const fourthMergeRequest = new MergeEventBuilderForMR(3)
-          .createdAt(parseISO("2021-03-11T09:00:00.000Z"))
-          .mergedAt(parseISO("2021-03-13T11:00:00.000Z"))
-          .build();
-        const fifthMergeRequest = new MergeEventBuilderForMR(3)
-          .createdAt(parseISO("2021-03-13T09:00:00.000Z"))
-          .mergedAt(parseISO("2021-03-13T12:00:00.000Z"))
-          .build();
-        const mergeRequests = [
-          firstMergeRequest,
-          secondMergeRequest,
-          thirdMergeRequest,
-          fourthMergeRequest,
-          fifthMergeRequest,
-        ];
 
-        const eventsByPeriod = gitEventsByPeriod(
-          new MergedEventStatistics(mergeRequests, {
+        const eventsByPeriod = cumulativeMergeEventsStatisticByPeriod(
+          new MergeEventStatistics(mergeRequests, {
             start,
             end,
           }),
-          getEventDate()
+          (mr: MergeEvent) => ({ end: mr.mergedAt || mr.closedAt, start: mr.createdAt })
         );
 
-        const months = eventsByPeriod.get(2021)[0].Month;
-        const expectedMonthMedianDuration: Duration = { days: 0, hours: 5, minutes: 0, months: 0, seconds: 0 };
-        expect(months[0].median()).toStrictEqual(expectedMonthMedianDuration);
-        const weeks = eventsByPeriod.get(2021)[1].Week;
-        const expectedFirstWeekMedianDuration: Duration = { days: 0, hours: 5, minutes: 0, months: 0, seconds: 0 };
-        expect(weeks[0].median()).toStrictEqual(expectedFirstWeekMedianDuration);
-        const expectedSecondtWeekMedianDuration: Duration = { days: 1, hours: 2, minutes: 30, months: 0, seconds: 0 };
-        expect(weeks[1].median()).toStrictEqual(expectedSecondtWeekMedianDuration);
-      });
-
-      it("should have median duration per period with empty period", () => {
-        const start = parseISO("2021-03-01T00:00:00");
-        const end = parseISO("2021-03-15T00:00:00");
-        const firstMergeRequest = new MergeEventBuilderForMR(3)
-          .createdAt(parseISO("2021-03-01T09:00:00.000Z"))
-          .mergedAt(parseISO("2021-03-02T09:00:00.000Z"))
-          .build();
-        const secondMergeRequest = new MergeEventBuilderForMR(3)
-          .createdAt(parseISO("2021-03-02T10:00:00.000Z"))
-          .mergedAt(parseISO("2021-03-02T15:00:00.000Z"))
-          .build();
-        const mergeRequests = [firstMergeRequest, secondMergeRequest];
-
-        const eventsByPeriod = gitEventsByPeriod(
-          new MergedEventStatistics(mergeRequests, {
-            start,
-            end,
-          }),
-          getEventDate()
-        );
-
-        const months = eventsByPeriod.get(2021)[0].Month;
-        const expectedMonthAverageDuration: Duration = { days: 0, hours: 14, minutes: 30, months: 0, seconds: 0 };
-        expect(months[0].average()).toStrictEqual(expectedMonthAverageDuration);
-        const weeks = eventsByPeriod.get(2021)[1].Week;
-        const expectedFirstWeekAverageDuration: Duration = { days: 0, hours: 14, minutes: 30, months: 0, seconds: 0 };
-        expect(weeks[0].median()).toStrictEqual(expectedFirstWeekAverageDuration);
-        expect(weeks[1].median()).toStrictEqual({ days: 0, hours: 0, minutes: 0, months: 0, seconds: 0 });
+        const months = eventsByPeriod.get("Month");
+        expect(months[0].opened).toBe(12);
+        expect(months[0].closed).toBe(8);
+        expect(months[0].trend).toBe(4);
+        expect(months[12].opened).toBeGreaterThanOrEqual(32);
+        expect(months[12].closed).toBe(21);
+        expect(months[12].trend).toBe(52);
+        const weeks = eventsByPeriod.get("Week");
+        expect(weeks[1].opened).toBeGreaterThanOrEqual(5);
+        expect(weeks[1].closed).toBe(2);
+        expect(weeks[1].trend).toBeCloseTo(1.8181, 2);
+        expect(weeks[2].opened).toBeGreaterThanOrEqual(12);
+        expect(weeks[2].closed).toBe(8);
+        expect(weeks[2].trend).toBeCloseTo(2.7272, 2);
+        expect(weeks[52].opened).toBeGreaterThanOrEqual(25);
+        expect(weeks[52].closed).toBe(13);
+        expect(weeks[52].trend).toBeCloseTo(48.1818, 2);
       });
     });
   });

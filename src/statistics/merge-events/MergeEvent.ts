@@ -27,7 +27,7 @@ type MergeEventsStatisticsResult = GitEventsStatisticsResult & {
   };
 };
 
-class MergedEventStatistics implements GitStatistics {
+class MergeEventStatistics implements GitStatistics {
   constructor(private mergeEvents: MergeEvent[], public readonly period: Period) {}
 
   sortedEvents = (): MergeEvent[] => {
@@ -66,10 +66,10 @@ class MergedEventStatistics implements GitStatistics {
 const mergeEventsStatistics = (
   repository: MergeEventRepository,
   requestParameter: RequestParameters
-): Promise<MergedEventStatistics> => {
+): Promise<MergeEventStatistics> => {
   return repository.getMergeEventsForPeriod(requestParameter).then((mergeEvents) => {
-    return new MergedEventStatistics(mergeEvents, { end: requestParameter.toDate, start: requestParameter.fromDate });
+    return new MergeEventStatistics(mergeEvents, { end: requestParameter.toDate, start: requestParameter.fromDate });
   });
 };
 
-export { MergeEvent, MergeEventRepository, MergedEventStatistics, mergeEventsStatistics };
+export { MergeEvent, MergeEventRepository, MergeEventStatistics, mergeEventsStatistics };
