@@ -186,6 +186,7 @@ export const mergedEventsStatisticByPeriod = (
 };
 
 interface CumulativeStatistics {
+  readonly index: number;
   readonly period: Period;
   readonly opened: number;
   readonly closed: number;
@@ -194,19 +195,12 @@ interface CumulativeStatistics {
 
 class CumulativeMergeEvent implements CumulativeStatistics {
   constructor(
+    public readonly index: number,
     public readonly period: Period,
     public readonly opened: number,
     public readonly closed: number,
     public readonly trend: number
   ) {}
-
-  static month(period: Period, opened: number, closed: number, trend: number): CumulativeStatistics {
-    return new CumulativeMergeEvent(period, opened, closed, trend);
-  }
-
-  static week(period: Period, opened: number, closed: number, trend: number): CumulativeStatistics {
-    return new CumulativeMergeEvent(period, opened, closed, trend);
-  }
 }
 
 export const cumulativeMergeEventsStatisticByPeriod = (
@@ -219,7 +213,8 @@ export const cumulativeMergeEventsStatisticByPeriod = (
     periodsInInterval: Date[],
     periodKey: Unit,
     comparingDate: (date: Date, compareTo: Date) => boolean,
-    endOfPeriod: (date: Date) => Date
+    endOfPeriod: (date: Date) => Date,
+    indexNumber: (date: Date) => number
   ) {
     const initialTrend = gitEventStatistics.sortedEvents().length / periodsInInterval.length;
     periodsInInterval.forEach((date, index) => {
@@ -233,6 +228,7 @@ export const cumulativeMergeEventsStatisticByPeriod = (
       const period = stats.get(periodKey);
       if (period === undefined) {
         const cumulativeStatistics = new CumulativeMergeEvent(
+          indexNumber(date),
           {
             end: endOfPeriod(date),
             start: date,
@@ -245,6 +241,7 @@ export const cumulativeMergeEventsStatisticByPeriod = (
       } else {
         const cumulativeResults = period[index - 1];
         const cumulativeStatistics = new CumulativeMergeEvent(
+          indexNumber(date),
           {
             end: endOfPeriod(date),
             start: date,
@@ -262,7 +259,8 @@ export const cumulativeMergeEventsStatisticByPeriod = (
     eachWeekOfInterval({ end: gitEventStatistics.period.end, start: gitEventStatistics.period.start }),
     "Week",
     (date, compareTo) => getWeek(date) === getWeek(compareTo) && getYear(date) === getYear(compareTo),
-    (week) => endOfWeek(week)
+    (week) => endOfWeek(week),
+    (date) => getWeek(date)
   );
 
   cumulativeStatistics(
@@ -272,7 +270,8 @@ export const cumulativeMergeEventsStatisticByPeriod = (
     }),
     "Month",
     (date, compareTo) => getMonth(date) === getMonth(compareTo) && getYear(date) === getYear(compareTo),
-    (month) => endOfMonth(month)
+    (month) => endOfMonth(month),
+    (date) => getMonth(date)
   );
   return stats;
 };
