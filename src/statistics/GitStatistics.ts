@@ -190,10 +190,10 @@ interface CumulativeStatistics {
   readonly period: Period;
   readonly opened: number;
   readonly closed: number;
-  readonly trend: number;
+  trend: number;
 }
 
-class CumulativeMergeEvent implements CumulativeStatistics {
+export class CumulativeMergeEvent implements CumulativeStatistics {
   constructor(
     public readonly index: number,
     public readonly period: Period,
@@ -201,6 +201,29 @@ class CumulativeMergeEvent implements CumulativeStatistics {
     public readonly closed: number,
     public readonly trend: number
   ) {}
+}
+
+export class TrendCalculator {
+  static calculate(cumulativeStatistics: CumulativeStatistics[]) {
+    const { sumOfIndexesByOpened, sumOpened, sumIndex, sumOfSquareIndex } = cumulativeStatistics.reduce(
+      (accumulator, currentValue, currentIndex) => {
+        return {
+          sumOfIndexesByOpened: accumulator.sumOfIndexesByOpened + (currentIndex + 1) * currentValue.opened,
+          sumOpened: accumulator.sumOpened + currentValue.opened,
+          sumIndex: accumulator.sumIndex + (currentIndex + 1),
+          sumOfSquareIndex: accumulator.sumOfSquareIndex + Math.pow(currentIndex + 1, 2),
+        };
+      },
+      { sumOfIndexesByOpened: 0, sumOpened: 0, sumIndex: 0, sumOfSquareIndex: 0 }
+    );
+    const slope =
+      (cumulativeStatistics.length * sumOfIndexesByOpened - sumOpened * sumIndex) /
+      (cumulativeStatistics.length * sumOfSquareIndex - Math.pow(sumIndex, 2));
+    const yIntercept = parseFloat(((sumOpened - slope * sumIndex) / cumulativeStatistics.length).toFixed(1));
+    cumulativeStatistics.forEach(
+      (cumulativeStatistic, index) => (cumulativeStatistic.trend = slope * (index + 1) + yIntercept)
+    );
+  }
 }
 
 export const cumulativeMergeEventsStatisticByPeriod = (
@@ -211,11 +234,11 @@ export const cumulativeMergeEventsStatisticByPeriod = (
 
   function cumulativeStatistics(
     periodsInInterval: Date[],
-    periodKey: Unit,
     comparingDate: (date: Date, compareTo: Date) => boolean,
     endOfPeriod: (date: Date) => Date,
     indexNumber: (date: Date) => number
-  ) {
+  ): CumulativeStatistics[] {
+    const result: CumulativeStatistics[] = [];
     const initialTrend = gitEventStatistics.sortedEvents().length / periodsInInterval.length;
     periodsInInterval.forEach((date, index) => {
       const opened = gitEventStatistics.sortedEvents().filter((event) => {
@@ -225,8 +248,7 @@ export const cumulativeMergeEventsStatisticByPeriod = (
         return comparingDate(date, eventDate(event).end);
       }).length;
       const trend = initialTrend * (index + 1);
-      const period = stats.get(periodKey);
-      if (period === undefined) {
+      if (result.length === 0) {
         const cumulativeStatistics = new CumulativeMergeEvent(
           indexNumber(date),
           {
@@ -237,9 +259,9 @@ export const cumulativeMergeEventsStatisticByPeriod = (
           closed,
           trend
         );
-        stats.set(periodKey, [cumulativeStatistics]);
+        result.push(cumulativeStatistics);
       } else {
-        const cumulativeResults = period[index - 1];
+        const cumulativeResults = result[index - 1];
         const cumulativeStatistics = new CumulativeMergeEvent(
           indexNumber(date),
           {
@@ -250,29 +272,36 @@ export const cumulativeMergeEventsStatisticByPeriod = (
           cumulativeResults.closed + closed,
           trend
         );
-        period.push(cumulativeStatistics);
+        result.push(cumulativeStatistics);
       }
     });
+    return result;
   }
 
-  cumulativeStatistics(
-    eachWeekOfInterval({ end: gitEventStatistics.period.end, start: gitEventStatistics.period.start }),
-    "Week",
+  const weeksCumulativeStatistics = cumulativeStatistics(
+    eachWeekOfInterval({
+      end: gitEventStatistics.period.end,
+      start: gitEventStatistics.period.start,
+    }),
     (date, compareTo) => getWeek(date) === getWeek(compareTo) && getYear(date) === getYear(compareTo),
     (week) => endOfWeek(week),
     (date) => getWeek(date)
   );
-
-  cumulativeStatistics(
+  const monthsCumulativeStatistics = cumulativeStatistics(
     eachMonthOfInterval({
       end: gitEventStatistics.period.end,
       start: gitEventStatistics.period.start,
     }),
-    "Month",
     (date, compareTo) => getMonth(date) === getMonth(compareTo) && getYear(date) === getYear(compareTo),
     (month) => endOfMonth(month),
     (date) => getMonth(date)
   );
+
+  TrendCalculator.calculate(weeksCumulativeStatistics);
+  TrendCalculator.calculate(monthsCumulativeStatistics);
+  stats.set("Week", weeksCumulativeStatistics);
+  stats.set("Month", monthsCumulativeStatistics);
+
   return stats;
 };
 
