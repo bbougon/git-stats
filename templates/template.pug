@@ -66,6 +66,10 @@ html(lang="en")
                                         canvas#merged-events-months-histogram
                                     div(class='col-lg-6')
                                         canvas#merged-events-months-avg-med
+                                div.row
+                                    div(class='col-lg-6')
+                                        canvas#cumulative-months-stats
+
                     div(class="tab-pane fade" id="weeks-tab-pane" role="tabpanel" aria-labelledby="weeks-tab" tabindex="0")
                         div#weeks
                             div(class='container-sm')
@@ -74,6 +78,9 @@ html(lang="en")
                                         canvas#merged-events-weeks-histogram
                                     div(class='col-lg-6')
                                         canvas#merged-events-weeks-avg-med
+                                div.row
+                                    div(class='col-lg-6')
+                                        canvas#cumulative-weeks-stats
 
         script(type='text/javascript').
 
@@ -89,25 +96,16 @@ html(lang="en")
             }
 
 
-            function initializeLinearDataSet(averageData, medianData) {
-                return [
+            function initializeLinearDataSet(charts) {
+                return charts.map((chart) => (
                     {
-                        label: 'Average time to merge',
-                        data: averageData,
+                        label: chart.label,
+                        data: chart.data,
                         borderWidth: 3,
                         borderJoinStyle: "round",
                         tension: 0.2,
                         yAxisID: 'y',
-                    },
-                    {
-                        label: 'Median time to merge',
-                        data: medianData,
-                        borderWidth: 3,
-                        borderJoinStyle: "round",
-                        tension: 0.2,
-                        yAxisID: 'y',
-                    }
-                ];
+                    }));
             }
 
             const options = {
@@ -147,14 +145,30 @@ html(lang="en")
             const monthsMergedEventsHistogramContext = document.getElementById('merged-events-months-histogram');
             const monthsMergedEventsHistogramDatasets = initializeHistogramDataSet([#{stats.mr.months.data}]);
             const monthsMergedEventsAvgAndMedContext = document.getElementById('merged-events-months-avg-med');
-            const monthsMergedEventsAvgAndMedDatasets = initializeLinearDataSet([#{stats.mr.months.average}], [#{stats.mr.months.median}]);
+            const monthsMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [#{stats.mr.months.average}], label: "Average time to merge"}, {data: [#{stats.mr.months.median}], label: "Median time to merge"}]);
             const monthsMergedEventsLabels = !{stringify(stats.mr.months.labels)}
 
             const weeksMergedEventsHistogramContext = document.getElementById('merged-events-weeks-histogram');
             const weeksMergedEventsHistogramDatasets = initializeHistogramDataSet([#{stats.mr.weeks.data}]);
             const weeksMergedEventsAvgAndMedContext = document.getElementById('merged-events-weeks-avg-med');
-            const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([#{stats.mr.weeks.average}], [#{stats.mr.weeks.median}]);
+            const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [#{stats.mr.weeks.average}], label: "Average time to merge"}, {data: [#{stats.mr.weeks.median}], label: "Median time to merge"}]);
             const weeksMergedEventsLabels = !{stringify(stats.mr.weeks.labels)}
+
+            const monthsCumulativeContext = document.getElementById('cumulative-months-stats')
+            const monthsCumulativeDatasets = initializeLinearDataSet([
+                {data: [#{stats.cumulative.months.openedData}], label: "Cumulative opened merged events"},
+                {data: [#{stats.cumulative.months.closedData}], label: "Cumulative closed merged events"},
+                {data: [#{stats.cumulative.months.trendData}], label: "Cumulative trend merged events"},
+            ])
+            const monthsCumulativeLabels = !{stringify(stats.cumulative.months.labels)}
+
+            const weeksCumulativeContext = document.getElementById('cumulative-weeks-stats')
+            const weeksCumulativeDatasets = initializeLinearDataSet([
+                {data: [#{stats.cumulative.weeks.openedData}], label: "Cumulative opened merged events"},
+                {data: [#{stats.cumulative.weeks.closedData}], label: "Cumulative closed merged events"},
+                {data: [#{stats.cumulative.weeks.trendData}], label: "Cumulative trend merged events"},
+            ])
+            const weeksCumulativeLabels = !{stringify(stats.cumulative.weeks.labels)}
 
             const aggregatedMergeRequestContext = document.getElementById("aggregated-statistics")
             const aggregatedMergeRequestChartLabels = ['Merged', 'Opened', 'Closed', 'All']
@@ -184,4 +198,6 @@ html(lang="en")
             renderChart('line', monthsMergedEventsAvgAndMedContext, monthsMergedEventsLabels, monthsMergedEventsAvgAndMedDatasets, options);
             renderChart('bar', weeksMergedEventsHistogramContext, weeksMergedEventsLabels, weeksMergedEventsHistogramDatasets, {});
             renderChart('line', weeksMergedEventsAvgAndMedContext, weeksMergedEventsLabels, weeksMergedEventsAvgAndMedDatasets, options);
+            renderChart('line', monthsCumulativeContext, monthsCumulativeLabels, monthsCumulativeDatasets, {});
+            renderChart('line', weeksCumulativeContext, weeksCumulativeLabels, weeksCumulativeDatasets, {});
             renderChart('doughnut', aggregatedMergeRequestContext, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets, {});
