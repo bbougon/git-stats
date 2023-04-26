@@ -1,22 +1,17 @@
 import { compareAsc, compareDesc, parseISO } from "date-fns";
 import { MergeEventStatistics, MergeEvent, MergeEventRepository } from "./merge-events/MergeEvent.js";
 import {
-  CumulativeMergeEventBuilder,
+  CumulativeStatisticBuilder,
   MergeEventBuilderForMR,
   MergeEventsBuilderForMR,
   RandomInPeriodMergeEventsBuilder,
   WeekPeriodMergeEventsBuilder,
 } from "../__tests__/builder.js";
-import {
-  mergedEventsStatisticByPeriod,
-  gitStatistics,
-  cumulativeMergeEventsStatisticByPeriod,
-  TrendCalculator,
-  CumulativeMergeEvent,
-} from "./GitStatistics.js";
+import { mergedEventsStatisticByPeriod, gitStatistics } from "./GitStatistics.js";
 import { MergeRequestsStatsParameters } from "./Gitlab.js";
 import { Repository } from "../Repository.js";
 import Duration from "./Duration.js";
+import { CumulativeStatisticsResult, TrendCalculator } from "./CumulativeStatistics";
 
 describe("Git Statistics", () => {
   function getEventDate() {
@@ -552,23 +547,34 @@ describe("Git Statistics", () => {
     });
 
     describe("Cumulative merge events statistics", () => {
-      it("should have total cumulative merged events in period", () => {
-        const start = parseISO("2021-06-07T00:00:00");
-        const end = parseISO("2021-06-26T00:00:00");
-        const mergeRequests = new MergeEventsBuilderForMR(1)
+      let repository: MergeRequestMemoryRepository;
+      beforeEach(() => {
+        repository = new MergeRequestMemoryRepository();
+      });
+
+      it("should have total cumulative merged events in period", async () => {
+        const start = parseISO("2021-06-06T00:00:00Z");
+        const end = parseISO("2021-06-26T23:59:59Z");
+        const mergeEvents = new MergeEventsBuilderForMR(1)
           .inWeek(new WeekPeriodMergeEventsBuilder(24, 7, 6))
           .inWeek(new WeekPeriodMergeEventsBuilder(25, 4, 2))
           .inWeek(new WeekPeriodMergeEventsBuilder(26, 1, 1))
           .forPeriod(start, end)
           .build();
+        repository.persistAll(mergeEvents);
 
-        const eventsByPeriod = cumulativeMergeEventsStatisticByPeriod(
-          new MergeEventStatistics(mergeRequests, {
-            start,
-            end,
-          }),
-          (mr: MergeEvent) => ({ end: mr.mergedAt || mr.closedAt, start: mr.createdAt })
-        );
+        const eventsByPeriod = (
+          (
+            await gitStatistics(
+              {
+                projectId: 1,
+                fromDate: start,
+                toDate: end,
+              } as MergeRequestsStatsParameters,
+              repository
+            )
+          ).cumulativeStatistics.result() as CumulativeStatisticsResult
+        ).cumulativeResults;
 
         const months = eventsByPeriod.get("Month");
         expect(months[0].opened).toBeGreaterThanOrEqual(12);
@@ -582,28 +588,34 @@ describe("Git Statistics", () => {
         expect(weeks[2].closed).toBe(9);
       });
 
-      it("should have total cumulative merged events in period greater than 1 month", () => {
-        const start = parseISO("2021-06-01T00:00:00");
-        const end = parseISO("2021-07-26T00:00:00");
-        const mergeRequests = new MergeEventsBuilderForMR(1)
-          .inWeek(new WeekPeriodMergeEventsBuilder(23, 5, 2))
-          .inWeek(new WeekPeriodMergeEventsBuilder(24, 7, 6))
-          .inWeek(new WeekPeriodMergeEventsBuilder(25, 4, 2))
-          .inWeek(new WeekPeriodMergeEventsBuilder(26, 0, 0))
+      it("should have total cumulative merged events in period greater than 1 month", async () => {
+        const start = parseISO("2021-06-06T00:00:00Z");
+        const end = parseISO("2021-07-26T00:00:00Z");
+        const mergeEvents = new MergeEventsBuilderForMR(1)
+          .inWeek(new WeekPeriodMergeEventsBuilder(24, 5, 2))
+          .inWeek(new WeekPeriodMergeEventsBuilder(25, 7, 6))
+          .inWeek(new WeekPeriodMergeEventsBuilder(26, 4, 2))
           .inWeek(new WeekPeriodMergeEventsBuilder(27, 0, 0))
-          .inWeek(new WeekPeriodMergeEventsBuilder(28, 5, 3))
-          .inWeek(new WeekPeriodMergeEventsBuilder(29, 4, 6))
-          .inWeek(new WeekPeriodMergeEventsBuilder(30, 3, 1))
+          .inWeek(new WeekPeriodMergeEventsBuilder(28, 0, 0))
+          .inWeek(new WeekPeriodMergeEventsBuilder(29, 5, 3))
+          .inWeek(new WeekPeriodMergeEventsBuilder(30, 4, 6))
+          .inWeek(new WeekPeriodMergeEventsBuilder(31, 3, 1))
           .forPeriod(start, end)
           .build();
+        repository.persistAll(mergeEvents);
 
-        const eventsByPeriod = cumulativeMergeEventsStatisticByPeriod(
-          new MergeEventStatistics(mergeRequests, {
-            start,
-            end,
-          }),
-          (mr: MergeEvent) => ({ end: mr.mergedAt || mr.closedAt, start: mr.createdAt })
-        );
+        const eventsByPeriod = (
+          (
+            await gitStatistics(
+              {
+                projectId: 1,
+                fromDate: start,
+                toDate: end,
+              } as MergeRequestsStatsParameters,
+              repository
+            )
+          ).cumulativeStatistics.result() as CumulativeStatisticsResult
+        ).cumulativeResults;
 
         const months = eventsByPeriod.get("Month");
         expect(months[0].opened).toBeGreaterThanOrEqual(16);
@@ -620,7 +632,7 @@ describe("Git Statistics", () => {
       it("should have total cumulative merged events for overlapping years", async () => {
         const start = parseISO("2021-01-01T00:00:00");
         const end = parseISO("2022-03-31T00:00:00");
-        const mergeRequests = new MergeEventsBuilderForMR(1)
+        const mergeEvents = new MergeEventsBuilderForMR(1)
           .inWeek(new WeekPeriodMergeEventsBuilder(2, 5, 2))
           .inWeek(new WeekPeriodMergeEventsBuilder(3, 7, 6))
           .inWeek(new WeekPeriodMergeEventsBuilder(12, 4, 3))
@@ -628,19 +640,27 @@ describe("Git Statistics", () => {
           .inWeek(new WeekPeriodMergeEventsBuilder(52, 0, 0))
           .forPeriod(start, end)
           .build();
+        repository.persistAll(mergeEvents);
 
-        const eventsByPeriod = cumulativeMergeEventsStatisticByPeriod(
-          new MergeEventStatistics(mergeRequests, {
-            start,
-            end,
-          }),
-          (mr: MergeEvent) => ({ end: mr.mergedAt || mr.closedAt, start: mr.createdAt })
-        );
+        const eventsByPeriod = (
+          (
+            await gitStatistics(
+              {
+                projectId: 1,
+                fromDate: start,
+                toDate: end,
+              } as MergeRequestsStatsParameters,
+              repository
+            )
+          ).cumulativeStatistics.result() as CumulativeStatisticsResult
+        ).cumulativeResults;
 
         const months = eventsByPeriod.get("Month");
-        expect(months[0].opened).toBe(12);
+        expect(months[0].opened).toBe(20);
         expect(months[0].closed).toBe(8);
-        expect(months[12].opened).toBeGreaterThanOrEqual(32);
+        expect(months[11].opened).toBe(33);
+        expect(months[11].closed).toBe(13);
+        expect(months[12].opened).toBe(53);
         expect(months[12].closed).toBe(21);
         const weeks = eventsByPeriod.get("Week");
         expect(weeks[1].opened).toBeGreaterThanOrEqual(5);
@@ -653,9 +673,9 @@ describe("Git Statistics", () => {
 
       describe("Trend calculator", () => {
         it("should calculate trend", () => {
-          const firstCumulative = new CumulativeMergeEventBuilder().atIndex(0).opened(3).closed(3).build();
-          const secondCumulative = new CumulativeMergeEventBuilder().atIndex(1).opened(5).closed(5).build();
-          const thirdCumulative = new CumulativeMergeEventBuilder().atIndex(2).opened(6.5).closed(6.5).build();
+          const firstCumulative = new CumulativeStatisticBuilder().atIndex(0).opened(3).closed(3).build();
+          const secondCumulative = new CumulativeStatisticBuilder().atIndex(1).opened(5).closed(5).build();
+          const thirdCumulative = new CumulativeStatisticBuilder().atIndex(2).opened(6.5).closed(6.5).build();
 
           TrendCalculator.calculate([firstCumulative, secondCumulative, thirdCumulative]);
 
@@ -686,4 +706,8 @@ class MergeRequestMemoryRepository extends MemoryRepository<MergeEvent> implemen
     );
     return Promise.all(mergeRequests);
   };
+
+  persistAll(mergeRequests: MergeEvent[]): void {
+    this.entities.push(...mergeRequests);
+  }
 }

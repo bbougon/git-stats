@@ -1,7 +1,15 @@
 import * as crypto from "crypto";
-import { addDays, addWeeks, differenceInCalendarDays, eachWeekOfInterval, getWeek, parseISO } from "date-fns";
+import {
+  addDays,
+  addHours,
+  differenceInCalendarDays,
+  differenceInDays,
+  eachWeekOfInterval,
+  getWeek,
+  parseISO,
+} from "date-fns";
 import { MergeEvent } from "../statistics/merge-events/MergeEvent.js";
-import { CumulativeMergeEvent } from "../statistics/GitStatistics";
+import { CumulativeStatistic } from "../statistics/CumulativeStatistics";
 
 export class MergeEventBuilderForMR {
   private projectId: number;
@@ -59,6 +67,7 @@ interface Builder<M> {
 
 interface MergeEventsBuilder<T> extends Builder<MergeEvent[]> {
   build(): MergeEvent[];
+
   forPeriod(period: { start: Date; end: Date }): T;
 
   forProject(projectId: number): T;
@@ -67,6 +76,7 @@ interface MergeEventsBuilder<T> extends Builder<MergeEvent[]> {
 export class WeekPeriodMergeEventsBuilder implements MergeEventsBuilder<WeekPeriodMergeEventsBuilder> {
   private _period: { start: Date; end: Date };
   private _projectId: number;
+
   constructor(private readonly weekNumber: number, private readonly opened: number, private readonly merged: number) {}
 
   build(): MergeEvent[] {
@@ -79,10 +89,16 @@ export class WeekPeriodMergeEventsBuilder implements MergeEventsBuilder<WeekPeri
           events.push(new MergeEventBuilderForMR(this._projectId).createdAt(randomDayInWeek).build());
         }
         for (let i = 0; i < this.merged; i++) {
-          const randomDayInWeek = addDays(week, Math.floor(Math.random() * (6 - 2) + 2));
+          const endOfDay = new Date(week.getFullYear(), week.getMonth(), week.getDate(), 23, 59);
+          const randomDayInWeek = addDays(endOfDay, Math.floor(Math.random() * (6 - 2) + 2));
+          const maxRange = differenceInDays(endOfDay, week);
           events.push(
             new MergeEventBuilderForMR(this._projectId)
-              .createdAt(addWeeks(week, -Math.floor(Math.random() * (6 - 2) + 2)))
+              .createdAt(
+                maxRange > 2
+                  ? addDays(endOfDay, -Math.floor(Math.random() * (maxRange - 2) + 2))
+                  : addHours(endOfDay, -Math.floor(Math.random() * (8 - 2) + 2))
+              )
               .mergedAt(randomDayInWeek)
               .build()
           );
@@ -106,6 +122,7 @@ export class WeekPeriodMergeEventsBuilder implements MergeEventsBuilder<WeekPeri
 export class RandomInPeriodMergeEventsBuilder implements MergeEventsBuilder<RandomInPeriodMergeEventsBuilder> {
   private _period: { start: Date; end: Date };
   private _projectId: number;
+
   constructor(
     private readonly numberOfMergeRequests: number,
     private readonly emptyPeriodNumber: number = 0,
@@ -157,6 +174,7 @@ export class MergeEventsBuilderForMR {
   private _projectId: number;
   private _period: { start: Date; end: Date };
   private builders: MergeEventsBuilder<WeekPeriodMergeEventsBuilder | RandomInPeriodMergeEventsBuilder>[] = [];
+
   constructor(projectId: number) {
     this._projectId = projectId;
     this._period = { start: parseISO("2021-01-01T00:00:00"), end: parseISO("2021-01-08T00:00:00") };
@@ -237,26 +255,32 @@ export class MergeEventBuilderForPR {
   };
 }
 
-export class CumulativeMergeEventBuilder {
+export class CumulativeStatisticBuilder {
   private index: number;
   private _opened: number;
   private _closed: number;
 
-  atIndex = (index: number): CumulativeMergeEventBuilder => {
+  atIndex = (index: number): CumulativeStatisticBuilder => {
     this.index = index;
     return this;
   };
 
-  opened = (opened: number): CumulativeMergeEventBuilder => {
+  opened = (opened: number): CumulativeStatisticBuilder => {
     this._opened = opened;
     return this;
   };
-  closed = (closed: number): CumulativeMergeEventBuilder => {
+  closed = (closed: number): CumulativeStatisticBuilder => {
     this._closed = closed;
     return this;
   };
 
-  build = (): CumulativeMergeEvent => {
-    return new CumulativeMergeEvent(this.index, { end: new Date(), start: new Date() }, this._opened, this._closed, 0);
+  build = (): CumulativeStatistic => {
+    return {
+      index: this.index,
+      period: { end: new Date(), start: new Date() },
+      opened: this._opened,
+      closed: this._closed,
+      trend: 0,
+    };
   };
 }

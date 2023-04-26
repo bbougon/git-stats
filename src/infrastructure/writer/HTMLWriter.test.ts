@@ -6,7 +6,8 @@ import * as os from "os";
 import * as fs from "fs";
 import { MergeEventBuilderForMR } from "../../__tests__/builder.js";
 import { parseISO } from "date-fns";
-import { MergeEventStatistics } from "../../statistics/merge-events/MergeEvent.js";
+import { MergeEvent, MergeEventStatistics } from "../../statistics/merge-events/MergeEvent.js";
+import { CumulativeStatistics } from "../../statistics/CumulativeStatistics";
 
 jest.mock("./FilePathConstant", () => ({
   __dirname: "src/infrastructure/writer/",
@@ -33,12 +34,18 @@ describe("HTML writer", () => {
     const tempDirectory = await mkdtemp(path.join(os.tmpdir(), "report-"));
     const fromDate = parseISO("2022-02-11T00:00:00");
     const toDate = parseISO("2022-02-17T00:00:00");
+    const mergeEvents = [firstMergeRequest, secondMergeRequest, thirdMergeRequest];
+    const period = {
+      end: toDate,
+      start: fromDate,
+    };
 
     new HTMLWriter(tempDirectory).write({
-      mergedEvents: new MergeEventStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
-        end: toDate,
-        start: fromDate,
-      }),
+      mergedEvents: new MergeEventStatistics(mergeEvents, period),
+      cumulativeStatistics: new CumulativeStatistics(mergeEvents, period, (mr: MergeEvent) => ({
+        end: mr.mergedAt || mr.closedAt,
+        start: mr.createdAt,
+      })),
     });
 
     expect(fs.readFileSync(`${tempDirectory}/report/index.html`, "utf8")).toMatchSnapshot();
@@ -59,13 +66,19 @@ describe("HTML writer", () => {
       .build();
     const tempDirectory = await mkdtemp(path.join(os.tmpdir(), "report-"));
     const fromDate = parseISO("2022-02-11T00:00:00");
+    const mergeEvents = [firstMergeRequest, secondMergeRequest, thirdMergeRequest];
     const toDate = parseISO("2022-02-17T00:00:00");
+    const period = {
+      end: toDate,
+      start: fromDate,
+    };
 
     new HTMLWriter(tempDirectory).write({
-      mergedEvents: new MergeEventStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
-        end: toDate,
-        start: fromDate,
-      }),
+      mergedEvents: new MergeEventStatistics(mergeEvents, period),
+      cumulativeStatistics: new CumulativeStatistics(mergeEvents, period, (mr: MergeEvent) => ({
+        end: mr.mergedAt || mr.closedAt,
+        start: mr.createdAt,
+      })),
     });
 
     expect(fs.readFileSync(`${tempDirectory}/report/index.html`, "utf8")).toMatchSnapshot();
@@ -85,12 +98,18 @@ describe("HTML writer", () => {
       .mergedAt(parseISO("2022-02-16T16:44:22"))
       .build();
     const tempDirectory = await mkdtemp(path.join(os.tmpdir(), "report-"));
+    const mergeEvents = [firstMergeRequest, secondMergeRequest, thirdMergeRequest];
+    const period = {
+      end: parseISO("2022-03-02T00:00:00"),
+      start: parseISO("2022-01-01T00:00:00"),
+    };
 
     new HTMLWriter(tempDirectory).write({
-      mergedEvents: new MergeEventStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
-        end: parseISO("2022-03-02T00:00:00"),
-        start: parseISO("2022-01-01T00:00:00"),
-      }),
+      mergedEvents: new MergeEventStatistics(mergeEvents, period),
+      cumulativeStatistics: new CumulativeStatistics(mergeEvents, period, (mr: MergeEvent) => ({
+        end: mr.mergedAt || mr.closedAt,
+        start: mr.createdAt,
+      })),
     });
 
     expect(fs.readFileSync(`${tempDirectory}/report/index.html`, "utf8")).toMatchSnapshot();

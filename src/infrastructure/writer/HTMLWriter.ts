@@ -5,17 +5,14 @@ import { openBrowser } from "./OpenBrowser.js";
 import * as pug from "pug";
 import * as path from "path";
 import { __dirname } from "./FilePathConstant.js";
-import {
-  cumulativeMergeEventsStatisticByPeriod,
-  mergedEventsStatisticByPeriod,
-  StatisticsAggregate,
-} from "../../statistics/GitStatistics.js";
+import { mergedEventsStatisticByPeriod, StatisticsAggregate } from "../../statistics/GitStatistics.js";
 import { MergeEventStatistics, MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
 import { progressBar } from "../progress-bar/ProgressBar.js";
 import { Title } from "../progress-bar/Title.js";
 import { HUMAN_READABLE_MONTHS } from "./HumanReadableLabels.js";
 import moment from "moment/moment.js";
 import Duration from "../../statistics/Duration.js";
+import { CumulativeStatistics } from "../../statistics/CumulativeStatistics.js";
 
 class HTMLContentBuilder {
   constructor(private readonly stats: StatisticsAggregate) {}
@@ -171,13 +168,7 @@ class HTMLContentBuilder {
     const cumulativeOpenedWeeksData: number[] = [];
     const cumulativeClosedWeeksData: number[] = [];
     const cumulativeTrendWeeksData: number[] = [];
-    const cumulativeStatistics = cumulativeMergeEventsStatisticByPeriod(
-      this.stats.mergedEvents as MergeEventStatistics,
-      (mr: MergeEvent) => ({
-        end: mr.mergedAt || mr.closedAt,
-        start: mr.createdAt,
-      })
-    );
+    const cumulativeStatistics = (this.stats.cumulativeStatistics as CumulativeStatistics).result().cumulativeResults;
 
     cumulativeStatistics.get("Month").forEach((cumulativeStatistics) => {
       cumulativeMonthsLabels.push(HUMAN_READABLE_MONTHS[cumulativeStatistics.index]);
