@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/bbougon/git-stats/compare/v0.2.2...v0.2.3) (2023-05-01)
+
+
+### Features
+
+* display cumulative statistics in console. ([5e32935](https://github.com/bbougon/git-stats/commit/5e329354c501f43b83694cbe1800657002cb2d6e))
+
 ## [0.2.2](https://github.com/bbougon/git-stats/compare/v0.2.1...v0.2.2) (2023-04-22)
 
 
