@@ -5,14 +5,14 @@ import { openBrowser } from "./OpenBrowser.js";
 import * as pug from "pug";
 import * as path from "path";
 import { __dirname } from "./FilePathConstant.js";
-import { mergedEventsStatisticByPeriod, StatisticsAggregate } from "../../statistics/GitStatistics.js";
-import { MergeEventStatistics, MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
+import { StatisticsAggregate } from "../../statistics/GitStatistics.js";
 import { progressBar } from "../progress-bar/ProgressBar.js";
 import { Title } from "../progress-bar/Title.js";
 import { HUMAN_READABLE_MONTHS } from "./HumanReadableLabels.js";
 import moment from "moment/moment.js";
 import Duration from "../../statistics/Duration.js";
 import { CumulativeStatistics } from "../../statistics/CumulativeStatistics.js";
+import { MergeEventsStatisticsByPeriod } from "../../statistics/MergeEventsStatisticsByPeriod.js";
 
 class HTMLContentBuilder {
   constructor(private readonly stats: StatisticsAggregate) {}
@@ -56,9 +56,9 @@ class HTMLContentBuilder {
       cumulativeTrendWeeksData,
     } = this.cumulativeStatistics();
 
-    const aggregatedStats = this.stats.mergedEvents.result();
-    const start = humanizeDate(this.stats.mergedEvents.period.start);
-    const end = humanizeDate(this.stats.mergedEvents.period.end);
+    const aggregatedStats = this.stats.mergeEvents.result();
+    const start = humanizeDate(this.stats.mergeEvents.period.start);
+    const end = humanizeDate(this.stats.mergeEvents.period.end);
     const templateFilePath = path.resolve(__dirname, "../../../templates/template.pug");
     const fn = pug.compileFile(templateFilePath, { pretty: true });
     return fn({
@@ -99,13 +99,8 @@ class HTMLContentBuilder {
   };
 
   private mergedEventsStatistics() {
-    const mergedEventsStatistics = mergedEventsStatisticByPeriod(
-      this.stats.mergedEvents as MergeEventStatistics,
-      (mr: MergeEvent) => ({
-        end: mr.mergedAt,
-        start: mr.createdAt,
-      })
-    );
+    const mergedEventsStatistics = (this.stats.mergedEventsStatistics as MergeEventsStatisticsByPeriod).result()
+      .mergeEventsResults;
     const mergedEventMonthsLabels: string[] = [];
     const mergedEventsMonthsData: number[] = [];
     const mergedEventsMonthsAverageTimeData: number[] = [];

@@ -142,7 +142,7 @@ export class RandomInPeriodMergeEventsBuilder implements MergeEventsBuilder<Rand
           );
         }
       } else {
-        const daysForCreation = Math.floor(Math.random() * daysInPeriod) - 1;
+        const daysForCreation = Math.floor(Math.random() * (daysInPeriod - 1) + 1);
         const daysToMerge = Math.floor(Math.random() * (daysInPeriod - daysForCreation) + daysForCreation + 1);
         mergedAt = addDays(this._period.start, daysToMerge);
         if (this.emptyPeriodNumber == undefined || getWeek(mergedAt) !== this.emptyPeriodNumber) {

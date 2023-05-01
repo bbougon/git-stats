@@ -201,7 +201,7 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
       const monthsCumulativeDatasets = initializeLinearDataSet([
           {data: [3], label: "Cumulative opened merged events"},
           {data: [3], label: "Cumulative closed merged events"},
-          {data: [NaN], label: "Cumulative trend merged events"},
+          {data: [3], label: "Cumulative trend merged events"},
       ])
       const monthsCumulativeLabels = ["Feb"]
       
@@ -450,7 +450,7 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
       const monthsCumulativeDatasets = initializeLinearDataSet([
           {data: [3], label: "Cumulative opened merged events"},
           {data: [2], label: "Cumulative closed merged events"},
-          {data: [NaN], label: "Cumulative trend merged events"},
+          {data: [3], label: "Cumulative trend merged events"},
       ])
       const monthsCumulativeLabels = ["Feb"]
       

@@ -112,7 +112,7 @@ class TrendCalculator {
     );
     const slope =
       (cumulativeStatistics.length * sumOfIndexesByOpened - sumOpened * sumIndex) /
-      (cumulativeStatistics.length * sumOfSquareIndex - Math.pow(sumIndex, 2));
+        (cumulativeStatistics.length * sumOfSquareIndex - Math.pow(sumIndex, 2)) || 0;
     const yIntercept = parseFloat(((sumOpened - slope * sumIndex) / cumulativeStatistics.length).toFixed(1));
     cumulativeStatistics.forEach(
       (cumulativeStatistic, index) => (cumulativeStatistic.trend = slope * (index + 1) + yIntercept)

@@ -8,6 +8,7 @@ import { MergeEventBuilderForMR } from "../../__tests__/builder.js";
 import { parseISO } from "date-fns";
 import { MergeEvent, MergeEventStatistics } from "../../statistics/merge-events/MergeEvent.js";
 import { CumulativeStatistics } from "../../statistics/CumulativeStatistics";
+import { MergeEventsStatisticsByPeriod } from "../../statistics/MergeEventsStatisticsByPeriod";
 
 jest.mock("./FilePathConstant", () => ({
   __dirname: "src/infrastructure/writer/",
@@ -41,9 +42,13 @@ describe("HTML writer", () => {
     };
 
     new HTMLWriter(tempDirectory).write({
-      mergedEvents: new MergeEventStatistics(mergeEvents, period),
+      mergeEvents: new MergeEventStatistics(mergeEvents, period),
       cumulativeStatistics: new CumulativeStatistics(mergeEvents, period, (mr: MergeEvent) => ({
         end: mr.mergedAt || mr.closedAt,
+        start: mr.createdAt,
+      })),
+      mergedEventsStatistics: new MergeEventsStatisticsByPeriod(mergeEvents, period, (mr: MergeEvent) => ({
+        end: mr.mergedAt,
         start: mr.createdAt,
       })),
     });
@@ -74,9 +79,13 @@ describe("HTML writer", () => {
     };
 
     new HTMLWriter(tempDirectory).write({
-      mergedEvents: new MergeEventStatistics(mergeEvents, period),
+      mergeEvents: new MergeEventStatistics(mergeEvents, period),
       cumulativeStatistics: new CumulativeStatistics(mergeEvents, period, (mr: MergeEvent) => ({
         end: mr.mergedAt || mr.closedAt,
+        start: mr.createdAt,
+      })),
+      mergedEventsStatistics: new MergeEventsStatisticsByPeriod(mergeEvents, period, (mr: MergeEvent) => ({
+        end: mr.mergedAt,
         start: mr.createdAt,
       })),
     });
@@ -105,9 +114,13 @@ describe("HTML writer", () => {
     };
 
     new HTMLWriter(tempDirectory).write({
-      mergedEvents: new MergeEventStatistics(mergeEvents, period),
+      mergeEvents: new MergeEventStatistics(mergeEvents, period),
       cumulativeStatistics: new CumulativeStatistics(mergeEvents, period, (mr: MergeEvent) => ({
         end: mr.mergedAt || mr.closedAt,
+        start: mr.createdAt,
+      })),
+      mergedEventsStatistics: new MergeEventsStatisticsByPeriod(mergeEvents, period, (mr: MergeEvent) => ({
+        end: mr.mergedAt,
         start: mr.createdAt,
       })),
     });
