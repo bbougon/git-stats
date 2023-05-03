@@ -9,7 +9,7 @@ type MergeEventsStatisticsByPeriodResults = GitEventsStatisticsResult & {
 
 class MergeEventsStatisticsByPeriod implements GitStatistics {
   constructor(
-    private readonly events: GitEvent[],
+    readonly events: GitEvent[],
     readonly period: Period,
     private readonly eventDate: (event: GitEvent) => Period
   ) {}
@@ -58,10 +58,6 @@ class MergeEventsStatisticsByPeriod implements GitStatistics {
         }
       });
     return { mergeEventsResults: fillEmptyPeriodsAndSortChronologically(stats, this.period) };
-  }
-
-  sortedEvents(): GitEvent[] {
-    return this.events;
   }
 }
 

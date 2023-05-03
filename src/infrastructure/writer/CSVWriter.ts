@@ -24,9 +24,9 @@ export class CSVWriter implements Writer {
       if (!fs.existsSync(reportFilePath)) {
         fs.mkdirSync(reportFilePath);
       }
-      const input = Object.entries(stats).flatMap(([key, value]) =>
-        value.sortedEvents().map((event) => ({ eventType: key, ...event }))
-      );
+      const input = Object.entries(stats)
+        .filter(([key, _value]) => key === "mergeEvents")
+        .flatMap(([key, value]) => value.events.map((event) => ({ eventType: key, ...event })));
       const stringifier = stringify(input, {
         header: true,
         columns: this.HEADER,

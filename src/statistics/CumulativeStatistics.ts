@@ -16,7 +16,7 @@ type CumulativeStatisticsResult = GitEventsStatisticsResult & {
 
 class CumulativeStatistics implements GitStatistics {
   constructor(
-    private readonly events: GitEvent[],
+    readonly events: GitEvent[],
     readonly period: Period,
     private readonly eventDate: (event: GitEvent) => Period
   ) {}
@@ -49,10 +49,6 @@ class CumulativeStatistics implements GitStatistics {
     stats.set("Month", monthsCumulativeStatistics);
 
     return { cumulativeResults: stats };
-  }
-
-  sortedEvents(): GitEvent[] {
-    return this.events;
   }
 
   private cumulativeStatistics(

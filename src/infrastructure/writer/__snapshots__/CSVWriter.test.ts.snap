@@ -2,8 +2,8 @@
 
 exports[`CSV writer should generate a CSV report file with all merge events 1`] = `
 "Event;Project;id;Created At;Merged At;Closed At
-mergedEvents;1;1;2022-02-11T11:37:22.000Z;2022-02-14T10:53:17.000Z;
-mergedEvents;1;2;2022-02-12T12:22:54.000Z;;
-mergedEvents;1;3;2022-02-13T08:17:34.000Z;;2022-02-16T15:44:22.000Z
+mergeEvents;1;1;2022-02-11T11:37:22.000Z;2022-02-14T10:53:17.000Z;
+mergeEvents;1;2;2022-02-12T12:22:54.000Z;;
+mergeEvents;1;3;2022-02-13T08:17:34.000Z;;2022-02-16T15:44:22.000Z
 "
 `;

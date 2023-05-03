@@ -19,15 +19,21 @@ export abstract class MergeEventHTTPRepository implements MergeEventRepository {
       requestParameters.fromDate,
       requestParameters.toDate,
       this.mergeRequestsMapper()
-    ).catch((reason: AxiosError) => {
-      const httpError: HTTPError = {
-        rationale: `We were unable to retrieve some informations on your project '${this.projectInfos(
-          requestParameters
-        )}'`,
-        additionalInfo: reason.response.data,
-      };
-      return Promise.reject(httpError);
-    });
+    )
+      .then((mergeEvents) => {
+        return mergeEvents
+          .sort((mr, mrToCompare) => compareAsc(mr.start, mrToCompare.start))
+          .sort((mr, mrToCompare) => compareAsc(mr.mergedAt, mrToCompare.mergedAt));
+      })
+      .catch((reason: AxiosError) => {
+        const httpError: HTTPError = {
+          rationale: `We were unable to retrieve some informations on your project '${this.projectInfos(
+            requestParameters
+          )}'`,
+          additionalInfo: reason.response.data,
+        };
+        return Promise.reject(httpError);
+      });
   }
 
   persist(_entity: MergeEvent) {

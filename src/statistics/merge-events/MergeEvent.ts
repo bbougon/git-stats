@@ -1,4 +1,4 @@
-import { compareAsc, differenceInHours } from "date-fns";
+import { differenceInHours } from "date-fns";
 import moment from "moment";
 import { Repository } from "../../Repository.js";
 import { RequestParameters } from "../../../index.js";
@@ -27,18 +27,12 @@ type MergeEventsStatisticsResult = GitEventsStatisticsResult & {
 };
 
 class MergeEventStatistics implements GitStatistics {
-  constructor(private mergeEvents: MergeEvent[], public readonly period: Period) {}
-
-  sortedEvents = (): MergeEvent[] => {
-    return this.mergeEvents
-      .sort((mr, mrToCompare) => compareAsc(mr.start, mrToCompare.start))
-      .sort((mr, mrToCompare) => compareAsc(mr.mergedAt, mrToCompare.mergedAt));
-  };
+  constructor(readonly events: MergeEvent[], public readonly period: Period) {}
 
   result = (): MergeEventsStatisticsResult => {
-    const mergedMergeRequests = this.mergeEvents.filter((mr) => mr.mergedAt !== null);
-    const closedMergeRequests = this.mergeEvents.filter((mr) => mr.closedAt !== null);
-    const openedMergeRequests = this.mergeEvents.filter((mr) => mr.mergedAt === null && mr.closedAt == null);
+    const mergedMergeRequests = this.events.filter((mr) => mr.mergedAt !== null);
+    const closedMergeRequests = this.events.filter((mr) => mr.closedAt !== null);
+    const openedMergeRequests = this.events.filter((mr) => mr.mergedAt === null && mr.closedAt == null);
     const hoursSpent = mergedMergeRequests.reduce(
       (accumulator, currentValue) => accumulator + differenceInHours(currentValue.mergedAt, currentValue.start),
       0
@@ -56,7 +50,7 @@ class MergeEventStatistics implements GitStatistics {
         merged: mergedMergeRequests.length,
         closed: closedMergeRequests.length,
         opened: openedMergeRequests.length,
-        all: this.mergeEvents.length,
+        all: this.events.length,
       },
     };
   };

@@ -67,7 +67,8 @@
     "testPathIgnorePatterns": [
       "<rootDir>/src/__tests__/builder.ts",
       "<rootDir>/src/__tests__/SetupJestMock.ts",
-      "<rootDir>/src/__tests__/CustomProgressBar.ts"
+      "<rootDir>/src/__tests__/CustomProgressBar.ts",
+      "<rootDir>/src/__tests__/MemoryRepositories.ts"
     ],
     "coveragePathIgnorePatterns": [
       "/__snapshots__/"

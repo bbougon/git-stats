@@ -8,10 +8,9 @@ type Period = { start: Date; end: Date };
 
 interface GitStatistics {
   readonly period: Period;
+  readonly events: GitEvent[];
 
   result: () => GitEventsStatisticsResult;
-
-  sortedEvents: () => GitEvent[];
 }
 
 interface StatisticFlow {

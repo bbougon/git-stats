@@ -5,7 +5,9 @@ import os from "os";
 import fs from "fs";
 import { parseISO } from "date-fns";
 import { CSVWriter } from "./CSVWriter.js";
-import { MergeEventStatistics } from "../../statistics/merge-events/MergeEvent.js";
+import { MergeRequestMemoryRepository } from "../../__tests__/MemoryRepositories";
+import { gitStatistics } from "../../statistics/GitStatistics";
+import { MergeRequestsStatsParameters } from "../../statistics/Gitlab";
 
 describe("CSV writer", () => {
   test("should generate a CSV report file with all merge events", async () => {
@@ -25,16 +27,21 @@ describe("CSV writer", () => {
       .createdAt(parseISO("2022-02-13T09:17:34+01:00"))
       .closedAt(parseISO("2022-02-16T16:44:22+01:00"))
       .build();
+    const repository = new MergeRequestMemoryRepository();
+    repository.persistAll([firstMergeRequest, secondMergeRequest, thirdMergeRequest]);
     const tempDirectory = await mkdtemp(path.join(os.tmpdir(), "report-"));
     const fromDate = parseISO("2022-02-11T00:00:00");
     const toDate = parseISO("2022-02-17T00:00:00");
 
-    new CSVWriter(tempDirectory).write({
-      mergedEvents: new MergeEventStatistics([firstMergeRequest, secondMergeRequest, thirdMergeRequest], {
-        end: toDate,
-        start: fromDate,
-      }),
-    });
+    const stats = await gitStatistics(
+      {
+        projectId: 1,
+        fromDate: fromDate,
+        toDate: toDate,
+      } as MergeRequestsStatsParameters,
+      repository
+    );
+    new CSVWriter(tempDirectory).write(stats);
 
     expect(fs.readFileSync(`${tempDirectory}/report/report.csv`, "utf8")).toMatchSnapshot();
   });
