@@ -11,7 +11,7 @@ export class CSVWriter implements Writer {
     { key: "eventType", header: "Event" },
     { key: "project", header: "Project" },
     { key: "id", header: "id" },
-    { key: "createdAt", header: "Created At" },
+    { key: "start", header: "Created At" },
     { key: "mergedAt", header: "Merged At" },
     { key: "closedAt", header: "Closed At" },
   ];

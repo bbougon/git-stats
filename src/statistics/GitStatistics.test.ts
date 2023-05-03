@@ -3,6 +3,7 @@ import { MergeEvent, MergeEventRepository } from "./merge-events/MergeEvent.js";
 import {
   CumulativeStatisticBuilder,
   MergeEventBuilderForMR,
+  MergeEventBuilderForPR,
   MergeEventsBuilderForMR,
   RandomInPeriodMergeEventsBuilder,
   WeekPeriodMergeEventsBuilder,
@@ -17,7 +18,7 @@ import { PullRequestsStatsParameter } from "./Github";
 
 describe("Git Statistics", () => {
   function getEventDate() {
-    return (mr: MergeEvent) => ({ end: mr.mergedAt, start: mr.createdAt });
+    return (mr: MergeEvent) => ({ end: mr.mergedAt, start: mr.start });
   }
 
   describe("Merge events", () => {
@@ -294,20 +295,16 @@ describe("Git Statistics", () => {
         const start = parseISO("2021-08-01T00:00:00");
         const end = parseISO("2021-08-31T00:00:00");
         const mergeEvents = [
-          {
-            closedAt: parseISO("2021-08-03T09:44:24.000Z"),
-            createdAt: parseISO("2021-08-03T09:44:16.000Z"),
-            id: 702124235,
-            mergedAt: parseISO("2021-08-03T09:44:24.000Z"),
-            project: "crm-pilates",
-          },
-          {
-            closedAt: parseISO("2021-08-22T10:09:15.000Z"),
-            createdAt: parseISO("2021-08-22T10:06:35.000Z"),
-            id: 717283366,
-            mergedAt: parseISO("2021-08-22T10:09:15.000Z"),
-            project: "crm-pilates",
-          },
+          new MergeEventBuilderForPR("crm-pilates", 702124235)
+            .createdAt(parseISO("2021-08-03T09:44:16.000Z"))
+            .mergedAt(parseISO("2021-08-03T09:44:24.000Z"))
+            .closed(parseISO("2021-08-03T09:44:24.000Z"))
+            .build(),
+          new MergeEventBuilderForPR("crm-pilates", 717283366)
+            .createdAt(parseISO("2021-08-22T10:06:35.000Z"))
+            .mergedAt(parseISO("2021-08-22T10:09:15.000Z"))
+            .closed(parseISO("2021-08-22T10:09:15.000Z"))
+            .build(),
         ];
         repository.persistAll(mergeEvents);
 
@@ -336,20 +333,16 @@ describe("Git Statistics", () => {
         const start = parseISO("2021-03-01T00:00:00");
         const end = parseISO("2022-03-02T00:00:00");
         const mergeEvents = [
-          {
-            closedAt: parseISO("2021-03-02T09:44:24.000Z"),
-            createdAt: parseISO("2021-03-01T09:44:16.000Z"),
-            id: 702124235,
-            mergedAt: parseISO("2021-03-02T09:44:24.000Z"),
-            project: "crm-pilates",
-          },
-          {
-            closedAt: parseISO("2022-02-28T10:09:15.000Z"),
-            createdAt: parseISO("2022-02-26T10:06:35.000Z"),
-            id: 717283366,
-            mergedAt: parseISO("2022-02-28T10:09:15.000Z"),
-            project: "crm-pilates",
-          },
+          new MergeEventBuilderForPR("crm-pilates", 702124235)
+            .createdAt(parseISO("2021-03-01T09:44:16.000Z"))
+            .mergedAt(parseISO("2021-03-02T09:44:24.000Z"))
+            .closed(parseISO("2021-03-02T09:44:24.000Z"))
+            .build(),
+          new MergeEventBuilderForPR("crm-pilates", 717283366)
+            .createdAt(parseISO("2022-02-26T10:06:35.000Z"))
+            .mergedAt(parseISO("2022-02-28T10:09:15.000Z"))
+            .closed(parseISO("2022-02-28T10:09:15.000Z"))
+            .build(),
         ];
         repository.persistAll(mergeEvents);
 
@@ -781,8 +774,8 @@ class MergeRequestMemoryRepository extends MemoryRepository<MergeEvent> implemen
     const mergeRequests = this.entities.filter(
       (mergeRequest) =>
         mergeRequest.project == requestParameters.projectId &&
-        compareAsc(mergeRequest.createdAt, requestParameters.fromDate) >= 0 &&
-        compareDesc(mergeRequest.createdAt, requestParameters.toDate) >= 0
+        compareAsc(mergeRequest.start, requestParameters.fromDate) >= 0 &&
+        compareDesc(mergeRequest.start, requestParameters.toDate) >= 0
     );
     return Promise.all(mergeRequests);
   };
@@ -797,8 +790,8 @@ class PullRequestMemoryRepository extends MemoryRepository<MergeEvent> implement
     const mergeRequests = this.entities.filter(
       (mergeRequest) =>
         mergeRequest.project == requestParameters.repo &&
-        compareAsc(mergeRequest.createdAt, requestParameters.fromDate) >= 0 &&
-        compareDesc(mergeRequest.createdAt, requestParameters.toDate) >= 0
+        compareAsc(mergeRequest.start, requestParameters.fromDate) >= 0 &&
+        compareDesc(mergeRequest.start, requestParameters.toDate) >= 0
     );
     return Promise.all(mergeRequests);
   };

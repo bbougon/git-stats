@@ -17,7 +17,7 @@ const fromDTO = (mergeRequestDTO: GitlabMergeRequestDTO): MergeEvent => {
     return date !== null ? parseISO(date) : null;
   };
   return {
-    createdAt: parseISO(mergeRequestDTO.created_at),
+    start: parseISO(mergeRequestDTO.created_at),
     mergedAt: parseDate(mergeRequestDTO.merged_at),
     closedAt: parseDate(mergeRequestDTO.closed_at),
     project: mergeRequestDTO.project_id,

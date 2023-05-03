@@ -8,7 +8,6 @@ import { GitEvent, GitEventsStatisticsResult, GitStatistics, Period } from "../S
 type MergeEvent = GitEvent & {
   project: number | string | undefined;
   id: number;
-  createdAt: Date;
   mergedAt: Date | null;
   closedAt: Date | null;
 };
@@ -32,7 +31,7 @@ class MergeEventStatistics implements GitStatistics {
 
   sortedEvents = (): MergeEvent[] => {
     return this.mergeEvents
-      .sort((mr, mrToCompare) => compareAsc(mr.createdAt, mrToCompare.createdAt))
+      .sort((mr, mrToCompare) => compareAsc(mr.start, mrToCompare.start))
       .sort((mr, mrToCompare) => compareAsc(mr.mergedAt, mrToCompare.mergedAt));
   };
 
@@ -41,7 +40,7 @@ class MergeEventStatistics implements GitStatistics {
     const closedMergeRequests = this.mergeEvents.filter((mr) => mr.closedAt !== null);
     const openedMergeRequests = this.mergeEvents.filter((mr) => mr.mergedAt === null && mr.closedAt == null);
     const hoursSpent = mergedMergeRequests.reduce(
-      (accumulator, currentValue) => accumulator + differenceInHours(currentValue.mergedAt, currentValue.createdAt),
+      (accumulator, currentValue) => accumulator + differenceInHours(currentValue.mergedAt, currentValue.start),
       0
     );
     const duration = moment.duration(hoursSpent / mergedMergeRequests.length, "hours");
@@ -62,14 +61,4 @@ class MergeEventStatistics implements GitStatistics {
     };
   };
 }
-
-const mergeEventsStatistics = (
-  repository: MergeEventRepository,
-  requestParameter: RequestParameters
-): Promise<MergeEventStatistics> => {
-  return repository.getMergeEventsForPeriod(requestParameter).then((mergeEvents) => {
-    return new MergeEventStatistics(mergeEvents, { end: requestParameter.toDate, start: requestParameter.fromDate });
-  });
-};
-
-export { MergeEvent, MergeEventRepository, MergeEventStatistics, mergeEventsStatistics };
+export { MergeEvent, MergeEventRepository, MergeEventStatistics };

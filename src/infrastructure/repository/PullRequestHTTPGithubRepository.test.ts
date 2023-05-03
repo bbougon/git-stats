@@ -40,7 +40,7 @@ describe("Github repository", () => {
     const mergedAt = mergeRequest.mergedAt !== null ? formatISO(mergeRequest.mergedAt) : null;
     const closedAt = mergeRequest.closedAt !== null ? formatISO(mergeRequest.closedAt) : null;
     return {
-      created_at: formatISO(mergeRequest.createdAt),
+      created_at: formatISO(mergeRequest.start),
       id: mergeRequest.id,
       head: mergeRequest.project !== null ? { repo: { name: mergeRequest.project } } : { repo: null },
       merged_at: mergedAt,

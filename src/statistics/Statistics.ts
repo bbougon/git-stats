@@ -1,6 +1,8 @@
 import Duration from "./Duration.js";
 
-type GitEvent = object;
+type GitEvent = {
+  start: Date;
+};
 type GitEventsStatisticsResult = object;
 type Period = { start: Date; end: Date };
 

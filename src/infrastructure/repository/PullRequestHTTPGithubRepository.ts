@@ -17,7 +17,7 @@ const fromDTO = (pullRequestDTO: PullRequestDTO): MergeEvent => {
   };
   return {
     closedAt: parseDate(pullRequestDTO.closed_at),
-    createdAt: parseISO(pullRequestDTO.created_at),
+    start: parseISO(pullRequestDTO.created_at),
     id: pullRequestDTO.id,
     mergedAt: parseDate(pullRequestDTO.merged_at),
     project: pullRequestDTO.head.repo?.name,

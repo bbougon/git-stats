@@ -41,11 +41,11 @@ describe("Console writer", () => {
       mergeEvents: new MergeEventStatistics(mergeEvents, period),
       mergedEventsStatistics: new MergeEventsStatisticsByPeriod(mergeEvents, period, (mr: MergeEvent) => ({
         end: mr.mergedAt,
-        start: mr.createdAt,
+        start: mr.start,
       })),
       cumulativeStatistics: new CumulativeStatistics(mergeEvents, period, (mr: MergeEvent) => ({
         end: mr.mergedAt || mr.closedAt,
-        start: mr.createdAt,
+        start: mr.start,
       })),
     });
 

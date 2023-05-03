@@ -52,7 +52,7 @@ export abstract class MergeEventHTTPRepository implements MergeEventRepository {
   }
 
   private isMergeRequestInExpectedPeriod = (mr: MergeEvent, fromDate: Date, toDate: Date): boolean => {
-    return compareAsc(mr.createdAt, fromDate) >= 0 && compareDesc(mr.createdAt, toDate) >= 0;
+    return compareAsc(mr.start, fromDate) >= 0 && compareDesc(mr.start, toDate) >= 0;
   };
 
   private fetchMergeRequestsForPeriod = (

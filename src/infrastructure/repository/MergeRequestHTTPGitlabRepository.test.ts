@@ -44,7 +44,7 @@ describe("Gitlab Repository", () => {
     const mergedAt = mergeRequest.mergedAt !== null ? formatISO(mergeRequest.mergedAt) : null;
     const closedAt = mergeRequest.closedAt !== null ? formatISO(mergeRequest.closedAt) : null;
     return {
-      created_at: formatISO(mergeRequest.createdAt),
+      created_at: formatISO(mergeRequest.start),
       id: mergeRequest.id,
       project_id: mergeRequest.project,
       merged_at: mergedAt,
