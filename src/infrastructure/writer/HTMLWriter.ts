@@ -12,7 +12,7 @@ import { HUMAN_READABLE_MONTHS } from "./HumanReadableLabels.js";
 import moment from "moment/moment.js";
 import Duration from "../../statistics/Duration.js";
 import { CumulativeStatistics } from "../../statistics/CumulativeStatistics.js";
-import { MergeEventsStatisticsByPeriod } from "../../statistics/MergeEventsStatisticsByPeriod.js";
+import { MergedEventsStatistics } from "../../statistics/MergedEventsStatistics.js";
 
 class HTMLContentBuilder {
   constructor(private readonly stats: StatisticsAggregate) {}
@@ -99,7 +99,7 @@ class HTMLContentBuilder {
   };
 
   private mergedEventsStatistics() {
-    const mergedEventsStatistics = (this.stats.mergedEventsStatistics as MergeEventsStatisticsByPeriod).result()
+    const mergedEventsStatistics = (this.stats.mergedEventsStatistics as MergedEventsStatistics).result()
       .mergeEventsResults;
     const mergedEventMonthsLabels: string[] = [];
     const mergedEventsMonthsData: number[] = [];

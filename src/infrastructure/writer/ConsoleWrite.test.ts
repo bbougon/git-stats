@@ -1,9 +1,10 @@
 import { ConsoleWriter, GitFlowsConsole } from "./ConsoleWriter";
-import { MergeEvent, MergeEventStatistics } from "../../statistics/merge-events/MergeEvent";
+import { MergeEvent } from "../../statistics/merge-events/MergeEvent";
 import { MergeEventBuilderForMR } from "../../__tests__/builder";
 import { parseISO } from "date-fns";
-import { MergeEventsStatisticsByPeriod } from "../../statistics/MergeEventsStatisticsByPeriod";
+import { MergedEventsStatistics } from "../../statistics/MergedEventsStatistics";
 import { CumulativeStatistics } from "../../statistics/CumulativeStatistics";
+import { MergeEventStatistics } from "../../statistics/MergeEventsStatistics";
 
 class TestConsole implements GitFlowsConsole {
   message = {};
@@ -39,7 +40,7 @@ describe("Console writer", () => {
     const consoleWriter = new ConsoleWriter(console);
     consoleWriter.write({
       mergeEvents: new MergeEventStatistics(mergeEvents, period),
-      mergedEventsStatistics: new MergeEventsStatisticsByPeriod(mergeEvents, period, (mr: MergeEvent) => ({
+      mergedEventsStatistics: new MergedEventsStatistics(mergeEvents, period, (mr: MergeEvent) => ({
         end: mr.mergedAt,
         start: mr.start,
       })),

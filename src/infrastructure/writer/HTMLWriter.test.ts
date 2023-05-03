@@ -6,9 +6,10 @@ import * as os from "os";
 import * as fs from "fs";
 import { MergeEventBuilderForMR } from "../../__tests__/builder.js";
 import { parseISO } from "date-fns";
-import { MergeEvent, MergeEventStatistics } from "../../statistics/merge-events/MergeEvent.js";
+import { MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
 import { CumulativeStatistics } from "../../statistics/CumulativeStatistics";
-import { MergeEventsStatisticsByPeriod } from "../../statistics/MergeEventsStatisticsByPeriod";
+import { MergedEventsStatistics } from "../../statistics/MergedEventsStatistics";
+import { MergeEventStatistics } from "../../statistics/MergeEventsStatistics";
 
 jest.mock("./FilePathConstant", () => ({
   __dirname: "src/infrastructure/writer/",
@@ -47,7 +48,7 @@ describe("HTML writer", () => {
         end: mr.mergedAt || mr.closedAt,
         start: mr.start,
       })),
-      mergedEventsStatistics: new MergeEventsStatisticsByPeriod(mergeEvents, period, (mr: MergeEvent) => ({
+      mergedEventsStatistics: new MergedEventsStatistics(mergeEvents, period, (mr: MergeEvent) => ({
         end: mr.mergedAt,
         start: mr.start,
       })),
@@ -84,7 +85,7 @@ describe("HTML writer", () => {
         end: mr.mergedAt || mr.closedAt,
         start: mr.start,
       })),
-      mergedEventsStatistics: new MergeEventsStatisticsByPeriod(mergeEvents, period, (mr: MergeEvent) => ({
+      mergedEventsStatistics: new MergedEventsStatistics(mergeEvents, period, (mr: MergeEvent) => ({
         end: mr.mergedAt,
         start: mr.start,
       })),
@@ -119,7 +120,7 @@ describe("HTML writer", () => {
         end: mr.mergedAt || mr.closedAt,
         start: mr.start,
       })),
-      mergedEventsStatistics: new MergeEventsStatisticsByPeriod(mergeEvents, period, (mr: MergeEvent) => ({
+      mergedEventsStatistics: new MergedEventsStatistics(mergeEvents, period, (mr: MergeEvent) => ({
         end: mr.mergedAt,
         start: mr.start,
       })),

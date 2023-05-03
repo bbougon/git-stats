@@ -1,6 +1,6 @@
 import { Writer } from "../../../index.js";
 import { StatisticsAggregate } from "../../statistics/GitStatistics.js";
-import { MergeEventsStatisticsByPeriodResults } from "../../statistics/MergeEventsStatisticsByPeriod.js";
+import { MergedEventsStatisticsResults } from "../../statistics/MergedEventsStatistics.js";
 import { GitStatistics } from "../../statistics/Statistics.js";
 import { CumulativeStatisticsResult } from "../../statistics/CumulativeStatistics.js";
 
@@ -24,7 +24,7 @@ type PeriodRecord = Record<string, PeriodUnitRecord[]>;
 
 class MergedEventsStatisticByPeriodBuilder implements StatisticBuilder<{ mergedEventsStatistics: PeriodRecord[] }> {
   build(statistics: GitStatistics): { mergedEventsStatistics: PeriodRecord[] } {
-    const events = (statistics.result() as MergeEventsStatisticsByPeriodResults).mergeEventsResults;
+    const events = (statistics.result() as MergedEventsStatisticsResults).mergeEventsResults;
     const data: PeriodRecord[] = [];
     events.forEach((period, year) => {
       const periodRecord: PeriodRecord = {};

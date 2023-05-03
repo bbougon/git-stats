@@ -1,8 +1,9 @@
-import { MergeEvent, MergeEventRepository, MergeEventStatistics } from "./merge-events/MergeEvent.js";
+import { MergeEvent, MergeEventRepository } from "./merge-events/MergeEvent.js";
 import { RequestParameters } from "../../index.js";
 import { CumulativeStatistics } from "./CumulativeStatistics.js";
 import { GitStatistics } from "./Statistics.js";
-import { MergeEventsStatisticsByPeriod } from "./MergeEventsStatisticsByPeriod.js";
+import { MergedEventsStatistics } from "./MergedEventsStatistics.js";
+import { MergeEventStatistics } from "./MergeEventsStatistics.js";
 
 type StatisticsAggregate = { [key: string]: GitStatistics };
 
@@ -13,7 +14,7 @@ const gitStatistics = (
   return repository.getMergeEventsForPeriod(requestParameter).then((mergeEvents) => {
     const period = { end: requestParameter.toDate, start: requestParameter.fromDate };
     const mergeEventStatistics = new MergeEventStatistics(mergeEvents, period);
-    const mergeEventsStatisticsByPeriod = new MergeEventsStatisticsByPeriod(mergeEvents, period, (mr: MergeEvent) => ({
+    const mergeEventsStatisticsByPeriod = new MergedEventsStatistics(mergeEvents, period, (mr: MergeEvent) => ({
       end: mr.mergedAt,
       start: mr.start,
     }));

@@ -12,7 +12,7 @@ import { gitStatistics } from "./GitStatistics.js";
 import { MergeRequestsStatsParameters } from "./Gitlab.js";
 import Duration from "./Duration.js";
 import { CumulativeStatisticsResult, TrendCalculator } from "./CumulativeStatistics";
-import { MergeEventsStatisticsByPeriodResults } from "./MergeEventsStatisticsByPeriod";
+import { MergedEventsStatisticsResults } from "./MergedEventsStatistics";
 import { PullRequestsStatsParameter } from "./Github";
 import { MergeRequestMemoryRepository, PullRequestMemoryRepository } from "../__tests__/MemoryRepositories";
 
@@ -181,7 +181,7 @@ describe("Git Statistics", () => {
               } as MergeRequestsStatsParameters,
               repository
             )
-          ).mergedEventsStatistics.result() as MergeEventsStatisticsByPeriodResults
+          ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
         ).mergeEventsResults;
 
         const month = eventsByPeriod.get(2022)[0].Month[0];
@@ -211,7 +211,7 @@ describe("Git Statistics", () => {
               } as MergeRequestsStatsParameters,
               repository
             )
-          ).mergedEventsStatistics.result() as MergeEventsStatisticsByPeriodResults
+          ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
         ).mergeEventsResults;
 
         const months = eventsByPeriod.get(2023)[0].Month;
@@ -239,7 +239,7 @@ describe("Git Statistics", () => {
               } as MergeRequestsStatsParameters,
               repository
             )
-          ).mergedEventsStatistics.result() as MergeEventsStatisticsByPeriodResults
+          ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
         ).mergeEventsResults;
 
         const monthsIn2022 = eventsByPeriod.get(2022)[0].Month;
@@ -283,7 +283,7 @@ describe("Git Statistics", () => {
               } as MergeRequestsStatsParameters,
               repository
             )
-          ).mergedEventsStatistics.result() as MergeEventsStatisticsByPeriodResults
+          ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
         ).mergeEventsResults;
 
         const monthsIn2020 = eventsByPeriod.get(2020)[0].Month;
@@ -319,7 +319,7 @@ describe("Git Statistics", () => {
               } as PullRequestsStatsParameter,
               repository
             )
-          ).mergedEventsStatistics.result() as MergeEventsStatisticsByPeriodResults
+          ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
         ).mergeEventsResults;
 
         const months = eventsByPeriod.get(2021)[0].Month;
@@ -357,7 +357,7 @@ describe("Git Statistics", () => {
               } as PullRequestsStatsParameter,
               repository
             )
-          ).mergedEventsStatistics.result() as MergeEventsStatisticsByPeriodResults
+          ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
         ).mergeEventsResults;
 
         const monthsIn2021 = eventsByPeriod.get(2021)[0].Month;
@@ -409,7 +409,7 @@ describe("Git Statistics", () => {
                 } as MergeRequestsStatsParameters,
                 repository
               )
-            ).mergedEventsStatistics.result() as MergeEventsStatisticsByPeriodResults
+            ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
           ).mergeEventsResults;
 
           const months = eventsByPeriod.get(2021)[0].Month;
@@ -464,7 +464,7 @@ describe("Git Statistics", () => {
                 } as MergeRequestsStatsParameters,
                 repository
               )
-            ).mergedEventsStatistics.result() as MergeEventsStatisticsByPeriodResults
+            ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
           ).mergeEventsResults;
 
           const months = eventsByPeriod.get(2021)[0].Month;
@@ -530,7 +530,7 @@ describe("Git Statistics", () => {
                 } as MergeRequestsStatsParameters,
                 repository
               )
-            ).mergedEventsStatistics.result() as MergeEventsStatisticsByPeriodResults
+            ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
           ).mergeEventsResults;
 
           const months = eventsByPeriod.get(2021)[0].Month;
@@ -585,7 +585,7 @@ describe("Git Statistics", () => {
                 } as MergeRequestsStatsParameters,
                 repository
               )
-            ).mergedEventsStatistics.result() as MergeEventsStatisticsByPeriodResults
+            ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
           ).mergeEventsResults;
 
           const months = eventsByPeriod.get(2021)[0].Month;
