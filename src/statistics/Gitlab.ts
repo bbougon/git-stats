@@ -1,5 +1,5 @@
 import { RequestParameters } from "../../index.js";
 
-export type MergeRequestsStatsParameters = RequestParameters & {
+export type GitlabEventParameters = RequestParameters & {
   projectId: number;
 };

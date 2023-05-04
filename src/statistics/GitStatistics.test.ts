@@ -1,20 +1,30 @@
 import { parseISO } from "date-fns";
-import { MergeEvent, MergeEventRepository } from "./merge-events/MergeEvent.js";
+import { MergeEvent } from "./merge-events/MergeEvent.js";
 import {
   CumulativeStatisticBuilder,
+  IssueEventBuilder,
   MergeEventBuilderForMR,
   MergeEventBuilderForPR,
   MergeEventsBuilderForMR,
   RandomInPeriodMergeEventsBuilder,
   WeekPeriodMergeEventsBuilder,
 } from "../__tests__/builder.js";
-import { gitStatistics } from "./GitStatistics.js";
-import { MergeRequestsStatsParameters } from "./Gitlab.js";
+import { gitStatistics, Unit, Year } from "./GitStatistics.js";
+import { GitlabEventParameters } from "./Gitlab.js";
 import Duration from "./Duration.js";
-import { CumulativeStatisticsResult, TrendCalculator } from "./CumulativeStatistics";
-import { MergedEventsStatisticsResults } from "./MergedEventsStatistics";
+import { CumulativeStatistic, TrendCalculator } from "./CumulativeStatistics";
 import { PullRequestsStatsParameter } from "./Github";
-import { MergeRequestMemoryRepository, PullRequestMemoryRepository } from "../__tests__/MemoryRepositories";
+import {
+  GithubMemoryRepositories,
+  GitlabMemoryRepositories,
+  IssueEventsMemoryRepository,
+  MergeRequestMemoryRepository,
+  PullRequestMemoryRepository,
+} from "../__tests__/MemoryRepositories";
+import { MergedEventsStatisticFlow } from "./MergedEventsStatistics";
+import { RequestParameters } from "../../index";
+import { Repositories } from "./Repositories";
+import { EventRepository } from "./EventRepository";
 
 describe("Git Statistics", () => {
   function getEventDate() {
@@ -23,8 +33,11 @@ describe("Git Statistics", () => {
 
   describe("Merge events", () => {
     describe("Aggregated statistics", () => {
+      beforeEach(() => {
+        new GitlabMemoryRepositories();
+      });
       it("should have merge events average", async () => {
-        const repository: MergeEventRepository = new MergeRequestMemoryRepository();
+        const repository: EventRepository<MergeEvent> = Repositories.mergeEvent();
         repository.persist(
           new MergeEventBuilderForMR(1)
             .createdAt(parseISO("2022-02-11T00:00:00"))
@@ -51,24 +64,21 @@ describe("Git Statistics", () => {
         );
 
         const stats = (
-          await gitStatistics(
-            {
-              projectId: 1,
-              fromDate: parseISO("2022-02-11T00:00:00"),
-              toDate: parseISO("2022-02-25T00:00:00"),
-            } as MergeRequestsStatsParameters,
-            repository
-          )
-        ).mergeEvents;
+          await gitStatistics({
+            projectId: 1,
+            fromDate: parseISO("2022-02-11T00:00:00"),
+            toDate: parseISO("2022-02-25T00:00:00"),
+          } as GitlabEventParameters)
+        ).mergeEvents.result();
 
-        expect(stats.result()).toEqual({
+        expect(stats.results).toEqual({
           average: { months: 0, days: 3, hours: 0, minutes: 0, seconds: 0 },
           total: { all: 3, merged: 3, closed: 0, opened: 0 },
         });
       });
 
       it("should have merge events average when merge request is not merged yet", async () => {
-        const repository: MergeEventRepository = new MergeRequestMemoryRepository();
+        const repository: EventRepository<MergeEvent> = Repositories.mergeEvent();
         repository.persist(
           new MergeEventBuilderForMR(1)
             .createdAt(parseISO("2022-05-11T12:35:37"))
@@ -80,24 +90,21 @@ describe("Git Statistics", () => {
         );
 
         const stats = (
-          await gitStatistics(
-            {
-              projectId: 1,
-              fromDate: parseISO("2022-05-08T00:00:00"),
-              toDate: parseISO("2022-05-15T00:00:00"),
-            } as MergeRequestsStatsParameters,
-            repository
-          )
-        ).mergeEvents;
+          await gitStatistics({
+            projectId: 1,
+            fromDate: parseISO("2022-05-08T00:00:00"),
+            toDate: parseISO("2022-05-15T00:00:00"),
+          } as GitlabEventParameters)
+        ).mergeEvents.result();
 
-        expect(stats.result()).toEqual({
-          average: { months: 0, days: 1, hours: 1, minutes: 0, seconds: 0 },
+        expect(stats.results).toEqual({
+          average: { months: 0, days: 1, hours: 1, minutes: 4, seconds: 45 },
           total: { all: 2, merged: 1, closed: 0, opened: 1 },
         });
       });
 
       it("should have merge events average with closed merge requests", async () => {
-        const repository: MergeEventRepository = new MergeRequestMemoryRepository();
+        const repository: EventRepository<MergeEvent> = Repositories.mergeEvent();
         repository.persist(
           new MergeEventBuilderForMR(1)
             .createdAt(parseISO("2022-05-11T12:35:37"))
@@ -112,24 +119,21 @@ describe("Git Statistics", () => {
         );
 
         const stats = (
-          await gitStatistics(
-            {
-              projectId: 1,
-              fromDate: parseISO("2022-05-08T00:00:00"),
-              toDate: parseISO("2022-05-15T00:00:00"),
-            } as MergeRequestsStatsParameters,
-            repository
-          )
-        ).mergeEvents;
+          await gitStatistics({
+            projectId: 1,
+            fromDate: parseISO("2022-05-08T00:00:00"),
+            toDate: parseISO("2022-05-15T00:00:00"),
+          } as GitlabEventParameters)
+        ).mergeEvents.result();
 
-        expect(stats.result()).toEqual({
-          average: { months: 0, days: 1, hours: 1, minutes: 0, seconds: 0 },
+        expect(stats.results).toEqual({
+          average: { months: 0, days: 1, hours: 1, minutes: 4, seconds: 45 },
           total: { all: 2, merged: 1, closed: 1, opened: 0 },
         });
       });
 
       it("should have merge events average for duration greater than a month", async () => {
-        const repository: MergeEventRepository = new MergeRequestMemoryRepository();
+        const repository: EventRepository<MergeEvent> = Repositories.mergeEvent();
         repository.persist(
           new MergeEventBuilderForMR(1)
             .createdAt(parseISO("2022-01-10T12:34:25"))
@@ -138,18 +142,15 @@ describe("Git Statistics", () => {
         );
 
         const stats = (
-          await gitStatistics(
-            {
-              projectId: 1,
-              fromDate: parseISO("2022-01-01T00:00:00"),
-              toDate: parseISO("2022-02-25T00:00:00"),
-            } as MergeRequestsStatsParameters,
-            repository
-          )
-        ).mergeEvents;
+          await gitStatistics({
+            projectId: 1,
+            fromDate: parseISO("2022-01-01T00:00:00"),
+            toDate: parseISO("2022-02-25T00:00:00"),
+          } as GitlabEventParameters)
+        ).mergeEvents.result();
 
-        expect(stats.result()).toEqual({
-          average: { months: 1, days: 4, hours: 4, minutes: 0, seconds: 0 },
+        expect(stats.results).toEqual({
+          average: { months: 1, days: 4, hours: 4, minutes: 48, seconds: 29 },
           total: { all: 1, merged: 1, closed: 0, opened: 0 },
         });
       });
@@ -159,7 +160,8 @@ describe("Git Statistics", () => {
       let repository: MergeRequestMemoryRepository | PullRequestMemoryRepository;
 
       beforeEach(() => {
-        repository = new MergeRequestMemoryRepository();
+        new GitlabMemoryRepositories();
+        repository = Repositories.mergeEvent() as MergeRequestMemoryRepository;
       });
 
       it("should sort the periods", async () => {
@@ -169,20 +171,15 @@ describe("Git Statistics", () => {
           .randomly(new RandomInPeriodMergeEventsBuilder(20, 7))
           .forPeriod(start, end)
           .build();
-        repository.persistAll(mergeEvents);
+        (Repositories.mergeEvent() as MergeRequestMemoryRepository).persistAll(mergeEvents);
 
         const eventsByPeriod = (
-          (
-            await gitStatistics(
-              {
-                projectId: 1,
-                fromDate: start,
-                toDate: end,
-              } as MergeRequestsStatsParameters,
-              repository
-            )
-          ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
-        ).mergeEventsResults;
+          await gitStatistics({
+            projectId: 1,
+            fromDate: start,
+            toDate: end,
+          } as GitlabEventParameters)
+        ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
 
         const month = eventsByPeriod.get(2022)[0].Month[0];
         expect(month.index).toEqual(1);
@@ -202,17 +199,12 @@ describe("Git Statistics", () => {
         repository.persistAll(mergeEvents);
 
         const eventsByPeriod = (
-          (
-            await gitStatistics(
-              {
-                projectId: 1,
-                fromDate: start,
-                toDate: end,
-              } as MergeRequestsStatsParameters,
-              repository
-            )
-          ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
-        ).mergeEventsResults;
+          await gitStatistics({
+            projectId: 1,
+            fromDate: start,
+            toDate: end,
+          } as GitlabEventParameters)
+        ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
 
         const months = eventsByPeriod.get(2023)[0].Month;
         expect(months.flatMap((month) => month.index)).toStrictEqual([0, 1]);
@@ -230,17 +222,12 @@ describe("Git Statistics", () => {
         repository.persistAll(mergeEvents);
 
         const eventsByPeriod = (
-          (
-            await gitStatistics(
-              {
-                projectId: 1,
-                fromDate: start,
-                toDate: end,
-              } as MergeRequestsStatsParameters,
-              repository
-            )
-          ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
-        ).mergeEventsResults;
+          await gitStatistics({
+            projectId: 1,
+            fromDate: start,
+            toDate: end,
+          } as GitlabEventParameters)
+        ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
 
         const monthsIn2022 = eventsByPeriod.get(2022)[0].Month;
         expect(monthsIn2022.flatMap((month) => month.index)).toStrictEqual([9, 10, 11]);
@@ -274,24 +261,20 @@ describe("Git Statistics", () => {
         repository.persistAll(mergeEvents);
 
         const eventsByPeriod = (
-          (
-            await gitStatistics(
-              {
-                projectId: 1,
-                fromDate: start,
-                toDate: end,
-              } as MergeRequestsStatsParameters,
-              repository
-            )
-          ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
-        ).mergeEventsResults;
+          await gitStatistics({
+            projectId: 1,
+            fromDate: start,
+            toDate: end,
+          } as GitlabEventParameters)
+        ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
 
         const monthsIn2020 = eventsByPeriod.get(2020)[0].Month;
         expect(monthsIn2020.flatMap((month) => month.index)).toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
       });
 
       it("should fill empty periods in the middle of a year", async () => {
-        repository = new PullRequestMemoryRepository();
+        new GithubMemoryRepositories();
+        repository = Repositories.mergeEvent() as PullRequestMemoryRepository;
         const start = parseISO("2021-08-01T00:00:00");
         const end = parseISO("2021-08-31T00:00:00");
         const mergeEvents = [
@@ -309,18 +292,13 @@ describe("Git Statistics", () => {
         repository.persistAll(mergeEvents);
 
         const eventsByPeriod = (
-          (
-            await gitStatistics(
-              {
-                repo: "crm-pilates",
-                owner: "someone",
-                fromDate: start,
-                toDate: end,
-              } as PullRequestsStatsParameter,
-              repository
-            )
-          ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
-        ).mergeEventsResults;
+          await gitStatistics({
+            repo: "crm-pilates",
+            owner: "someone",
+            fromDate: start,
+            toDate: end,
+          } as PullRequestsStatsParameter)
+        ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
 
         const months = eventsByPeriod.get(2021)[0].Month;
         expect(months.flatMap((month) => month.index)).toStrictEqual([7]);
@@ -329,7 +307,8 @@ describe("Git Statistics", () => {
       });
 
       it("should create all periods if it does exactly one year", async () => {
-        repository = new PullRequestMemoryRepository();
+        new GithubMemoryRepositories();
+        repository = Repositories.mergeEvent() as PullRequestMemoryRepository;
         const start = parseISO("2021-03-01T00:00:00");
         const end = parseISO("2022-03-02T00:00:00");
         const mergeEvents = [
@@ -347,18 +326,13 @@ describe("Git Statistics", () => {
         repository.persistAll(mergeEvents);
 
         const eventsByPeriod = (
-          (
-            await gitStatistics(
-              {
-                repo: "crm-pilates",
-                owner: "any",
-                fromDate: start,
-                toDate: end,
-              } as PullRequestsStatsParameter,
-              repository
-            )
-          ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
-        ).mergeEventsResults;
+          await gitStatistics({
+            repo: "crm-pilates",
+            owner: "any",
+            fromDate: start,
+            toDate: end,
+          } as PullRequestsStatsParameter)
+        ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
 
         const monthsIn2021 = eventsByPeriod.get(2021)[0].Month;
         expect(monthsIn2021.flatMap((month) => month.index)).toStrictEqual([2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
@@ -400,17 +374,12 @@ describe("Git Statistics", () => {
           repository.persistAll(mergeEvents);
 
           const eventsByPeriod = (
-            (
-              await gitStatistics(
-                {
-                  projectId: 3,
-                  fromDate: start,
-                  toDate: end,
-                } as MergeRequestsStatsParameters,
-                repository
-              )
-            ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
-          ).mergeEventsResults;
+            await gitStatistics({
+              projectId: 3,
+              fromDate: start,
+              toDate: end,
+            } as GitlabEventParameters)
+          ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
 
           const months = eventsByPeriod.get(2021)[0].Month;
           const expectedMonthAverageDuration: Duration = {
@@ -455,17 +424,12 @@ describe("Git Statistics", () => {
           repository.persistAll(mergeEvents);
 
           const eventsByPeriod = (
-            (
-              await gitStatistics(
-                {
-                  projectId: 3,
-                  fromDate: start,
-                  toDate: end,
-                } as MergeRequestsStatsParameters,
-                repository
-              )
-            ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
-          ).mergeEventsResults;
+            await gitStatistics({
+              projectId: 3,
+              fromDate: start,
+              toDate: end,
+            } as GitlabEventParameters)
+          ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
 
           const months = eventsByPeriod.get(2021)[0].Month;
           const expectedMonthAverageDuration: Duration = {
@@ -521,17 +485,12 @@ describe("Git Statistics", () => {
           repository.persistAll(mergeEvents);
 
           const eventsByPeriod = (
-            (
-              await gitStatistics(
-                {
-                  projectId: 3,
-                  fromDate: start,
-                  toDate: end,
-                } as MergeRequestsStatsParameters,
-                repository
-              )
-            ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
-          ).mergeEventsResults;
+            await gitStatistics({
+              projectId: 3,
+              fromDate: start,
+              toDate: end,
+            } as GitlabEventParameters)
+          ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
 
           const months = eventsByPeriod.get(2021)[0].Month;
           const expectedMonthMedianDuration: Duration = {
@@ -576,17 +535,12 @@ describe("Git Statistics", () => {
           repository.persistAll(mergeEvents);
 
           const eventsByPeriod = (
-            (
-              await gitStatistics(
-                {
-                  projectId: 3,
-                  fromDate: start,
-                  toDate: end,
-                } as MergeRequestsStatsParameters,
-                repository
-              )
-            ).mergedEventsStatistics.result() as MergedEventsStatisticsResults
-          ).mergeEventsResults;
+            await gitStatistics({
+              projectId: 3,
+              fromDate: start,
+              toDate: end,
+            } as GitlabEventParameters)
+          ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
 
           const months = eventsByPeriod.get(2021)[0].Month;
           const expectedMonthAverageDuration: Duration = {
@@ -613,8 +567,10 @@ describe("Git Statistics", () => {
 
     describe("Cumulative merge events statistics", () => {
       let repository: MergeRequestMemoryRepository;
+
       beforeEach(() => {
-        repository = new MergeRequestMemoryRepository();
+        new GitlabMemoryRepositories();
+        repository = Repositories.mergeEvent() as MergeRequestMemoryRepository;
       });
 
       it("should have total cumulative merged events in period", async () => {
@@ -629,17 +585,12 @@ describe("Git Statistics", () => {
         repository.persistAll(mergeEvents);
 
         const eventsByPeriod = (
-          (
-            await gitStatistics(
-              {
-                projectId: 1,
-                fromDate: start,
-                toDate: end,
-              } as MergeRequestsStatsParameters,
-              repository
-            )
-          ).cumulativeStatistics.result() as CumulativeStatisticsResult
-        ).cumulativeResults;
+          await gitStatistics({
+            projectId: 1,
+            fromDate: start,
+            toDate: end,
+          } as GitlabEventParameters)
+        ).cumulativeStatistics.result<Map<Unit, CumulativeStatistic[]>>().results;
 
         const months = eventsByPeriod.get("Month");
         expect(months[0].opened).toBeGreaterThanOrEqual(12);
@@ -670,17 +621,12 @@ describe("Git Statistics", () => {
         repository.persistAll(mergeEvents);
 
         const eventsByPeriod = (
-          (
-            await gitStatistics(
-              {
-                projectId: 1,
-                fromDate: start,
-                toDate: end,
-              } as MergeRequestsStatsParameters,
-              repository
-            )
-          ).cumulativeStatistics.result() as CumulativeStatisticsResult
-        ).cumulativeResults;
+          await gitStatistics({
+            projectId: 1,
+            fromDate: start,
+            toDate: end,
+          } as GitlabEventParameters)
+        ).cumulativeStatistics.result<Map<Unit, CumulativeStatistic[]>>().results;
 
         const months = eventsByPeriod.get("Month");
         expect(months[0].opened).toBeGreaterThanOrEqual(16);
@@ -708,17 +654,12 @@ describe("Git Statistics", () => {
         repository.persistAll(mergeEvents);
 
         const eventsByPeriod = (
-          (
-            await gitStatistics(
-              {
-                projectId: 1,
-                fromDate: start,
-                toDate: end,
-              } as MergeRequestsStatsParameters,
-              repository
-            )
-          ).cumulativeStatistics.result() as CumulativeStatisticsResult
-        ).cumulativeResults;
+          await gitStatistics({
+            projectId: 1,
+            fromDate: start,
+            toDate: end,
+          } as GitlabEventParameters)
+        ).cumulativeStatistics.result<Map<Unit, CumulativeStatistic[]>>().results;
 
         const months = eventsByPeriod.get("Month");
         expect(months[0].opened).toBe(20);
@@ -755,6 +696,39 @@ describe("Git Statistics", () => {
           TrendCalculator.calculate([firstCumulative]);
 
           expect(firstCumulative.trend).toBe(3);
+        });
+      });
+    });
+  });
+
+  describe("Issues", () => {
+    describe("Aggregated Statistics", () => {
+      beforeEach(() => {
+        new GitlabMemoryRepositories();
+      });
+
+      it("should have aggregate issues statistics", async () => {
+        const repository: IssueEventsMemoryRepository = Repositories.issueEvent() as IssueEventsMemoryRepository;
+        const firstIssue = new IssueEventBuilder(1).createdAt(parseISO("2022-05-01T10:52:00")).build();
+        const secondIssue = new IssueEventBuilder(1).createdAt(parseISO("2022-05-11T13:32:00")).build();
+        const thirdIssue = new IssueEventBuilder(1).createdAt(parseISO("2022-05-13T15:25:00")).build();
+        const fourthIssue = new IssueEventBuilder(1).createdAt(parseISO("2022-05-21T09:18:00")).build();
+        const fifthIssue = new IssueEventBuilder(1)
+          .createdAt(parseISO("2022-05-21T11:28:00"))
+          .closedAt(parseISO("2022-05-21T15:58:00"))
+          .build();
+        repository.persistAll([firstIssue, secondIssue, thirdIssue, fourthIssue, fifthIssue]);
+
+        const gitStatistics1 = await gitStatistics({
+          projectId: 1,
+          fromDate: parseISO("2022-05-01T00:00:00"),
+          toDate: parseISO("2022-05-31T23:59:59"),
+        } as RequestParameters);
+        const statistics = gitStatistics1.issues.result();
+
+        expect(statistics.results).toEqual({
+          average: { months: 0, days: 0, hours: 4, minutes: 30, seconds: 0 },
+          total: { all: 5, closed: 1, opened: 4 },
         });
       });
     });

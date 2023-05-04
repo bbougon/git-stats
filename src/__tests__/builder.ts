@@ -10,6 +10,7 @@ import {
 } from "date-fns";
 import { MergeEvent } from "../statistics/merge-events/MergeEvent.js";
 import { CumulativeStatistic } from "../statistics/CumulativeStatistics";
+import { IssueEvent } from "../statistics/issues/Issues";
 
 export class MergeEventBuilderForMR {
   private projectId: number;
@@ -281,6 +282,34 @@ export class CumulativeStatisticBuilder {
       opened: this._opened,
       closed: this._closed,
       trend: 0,
+    };
+  };
+}
+
+export class IssueEventBuilder {
+  private _createdAt: Date;
+  private _closedAt: Date | null;
+  constructor(private readonly projectId: number, private readonly id: number = crypto.randomInt(2 ^ 16)) {
+    this._closedAt = null;
+  }
+
+  createdAt = (createdAt: Date): IssueEventBuilder => {
+    this._createdAt = createdAt;
+    return this;
+  };
+
+  closedAt = (closedAt: Date): IssueEventBuilder => {
+    this._closedAt = closedAt;
+    return this;
+  };
+
+  build = (): IssueEvent => {
+    return {
+      closedAt: this._closedAt,
+      id: this.id,
+      project: this.projectId,
+      start: this._createdAt,
+      state: this._closedAt === null ? "opened" : "closed",
     };
   };
 }

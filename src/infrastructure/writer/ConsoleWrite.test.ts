@@ -4,7 +4,7 @@ import { MergeEventBuilderForMR } from "../../__tests__/builder";
 import { parseISO } from "date-fns";
 import { MergedEventsStatistics } from "../../statistics/MergedEventsStatistics";
 import { CumulativeStatistics } from "../../statistics/CumulativeStatistics";
-import { MergeEventStatistics } from "../../statistics/MergeEventsStatistics";
+import { MergeEventStatistics } from "../../statistics/merge-events/MergeEventsStatistics";
 
 class TestConsole implements GitFlowsConsole {
   message = {};
@@ -56,9 +56,9 @@ describe("Console writer", () => {
           average: {
             days: 3,
             hours: 3,
-            minutes: 0,
+            minutes: 21,
             months: 0,
-            seconds: 0,
+            seconds: 21,
           },
           total: {
             all: 3,

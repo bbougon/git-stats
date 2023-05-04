@@ -1,16 +1,16 @@
-import { MergeEventBuilderForPR } from "../../__tests__/builder.js";
 import { formatISO, parseISO } from "date-fns";
 import { PullRequestDTO, PullRequestHTTPGithubRepository } from "./PullRequestHTTPGithubRepository.js";
-import { MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
-import { PullRequestsStatsParameter } from "../../statistics/Github.js";
 import MockAdapter from "axios-mock-adapter";
-import { axiosInstance } from "./axios";
+import { MergeEvent } from "../../../statistics/merge-events/MergeEvent";
+import { axiosInstance } from "../axios";
+import { MergeEventBuilderForPR } from "../../../__tests__/builder";
+import { PullRequestsStatsParameter } from "../../../statistics/Github";
 
-jest.mock("../progress-bar/ProgressBar", () => {
+jest.mock("../../progress-bar/ProgressBar", () => {
   return { progressBar: (_title: string) => jest.fn() };
 });
 
-describe("Github repository", () => {
+describe("Pull Request repository", () => {
   let firstPullRequest: MergeEvent;
   let secondPullRequest: MergeEvent;
   let thirdPullRequest: MergeEvent;
@@ -95,7 +95,7 @@ describe("Github repository", () => {
       toDate: parseISO("2021-11-10T00:00:00Z"),
       owner: "bertrand",
     } as PullRequestsStatsParameter;
-    const pullRequests = await new PullRequestHTTPGithubRepository("my-token").getMergeEventsForPeriod(
+    const pullRequests = await new PullRequestHTTPGithubRepository("my-token").getEventsForPeriod(
       pullRequestParameters
     );
 
@@ -121,7 +121,7 @@ describe("Github repository", () => {
       toDate: parseISO("2021-11-10T00:00:00Z"),
       owner: "bertrand",
     } as PullRequestsStatsParameter;
-    const pullRequests = await new PullRequestHTTPGithubRepository("my-token").getMergeEventsForPeriod(
+    const pullRequests = await new PullRequestHTTPGithubRepository("my-token").getEventsForPeriod(
       pullRequestParameters
     );
 
@@ -152,7 +152,7 @@ describe("Github repository", () => {
       toDate: parseISO("2021-11-10T00:00:00Z"),
       owner: "bertrand",
     } as PullRequestsStatsParameter;
-    const pullRequests = await new PullRequestHTTPGithubRepository("my-token").getMergeEventsForPeriod(
+    const pullRequests = await new PullRequestHTTPGithubRepository("my-token").getEventsForPeriod(
       pullRequestParameters
     );
 

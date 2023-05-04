@@ -5,14 +5,15 @@ import { openBrowser } from "./OpenBrowser.js";
 import * as pug from "pug";
 import * as path from "path";
 import { __dirname } from "./FilePathConstant.js";
-import { StatisticsAggregate } from "../../statistics/GitStatistics.js";
+import { StatisticsAggregate, Unit, Year } from "../../statistics/GitStatistics.js";
 import { progressBar } from "../progress-bar/ProgressBar.js";
 import { Title } from "../progress-bar/Title.js";
 import { HUMAN_READABLE_MONTHS } from "./HumanReadableLabels.js";
 import moment from "moment/moment.js";
 import Duration from "../../statistics/Duration.js";
-import { CumulativeStatistics } from "../../statistics/CumulativeStatistics.js";
-import { MergedEventsStatistics } from "../../statistics/MergedEventsStatistics.js";
+import { CumulativeStatistic } from "../../statistics/CumulativeStatistics.js";
+import { MergedEventsStatisticFlow } from "../../statistics/MergedEventsStatistics.js";
+import { MergeEventsStatisticsResult } from "../../statistics/merge-events/MergeEventsStatistics.js";
 
 class HTMLContentBuilder {
   constructor(private readonly stats: StatisticsAggregate) {}
@@ -56,7 +57,7 @@ class HTMLContentBuilder {
       cumulativeTrendWeeksData,
     } = this.cumulativeStatistics();
 
-    const aggregatedStats = this.stats.mergeEvents.result();
+    const aggregatedStats = this.stats.mergeEvents.result<MergeEventsStatisticsResult>().results;
     const start = humanizeDate(this.stats.mergeEvents.period.start);
     const end = humanizeDate(this.stats.mergeEvents.period.end);
     const templateFilePath = path.resolve(__dirname, "../../../templates/template.pug");
@@ -99,8 +100,8 @@ class HTMLContentBuilder {
   };
 
   private mergedEventsStatistics() {
-    const mergedEventsStatistics = (this.stats.mergedEventsStatistics as MergedEventsStatistics).result()
-      .mergeEventsResults;
+    const mergedEventsStatistics =
+      this.stats.mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
     const mergedEventMonthsLabels: string[] = [];
     const mergedEventsMonthsData: number[] = [];
     const mergedEventsMonthsAverageTimeData: number[] = [];
@@ -163,7 +164,7 @@ class HTMLContentBuilder {
     const cumulativeOpenedWeeksData: number[] = [];
     const cumulativeClosedWeeksData: number[] = [];
     const cumulativeTrendWeeksData: number[] = [];
-    const cumulativeStatistics = (this.stats.cumulativeStatistics as CumulativeStatistics).result().cumulativeResults;
+    const cumulativeStatistics = this.stats.cumulativeStatistics.result<Map<Unit, CumulativeStatistic[]>>().results;
 
     cumulativeStatistics.get("Month").forEach((cumulativeStatistics) => {
       cumulativeMonthsLabels.push(HUMAN_READABLE_MONTHS[cumulativeStatistics.index]);
@@ -193,7 +194,7 @@ class HTMLContentBuilder {
 }
 
 export class HTMLWriter implements Writer {
-  private _filePath: string;
+  private readonly _filePath: string;
 
   constructor(filePath: string) {
     this._filePath = filePath;
