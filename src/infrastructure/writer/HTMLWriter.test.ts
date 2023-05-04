@@ -9,7 +9,7 @@ import { parseISO } from "date-fns";
 import { MergeEvent } from "../../statistics/merge-events/MergeEvent.js";
 import { CumulativeStatistics } from "../../statistics/CumulativeStatistics";
 import { MergedEventsStatistics } from "../../statistics/MergedEventsStatistics";
-import { MergeEventStatistics } from "../../statistics/MergeEventsStatistics";
+import { MergeEventStatistics } from "../../statistics/merge-events/MergeEventsStatistics";
 
 jest.mock("./FilePathConstant", () => ({
   __dirname: "src/infrastructure/writer/",

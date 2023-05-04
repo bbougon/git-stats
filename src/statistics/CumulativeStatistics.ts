@@ -9,11 +9,6 @@ interface CumulativeStatistic {
   readonly closed: number;
   trend: number;
 }
-
-type CumulativeStatisticsResult = GitEventsStatisticsResult & {
-  cumulativeResults: Map<Unit, CumulativeStatistic[]>;
-};
-
 class CumulativeStatistics implements GitStatistics {
   constructor(
     readonly events: GitEvent[],
@@ -21,7 +16,7 @@ class CumulativeStatistics implements GitStatistics {
     private readonly eventDate: (event: GitEvent) => Period
   ) {}
 
-  result(): CumulativeStatisticsResult {
+  result<T = Map<Unit, CumulativeStatistic[]>>(): GitEventsStatisticsResult<T> {
     const stats = new Map<Unit, CumulativeStatistic[]>();
 
     const weeksCumulativeStatistics = this.cumulativeStatistics(
@@ -48,7 +43,7 @@ class CumulativeStatistics implements GitStatistics {
     stats.set("Week", weeksCumulativeStatistics);
     stats.set("Month", monthsCumulativeStatistics);
 
-    return { cumulativeResults: stats };
+    return { results: stats } as GitEventsStatisticsResult<T>;
   }
 
   private cumulativeStatistics(
@@ -116,4 +111,4 @@ class TrendCalculator {
   }
 }
 
-export { CumulativeStatistic, CumulativeStatisticsResult, TrendCalculator, CumulativeStatistics };
+export { CumulativeStatistic, TrendCalculator, CumulativeStatistics };

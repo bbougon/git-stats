@@ -21,7 +21,7 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
               <div class="col-sm-12 mb-3 mb-sm-0">
                 <div class="card mb-3">
                   <div class="card-body text-center">
-                    <h5 class="card-title">0 months, 2 days, 3 hours, 20 minutes, 0 seconds</h5>
+                    <h5 class="card-title">0 months, 2 days, 3 hours, 52 minutes, 27 seconds</h5>
                     <p class="card-text"><em>Average time to merge</em></p>
                   </div>
                 </div>
@@ -270,7 +270,7 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
               <div class="col-sm-12 mb-3 mb-sm-0">
                 <div class="card mb-3">
                   <div class="card-body text-center">
-                    <h5 class="card-title">0 months, 3 days, 3 hours, 0 minutes, 0 seconds</h5>
+                    <h5 class="card-title">0 months, 3 days, 3 hours, 21 minutes, 21 seconds</h5>
                     <p class="card-text"><em>Average time to merge</em></p>
                   </div>
                 </div>
@@ -519,7 +519,7 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
               <div class="col-sm-12 mb-3 mb-sm-0">
                 <div class="card mb-3">
                   <div class="card-body text-center">
-                    <h5 class="card-title">0 months, 7 days, 18 hours, 0 minutes, 0 seconds</h5>
+                    <h5 class="card-title">0 months, 7 days, 18 hours, 14 minutes, 14 seconds</h5>
                     <p class="card-text"><em>Average time to merge</em></p>
                   </div>
                 </div>

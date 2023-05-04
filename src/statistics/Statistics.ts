@@ -2,15 +2,16 @@ import Duration from "./Duration.js";
 
 type GitEvent = {
   start: Date;
+  closedAt: Date | null;
 };
-type GitEventsStatisticsResult = object;
+type GitEventsStatisticsResult<T> = { results: T };
 type Period = { start: Date; end: Date };
 
 interface GitStatistics {
   readonly period: Period;
   readonly events: GitEvent[];
 
-  result: () => GitEventsStatisticsResult;
+  result: <T>() => GitEventsStatisticsResult<T>;
 }
 
 interface StatisticFlow {

@@ -75,11 +75,6 @@ export class MergedEventsStatisticFlow implements StatisticFlow {
     return { days: 0, hours: 0, minutes: 0, months: 0, seconds: 0 };
   }
 }
-
-type MergedEventsStatisticsResults = GitEventsStatisticsResult & {
-  mergeEventsResults: Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>;
-};
-
 class MergedEventsStatistics implements GitStatistics {
   constructor(
     readonly events: GitEvent[],
@@ -87,7 +82,7 @@ class MergedEventsStatistics implements GitStatistics {
     private readonly eventDate: (event: GitEvent) => Period
   ) {}
 
-  result(): MergedEventsStatisticsResults {
+  result<T = Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>(): GitEventsStatisticsResult<T> {
     const stats: Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]> = new Map<
       Year,
       { [key: Unit]: MergedEventsStatisticFlow[] }[]
@@ -130,7 +125,7 @@ class MergedEventsStatistics implements GitStatistics {
           });
         }
       });
-    return { mergeEventsResults: fillEmptyPeriodsAndSortChronologically(stats, this.period) };
+    return { results: fillEmptyPeriodsAndSortChronologically(stats, this.period) } as GitEventsStatisticsResult<T>;
   }
 }
 
@@ -211,4 +206,4 @@ abstract class PeriodIndexesBuilder {
   }
 }
 
-export { MergedEventsStatisticsResults, MergedEventsStatistics };
+export { MergedEventsStatistics };

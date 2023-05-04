@@ -1,8 +1,9 @@
 import { Writer } from "../../../index.js";
-import { StatisticsAggregate } from "../../statistics/GitStatistics.js";
-import { MergedEventsStatisticsResults } from "../../statistics/MergedEventsStatistics.js";
+import { StatisticsAggregate, Unit, Year } from "../../statistics/GitStatistics.js";
 import { GitStatistics } from "../../statistics/Statistics.js";
-import { CumulativeStatisticsResult } from "../../statistics/CumulativeStatistics.js";
+import { MergedEventsStatisticFlow } from "../../statistics/MergedEventsStatistics.js";
+import { CumulativeStatistic } from "../../statistics/CumulativeStatistics.js";
+import { MergeEventsStatisticsResult } from "../../statistics/merge-events/MergeEventsStatistics.js";
 
 export interface GitFlowsConsole {
   log(message?: any, ...optionalParams: any[]): void;
@@ -24,7 +25,7 @@ type PeriodRecord = Record<string, PeriodUnitRecord[]>;
 
 class MergedEventsStatisticByPeriodBuilder implements StatisticBuilder<{ mergedEventsStatistics: PeriodRecord[] }> {
   build(statistics: GitStatistics): { mergedEventsStatistics: PeriodRecord[] } {
-    const events = (statistics.result() as MergedEventsStatisticsResults).mergeEventsResults;
+    const events = statistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
     const data: PeriodRecord[] = [];
     events.forEach((period, year) => {
       const periodRecord: PeriodRecord = {};
@@ -66,18 +67,18 @@ type AggregateStatistics = {
 };
 class MergeEventsStatisticBuilder implements StatisticBuilder<{ mergedEvents: AggregateStatistics }> {
   build(statistics: GitStatistics): { mergedEvents: AggregateStatistics } {
-    const result: AggregateStatistics = statistics.result() as AggregateStatistics;
+    const result: AggregateStatistics = statistics.result<MergeEventsStatisticsResult>().results as AggregateStatistics;
     return { mergedEvents: result };
   }
 }
 
 type CumulativeRecord = Record<string, { opened: number; closed: number; trend: number }>;
-type CumulativeStatistic = Record<string, CumulativeRecord[]>;
+type CumulativeStatisticRecord = Record<string, CumulativeRecord[]>;
 
-class CumulativeStatisticBuilder implements StatisticBuilder<{ cumulativeStatistics: CumulativeStatistic[] }> {
-  build(statistics: GitStatistics): { cumulativeStatistics: CumulativeStatistic[] } {
-    const result: CumulativeStatistic[] = [];
-    (statistics.result() as CumulativeStatisticsResult).cumulativeResults.forEach((value, key) => {
+class CumulativeStatisticBuilder implements StatisticBuilder<{ cumulativeStatistics: CumulativeStatisticRecord[] }> {
+  build(statistics: GitStatistics): { cumulativeStatistics: CumulativeStatisticRecord[] } {
+    const result: CumulativeStatisticRecord[] = [];
+    statistics.result<Map<Unit, CumulativeStatistic[]>>().results.forEach((value, key) => {
       result.push({
         [key]: value.map((statistic) => ({
           [statistic.index]: { opened: statistic.opened, closed: statistic.closed, trend: statistic.trend },

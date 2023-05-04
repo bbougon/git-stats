@@ -1,18 +1,23 @@
 #!/usr/bin/env node
 import { Command, program } from "commander";
-import { MergedRequestHTTPGitlabRepository } from "./src/infrastructure/repository/MergeRequestHTTPGitlabRepository.js";
 import { parseISO } from "date-fns";
 import { ConsoleWriter } from "./src/infrastructure/writer/ConsoleWriter.js";
 import { HTMLWriter } from "./src/infrastructure/writer/HTMLWriter.js";
-import { PullRequestHTTPGithubRepository } from "./src/infrastructure/repository/PullRequestHTTPGithubRepository.js";
 import { CSVWriter } from "./src/infrastructure/writer/CSVWriter.js";
 import { gitStatistics, StatisticsAggregate } from "./src/statistics/GitStatistics.js";
-import { MergeEventRepository } from "./src/statistics/merge-events/MergeEvent.js";
-import { MergeRequestsStatsParameters } from "./src/statistics/Gitlab.js";
+import { MergeEvent } from "./src/statistics/merge-events/MergeEvent.js";
+import { GitlabEventParameters } from "./src/statistics/Gitlab.js";
 import { PullRequestsStatsParameter } from "./src/statistics/Github.js";
 import { ProgressBar } from "./src/infrastructure/progress-bar/ProgressBar.js";
 import * as chalk from "./src/infrastructure/progress-bar/Chalk.js";
-import { HTTPError } from "./src/infrastructure/repository/MergeEventHTTPRepository.js";
+import { HTTPError } from "./src/infrastructure/repository/EventHTTPRepository.js";
+import { Repositories } from "./src/statistics/Repositories.js";
+import { IssueEvent } from "./src/statistics/issues/Issues.js";
+import { MergedRequestHTTPGitlabRepository } from "./src/infrastructure/repository/gitlab/MergeRequestHTTPGitlabRepository.js";
+import { PullRequestHTTPGithubRepository } from "./src/infrastructure/repository/github/PullRequestHTTPGithubRepository.js";
+import { IssueHTTPGitlabRepository } from "./src/infrastructure/repository/gitlab/IssueHTTPGitlabRepository.js";
+import { EventRepository } from "./src/statistics/EventRepository.js";
+import { IssueHTTPGithubRepository } from "./src/infrastructure/repository/github/IssueHTTPGithubRepository.js";
 
 type Period = {
   start: Date;
@@ -83,7 +88,7 @@ const githubCommand = program
 const proceedCommand = (
   command: Command,
   commandParameters: (...args: any[]) => CommandParameters,
-  repository: (token: string) => MergeEventRepository
+  repositories: (token: string) => Repositories
 ) => {
   command
     .option(
@@ -94,7 +99,8 @@ const proceedCommand = (
     )
     .action((...args: any[]) => {
       const parameters = commandParameters(...args);
-      gitStatistics(parameters.requestParameters, repository(parameters.token))
+      Repositories.initialize(repositories(parameters.token));
+      gitStatistics(parameters.requestParameters)
         .then((stats) => {
           parameters.options.format.write(stats);
           ProgressBar.progressBar().clear();
@@ -122,11 +128,20 @@ proceedCommand(
       fromDate: period.start,
       projectId: projectId,
       toDate: period.end,
-    } as MergeRequestsStatsParameters,
+    } as GitlabEventParameters,
     options,
     token,
   }),
-  (token: string) => new MergedRequestHTTPGitlabRepository(token)
+  (token: string) =>
+    new (class extends Repositories {
+      protected getIssueEventRepository(): EventRepository<IssueEvent> {
+        return new IssueHTTPGitlabRepository(token);
+      }
+
+      protected getMergeEventRepository(): EventRepository<MergeEvent> {
+        return new MergedRequestHTTPGitlabRepository(token);
+      }
+    })()
 );
 
 proceedCommand(
@@ -141,7 +156,16 @@ proceedCommand(
     options,
     token,
   }),
-  (token: string) => new PullRequestHTTPGithubRepository(token)
+  (token: string) =>
+    new (class extends Repositories {
+      protected getIssueEventRepository(): EventRepository<IssueEvent> {
+        return new IssueHTTPGithubRepository(token);
+      }
+
+      protected getMergeEventRepository(): EventRepository<MergeEvent> {
+        return new PullRequestHTTPGithubRepository(token);
+      }
+    })()
 );
 
 program.parse();
