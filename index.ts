@@ -2,7 +2,6 @@
 import { Command, program } from "commander";
 import { parseISO } from "date-fns";
 import { ConsoleWriter } from "./src/infrastructure/writer/ConsoleWriter.js";
-import { HTMLWriter } from "./src/infrastructure/writer/HTMLWriter.js";
 import { CSVWriter } from "./src/infrastructure/writer/CSVWriter.js";
 import { gitStatistics, StatisticsAggregate } from "./src/statistics/GitStatistics.js";
 import { MergeEvent } from "./src/statistics/merge-events/MergeEvent.js";
@@ -18,6 +17,7 @@ import { PullRequestHTTPGithubRepository } from "./src/infrastructure/repository
 import { IssueHTTPGitlabRepository } from "./src/infrastructure/repository/gitlab/IssueHTTPGitlabRepository.js";
 import { EventRepository } from "./src/statistics/EventRepository.js";
 import { IssueHTTPGithubRepository } from "./src/infrastructure/repository/github/IssueHTTPGithubRepository.js";
+import { HTMLWriter } from "./src/infrastructure/writer/html/HTMLWriter.js";
 
 type Period = {
   start: Date;

@@ -22,12 +22,12 @@ describe("Github issues repository", () => {
   });
 
   beforeEach(() => {
-    firstIssueEvent = new IssueEventBuilder(1)
+    firstIssueEvent = new IssueEventBuilder(undefined)
       .createdAt(parseISO("2021-11-03T15:18:26"))
       .closedAt(parseISO("2021-11-03T17:43:32"))
       .build();
-    secondIssueEvent = new IssueEventBuilder(1).createdAt(parseISO("2021-11-08T09:27:56")).build();
-    thirdIssueEvent = new IssueEventBuilder(1)
+    secondIssueEvent = new IssueEventBuilder(undefined).createdAt(parseISO("2021-11-08T09:27:56")).build();
+    thirdIssueEvent = new IssueEventBuilder(undefined)
       .createdAt(parseISO("2021-11-06T07:37:26"))
       .closedAt(parseISO("2021-11-09T17:43:32"))
       .build();
@@ -44,6 +44,7 @@ describe("Github issues repository", () => {
       id: event.id,
       state: stateMap.get(event.state),
       repository: { name: event.project as string },
+      pull_request: undefined,
     };
   };
 
@@ -97,5 +98,41 @@ describe("Github issues repository", () => {
     const pullRequests = await new IssueHTTPGithubRepository("my-token").getEventsForPeriod(Parameters);
 
     expect(pullRequests).toEqual([firstIssueEvent, thirdIssueEvent, secondIssueEvent]);
+  });
+
+  it("should retrieve only issues, i.e: remove pull requests", async () => {
+    const build = new IssueEventBuilder(1).createdAt(parseISO("2021-11-04T12:56:43")).build();
+    const pullRequestDTO = toGithubDTO(build);
+    const pullRequestEvent = {
+      ...pullRequestDTO,
+      pull_request: {
+        url: "https://api.github.com/repos/bbougon/git-stats/pulls/11",
+        html_url: "https://github.com/bbougon/git-stats/pull/11",
+        diff_url: "https://github.com/bbougon/git-stats/pull/11.diff",
+        patch_url: "https://github.com/bbougon/git-stats/pull/11.patch",
+        merged_at: "2023-04-11T21:29:42Z",
+      },
+    };
+    mock
+      .onGet(
+        `https://api.github.com/repos/bertrand/my-awesome-project/issues?state=all&sort=created&per_page=100`,
+        "",
+        expect.objectContaining({
+          Accept: "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          Authorization: "Bearer my-token",
+        })
+      )
+      .reply(200, JSON.stringify([toGithubDTO(firstIssueEvent), pullRequestEvent]), {});
+
+    const Parameters = {
+      repo: "my-awesome-project",
+      fromDate: parseISO("2021-11-03T00:00:00Z"),
+      toDate: parseISO("2021-11-10T00:00:00Z"),
+      owner: "bertrand",
+    } as PullRequestsStatsParameter;
+    const pullRequests = await new IssueHTTPGithubRepository("my-token").getEventsForPeriod(Parameters);
+
+    expect(pullRequests).toEqual([firstIssueEvent]);
   });
 });

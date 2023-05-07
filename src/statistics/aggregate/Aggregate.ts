@@ -37,6 +37,9 @@ abstract class AbstractGitEventStatistics implements GitStatistics {
   }
 
   private duration() {
+    if (this.events.length === 0) {
+      return moment.duration(0, "seconds");
+    }
     const secondsSpent = this.timeSpent((dateLeft: Date, dateRight: Date) => differenceInSeconds(dateLeft, dateRight));
     return moment.duration(secondsSpent.duration / secondsSpent.length, "seconds");
   }

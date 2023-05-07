@@ -1,0 +1,127 @@
+div(class="tab-pane fade show active ps-4" id="merge-events-tab-pane" role="tabpanel" aria-labelledby="merge-events-tab" tabindex="0")
+    h4 Merged events for period #{period.start} to #{period.end}
+    div(class='container-sm text-left')
+        h3 Aggregated Statistics
+        div.row
+            div(class='col-lg-10 text-secondary')
+                div.row
+                    div(class='col-sm-12 mb-3 mb-sm-0')
+                        div(class='card mb-3')
+                            div(class='card-body text-center')
+                                h5.card-title #{stats.merge.average.months} months, #{stats.merge.average.days} days, #{stats.merge.average.hours} hours, #{stats.merge.average.minutes} minutes, #{stats.merge.average.seconds} seconds
+                                p.card-text
+                                    em Average time to merge
+                div.row
+                    div(class='col-sm-3 mb-3 mb-sm-0')
+                        div(class='card mb-3')
+                            div(class='card-body text-center')
+                                h5(class='card-title text-merged') #{stats.merge.total.merged}
+                                p.card-text
+                                    em # Merged
+                    div(class='col-sm-3 mb-3 mb-sm-0')
+                        div(class='card mb-3')
+                            div(class='card-body text-center')
+                                h5(class='card-title text-opened') #{stats.merge.total.opened}
+                                p.card-text
+                                    em # Opened
+                    div(class='col-sm-3 mb-3 mb-sm-0')
+                        div(class='card mb-3')
+                            div(class='card-body text-center')
+                                h5(class='card-title text-closed') #{stats.merge.total.closed}
+                                p.card-text
+                                    em # Closed
+                    div(class='col-sm-3 mb-3 mb-sm-0')
+                        div(class='card mb-3')
+                            div(class='card-body text-center')
+                                h5(class='card-title text-total') #{stats.merge.total.all}
+                                p.card-text
+                                    em # Overall
+            div.col-lg-2
+                div.row
+                    div
+                        canvas#aggregated-statistics
+    div.container-sm
+        ul(class="nav nav-tabs" id="myTab" role="tablist")
+            li(class="nav-item" role="presentation")
+                button(class="nav-link active" id="months-tab" data-bs-toggle="tab" data-bs-target="#months-tab-pane" type="button" role="tab" aria-controls="months-tab-pane" aria-selected="true")
+                    h5 Months
+            li(class="nav-item" role="presentation")
+                button(class="nav-link" id="weeks-tab" data-bs-toggle="tab" data-bs-target="#weeks-tab-pane" type="button" role="tab" aria-controls="weeks-tab-pane" aria-selected="false")
+                    h5 Weeks
+        div(class="tab-content" id="periodTabContent")
+            div(class="tab-pane fade show active" id="months-tab-pane" role="tabpanel" aria-labelledby="months-tab" tabindex="0")
+                div#months
+                    div(class='container-sm')
+                        div.row
+                            div(class='col-lg-6')
+                                canvas#merged-events-months-histogram
+                            div(class='col-lg-6')
+                                canvas#merged-events-months-avg-med
+                        div.row
+                            div(class='col-lg-6')
+                                canvas#cumulative-months-stats
+
+            div(class="tab-pane fade" id="weeks-tab-pane" role="tabpanel" aria-labelledby="weeks-tab" tabindex="0")
+                div#weeks
+                    div(class='container-sm')
+                        div.row
+                            div(class='col-lg-6')
+                                canvas#merged-events-weeks-histogram
+                            div(class='col-lg-6')
+                                canvas#merged-events-weeks-avg-med
+                        div.row
+                            div(class='col-lg-6')
+                                canvas#cumulative-weeks-stats
+
+include ../includes/graphs.pug
+
+script(type='text/javascript').
+
+    const monthsMergedEventsHistogramContext = document.getElementById('merged-events-months-histogram');
+    const monthsMergedEventsHistogramDatasets = initializeHistogramDataSet([#{stats.merge.mr.months.data}]);
+    const monthsMergedEventsAvgAndMedContext = document.getElementById('merged-events-months-avg-med');
+    const monthsMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [#{stats.merge.mr.months.average}], label: "Average time to merge"}, {data: [#{stats.merge.mr.months.median}], label: "Median time to merge"}]);
+    const monthsMergedEventsLabels = !{stringify(stats.merge.mr.months.labels)}
+
+    const weeksMergedEventsHistogramContext = document.getElementById('merged-events-weeks-histogram');
+    const weeksMergedEventsHistogramDatasets = initializeHistogramDataSet([#{stats.merge.mr.weeks.data}]);
+    const weeksMergedEventsAvgAndMedContext = document.getElementById('merged-events-weeks-avg-med');
+    const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [#{stats.merge.mr.weeks.average}], label: "Average time to merge"}, {data: [#{stats.merge.mr.weeks.median}], label: "Median time to merge"}]);
+    const weeksMergedEventsLabels = !{stringify(stats.merge.mr.weeks.labels)}
+
+    const monthsCumulativeContext = document.getElementById('cumulative-months-stats')
+    const monthsCumulativeDatasets = initializeLinearDataSet([
+        {data: [#{stats.merge.cumulative.months.openedData}], label: "Cumulative opened merged events"},
+        {data: [#{stats.merge.cumulative.months.closedData}], label: "Cumulative closed merged events"},
+        {data: [#{stats.merge.cumulative.months.trendData}], label: "Cumulative trend merged events"},
+    ])
+    const monthsCumulativeLabels = !{stringify(stats.merge.cumulative.months.labels)}
+
+    const weeksCumulativeContext = document.getElementById('cumulative-weeks-stats')
+    const weeksCumulativeDatasets = initializeLinearDataSet([
+        {data: [#{stats.merge.cumulative.weeks.openedData}], label: "Cumulative opened merged events"},
+        {data: [#{stats.merge.cumulative.weeks.closedData}], label: "Cumulative closed merged events"},
+        {data: [#{stats.merge.cumulative.weeks.trendData}], label: "Cumulative trend merged events"},
+    ])
+    const weeksCumulativeLabels = !{stringify(stats.merge.cumulative.weeks.labels)}
+
+    const aggregatedMergeRequestContext = document.getElementById("aggregated-statistics")
+    const aggregatedMergeRequestChartLabels = ['Merged', 'Opened', 'Closed', 'All']
+    const aggregatedMergeRequestChartDatasets =    [{
+        label: 'Aggregated merge requests',
+        data: [
+            #{stats.merge.total.merged},
+            #{stats.merge.total.opened},
+            #{stats.merge.total.closed},
+            #{stats.merge.total.all}
+        ],
+        hoverOffset: 4
+    }]
+
+    renderChart('bar', monthsMergedEventsHistogramContext, monthsMergedEventsLabels, monthsMergedEventsHistogramDatasets, {});
+    renderChart('line', monthsMergedEventsAvgAndMedContext, monthsMergedEventsLabels, monthsMergedEventsAvgAndMedDatasets, options);
+    renderChart('bar', weeksMergedEventsHistogramContext, weeksMergedEventsLabels, weeksMergedEventsHistogramDatasets, {});
+    renderChart('line', weeksMergedEventsAvgAndMedContext, weeksMergedEventsLabels, weeksMergedEventsAvgAndMedDatasets, options);
+    renderChart('line', monthsCumulativeContext, monthsCumulativeLabels, monthsCumulativeDatasets, {});
+    renderChart('line', weeksCumulativeContext, weeksCumulativeLabels, weeksCumulativeDatasets, {});
+    renderChart('doughnut', aggregatedMergeRequestContext, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets, {});

@@ -58,9 +58,9 @@ export abstract class EventHTTPRepository<T, U extends GitEvent>
 
   protected abstract httpInit(requestParameters: RequestParameters): HTTPInit;
 
-  protected eventMapper = (): ((payload: T[]) => U[]) => {
+  protected eventMapper(): (payload: T[]) => U[] {
     return (payload: T[]): U[] => payload.map((mr) => this.fromDTO(mr));
-  };
+  }
 
   protected abstract fromDTO(dto: T): U;
 
