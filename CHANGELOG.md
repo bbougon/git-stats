@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4](https://github.com/bbougon/git-stats/compare/v0.2.3...v0.2.4) (2023-05-07)
+
+
+### Features
+
+* aggregate statistics for issues ([d2022fa](https://github.com/bbougon/git-stats/commit/d2022fa7377e441cf7a89895d44a1b1e4f6e68b8))
+
 ## [0.2.3](https://github.com/bbougon/git-stats/compare/v0.2.2...v0.2.3) (2023-05-01)
 
 
