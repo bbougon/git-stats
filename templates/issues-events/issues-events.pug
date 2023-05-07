@@ -1,0 +1,36 @@
+div(class="tab-pane fade ps-4" id="issues-events-tab-pane" role="tabpanel" aria-labelledby="issues-events-tab" tabindex="0")
+    h4 Issues events for period #{period.start} to #{period.end}
+    div(class='container-sm text-left')
+        h3 Aggregated Statistics
+        div.row
+            div(class='col-lg-10 text-secondary')
+                div.row
+                    div(class='col-sm-12 mb-3 mb-sm-0')
+                        div(class='card mb-3')
+                            div(class='card-body text-center')
+                                h5.card-title #{stats.issues.average.months} months, #{stats.issues.average.days} days, #{stats.issues.average.hours} hours, #{stats.issues.average.minutes} minutes, #{stats.issues.average.seconds} seconds
+                                p.card-text
+                                    em Average time to merge
+                div.row
+                    div(class='col-sm-4 mb-4 mb-sm-0')
+                        div(class='card mb-4')
+                            div(class='card-body text-center')
+                                h5(class='card-title text-opened') #{stats.issues.total.opened}
+                                p.card-text
+                                    em # Opened
+                    div(class='col-sm-4 mb-4 mb-sm-0')
+                        div(class='card mb-4')
+                            div(class='card-body text-center')
+                                h5(class='card-title text-closed') #{stats.issues.total.closed}
+                                p.card-text
+                                    em # Closed
+                    div(class='col-sm-4 mb-4 mb-sm-0')
+                        div(class='card mb-4')
+                            div(class='card-body text-center')
+                                h5(class='card-title text-total') #{stats.issues.total.all}
+                                p.card-text
+                                    em # Overall
+            div.col-lg-2
+                div.row
+                    div
+                        canvas#aggregated-issues-statistics

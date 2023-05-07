@@ -1,0 +1,928 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HTML writer should generate an HTML report file for merged requests 1`] = `
+"<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Report Friday, February 11, 2022 to Thursday, February 17, 2022</title>
+    <link href="style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+  </head>
+  <body>
+    <ul class="nav nav-underline" id="homeTab" role="tablist">
+      <li class="nav-item" role="presentation"><a class="nav-link active" id="merge-events-tab" data-bs-toggle="tab" data-bs-target="#merge-events-tab-pane" type="button" role="tab" aria-controls="merge-events-tab-pane" aria-selected="true">Merge events</a></li>
+      <li class="nav-item" role="presentation"><a class="nav-link" id="issues-events-tab" data-bs-toggle="tab" data-bs-target="#issues-events-tab-pane" type="button" role="tab" aria-controls="issues-events-tab-pane" aria-selected="false">Issues</a></li>
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane fade show active ps-4" id="merge-events-tab-pane" role="tabpanel" aria-labelledby="merge-events-tab" tabindex="0">
+        <h4>Merged events for period Friday, February 11, 2022 to Thursday, February 17, 2022</h4>
+        <div class="container-sm text-left">
+          <h3>Aggregated Statistics</h3>
+          <div class="row">
+            <div class="col-lg-10 text-secondary">
+              <div class="row">
+                <div class="col-sm-12 mb-3 mb-sm-0">
+                  <div class="card mb-3">
+                    <div class="card-body text-center">
+                      <h5 class="card-title">0 months, 2 days, 3 hours, 52 minutes, 27 seconds</h5>
+                      <p class="card-text"><em>Average time to merge</em></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-3 mb-3 mb-sm-0">
+                  <div class="card mb-3">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-merged">3</h5>
+                      <p class="card-text"><em># Merged</em></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-3 mb-3 mb-sm-0">
+                  <div class="card mb-3">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-opened">0</h5>
+                      <p class="card-text"><em># Opened</em></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-3 mb-3 mb-sm-0">
+                  <div class="card mb-3">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-closed">0</h5>
+                      <p class="card-text"><em># Closed</em></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-3 mb-3 mb-sm-0">
+                  <div class="card mb-3">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-total">3</h5>
+                      <p class="card-text"><em># Overall</em></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-2">
+              <div class="row">
+                <div>
+                  <canvas id="aggregated-statistics"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="container-sm">
+          <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="months-tab" data-bs-toggle="tab" data-bs-target="#months-tab-pane" type="button" role="tab" aria-controls="months-tab-pane" aria-selected="true">
+                <h5>Months</h5>
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="weeks-tab" data-bs-toggle="tab" data-bs-target="#weeks-tab-pane" type="button" role="tab" aria-controls="weeks-tab-pane" aria-selected="false">
+                <h5>Weeks</h5>
+              </button>
+            </li>
+          </ul>
+          <div class="tab-content" id="periodTabContent">
+            <div class="tab-pane fade show active" id="months-tab-pane" role="tabpanel" aria-labelledby="months-tab" tabindex="0">
+              <div id="months">
+                <div class="container-sm">
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <canvas id="merged-events-months-histogram"></canvas>
+                    </div>
+                    <div class="col-lg-6">
+                      <canvas id="merged-events-months-avg-med"></canvas>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <canvas id="cumulative-months-stats"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="weeks-tab-pane" role="tabpanel" aria-labelledby="weeks-tab" tabindex="0">
+              <div id="weeks">
+                <div class="container-sm">
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <canvas id="merged-events-weeks-histogram"></canvas>
+                    </div>
+                    <div class="col-lg-6">
+                      <canvas id="merged-events-weeks-avg-med"></canvas>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <canvas id="cumulative-weeks-stats"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script type="text/javascript">
+        function initializeHistogramDataSet(mergeEventsFlows) {
+            return [
+                {
+                    label: '# of merged events',
+                    data: mergeEventsFlows,
+                    yAxisID: 'y',
+                    barPercentage: 1.24,
+                }
+            ];
+        }
+        
+        
+        function initializeLinearDataSet(charts) {
+            return charts.map((chart) => (
+                {
+                    label: chart.label,
+                    data: chart.data,
+                    borderWidth: 3,
+                    borderJoinStyle: "round",
+                    tension: 0.2,
+                    yAxisID: 'y',
+                }));
+        }
+        
+        const options = {
+            scales: {
+                y: {
+                    display: true,
+                    position: 'left',
+                    ticks: {
+                        beginAtZero: true,
+                        callback: function (value, index, ticks) {
+                            const duration = moment.duration(parseInt(value), "hours");
+                            return 2 > 0 || 0 > 0 ? Math.round(duration.asDays()) + " day(s)" : Math.round(duration.asHours()) + " hours(s)";
+                        }
+                    }
+                },
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            let label = context.dataset.label || '';
+        
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                const duration = moment.duration(parseInt(context.parsed.y), "hours");
+                                label += 2 > 0 || 0 > 0 ? Math.round(duration.asDays()) + " day(s)" : Math.round(duration.asHours()) + " hours(s)";
+                            }
+                            return label
+                        },
+                    }
+                }
+            }
+        }
+        
+        function renderChart(type, context, labels, datasets, options = {}) {
+            new Chart(context, {
+                type,
+                data: {
+                    labels: labels,
+                    datasets: datasets,
+                },
+                options
+            });
+        }
+      </script>
+      <script type="text/javascript">
+        const monthsMergedEventsHistogramContext = document.getElementById('merged-events-months-histogram');
+        const monthsMergedEventsHistogramDatasets = initializeHistogramDataSet([3]);
+        const monthsMergedEventsAvgAndMedContext = document.getElementById('merged-events-months-avg-med');
+        const monthsMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [51.333333333333336], label: "Average time to merge"}, {data: [71], label: "Median time to merge"}]);
+        const monthsMergedEventsLabels = ["Feb"]
+        
+        const weeksMergedEventsHistogramContext = document.getElementById('merged-events-weeks-histogram');
+        const weeksMergedEventsHistogramDatasets = initializeHistogramDataSet([1,2]);
+        const weeksMergedEventsAvgAndMedContext = document.getElementById('merged-events-weeks-avg-med');
+        const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [4,75], label: "Average time to merge"}, {data: [4,75], label: "Median time to merge"}]);
+        const weeksMergedEventsLabels = ["Week 7","Week 8"]
+        
+        const monthsCumulativeContext = document.getElementById('cumulative-months-stats')
+        const monthsCumulativeDatasets = initializeLinearDataSet([
+            {data: [3], label: "Cumulative opened merged events"},
+            {data: [3], label: "Cumulative closed merged events"},
+            {data: [3], label: "Cumulative trend merged events"},
+        ])
+        const monthsCumulativeLabels = ["Feb"]
+        
+        const weeksCumulativeContext = document.getElementById('cumulative-weeks-stats')
+        const weeksCumulativeDatasets = initializeLinearDataSet([
+            {data: [2,3], label: "Cumulative opened merged events"},
+            {data: [1,3], label: "Cumulative closed merged events"},
+            {data: [2,3], label: "Cumulative trend merged events"},
+        ])
+        const weeksCumulativeLabels = ["Week 7","Week 8"]
+        
+        const aggregatedMergeRequestContext = document.getElementById("aggregated-statistics")
+        const aggregatedMergeRequestChartLabels = ['Merged', 'Opened', 'Closed', 'All']
+        const aggregatedMergeRequestChartDatasets =    [{
+            label: 'Aggregated merge requests',
+            data: [
+                3,
+                0,
+                0,
+                3
+            ],
+            hoverOffset: 4
+        }]
+        
+        renderChart('bar', monthsMergedEventsHistogramContext, monthsMergedEventsLabels, monthsMergedEventsHistogramDatasets, {});
+        renderChart('line', monthsMergedEventsAvgAndMedContext, monthsMergedEventsLabels, monthsMergedEventsAvgAndMedDatasets, options);
+        renderChart('bar', weeksMergedEventsHistogramContext, weeksMergedEventsLabels, weeksMergedEventsHistogramDatasets, {});
+        renderChart('line', weeksMergedEventsAvgAndMedContext, weeksMergedEventsLabels, weeksMergedEventsAvgAndMedDatasets, options);
+        renderChart('line', monthsCumulativeContext, monthsCumulativeLabels, monthsCumulativeDatasets, {});
+        renderChart('line', weeksCumulativeContext, weeksCumulativeLabels, weeksCumulativeDatasets, {});
+        renderChart('doughnut', aggregatedMergeRequestContext, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets, {});
+      </script>
+      <div class="tab-pane fade ps-4" id="issues-events-tab-pane" role="tabpanel" aria-labelledby="issues-events-tab" tabindex="0">
+        <h4>Issues events for period Friday, February 11, 2022 to Thursday, February 17, 2022</h4>
+        <div class="container-sm text-left">
+          <h3>Aggregated Statistics</h3>
+          <div class="row">
+            <div class="col-lg-10 text-secondary">
+              <div class="row">
+                <div class="col-sm-12 mb-3 mb-sm-0">
+                  <div class="card mb-3">
+                    <div class="card-body text-center">
+                      <h5 class="card-title">0 months, 2 days, 23 hours, 15 minutes, 55 seconds</h5>
+                      <p class="card-text"><em>Average time to merge</em></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-4 mb-4 mb-sm-0">
+                  <div class="card mb-4">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-opened">1</h5>
+                      <p class="card-text"><em># Opened</em></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-4 mb-4 mb-sm-0">
+                  <div class="card mb-4">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-closed">1</h5>
+                      <p class="card-text"><em># Closed</em></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-4 mb-4 mb-sm-0">
+                  <div class="card mb-4">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-total">2</h5>
+                      <p class="card-text"><em># Overall</em></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-2">
+              <div class="row">
+                <div>
+                  <canvas id="aggregated-issues-statistics"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>"
+`;
+
+exports[`HTML writer should generate an HTML report file for merged requests when some mr are not yet merged 1`] = `
+"<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Report Friday, February 11, 2022 to Thursday, February 17, 2022</title>
+    <link href="style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+  </head>
+  <body>
+    <ul class="nav nav-underline" id="homeTab" role="tablist">
+      <li class="nav-item" role="presentation"><a class="nav-link active" id="merge-events-tab" data-bs-toggle="tab" data-bs-target="#merge-events-tab-pane" type="button" role="tab" aria-controls="merge-events-tab-pane" aria-selected="true">Merge events</a></li>
+      <li class="nav-item" role="presentation"><a class="nav-link" id="issues-events-tab" data-bs-toggle="tab" data-bs-target="#issues-events-tab-pane" type="button" role="tab" aria-controls="issues-events-tab-pane" aria-selected="false">Issues</a></li>
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane fade show active ps-4" id="merge-events-tab-pane" role="tabpanel" aria-labelledby="merge-events-tab" tabindex="0">
+        <h4>Merged events for period Friday, February 11, 2022 to Thursday, February 17, 2022</h4>
+        <div class="container-sm text-left">
+          <h3>Aggregated Statistics</h3>
+          <div class="row">
+            <div class="col-lg-10 text-secondary">
+              <div class="row">
+                <div class="col-sm-12 mb-3 mb-sm-0">
+                  <div class="card mb-3">
+                    <div class="card-body text-center">
+                      <h5 class="card-title">0 months, 3 days, 3 hours, 21 minutes, 21 seconds</h5>
+                      <p class="card-text"><em>Average time to merge</em></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-3 mb-3 mb-sm-0">
+                  <div class="card mb-3">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-merged">2</h5>
+                      <p class="card-text"><em># Merged</em></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-3 mb-3 mb-sm-0">
+                  <div class="card mb-3">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-opened">1</h5>
+                      <p class="card-text"><em># Opened</em></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-3 mb-3 mb-sm-0">
+                  <div class="card mb-3">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-closed">0</h5>
+                      <p class="card-text"><em># Closed</em></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-3 mb-3 mb-sm-0">
+                  <div class="card mb-3">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-total">3</h5>
+                      <p class="card-text"><em># Overall</em></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-2">
+              <div class="row">
+                <div>
+                  <canvas id="aggregated-statistics"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="container-sm">
+          <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="months-tab" data-bs-toggle="tab" data-bs-target="#months-tab-pane" type="button" role="tab" aria-controls="months-tab-pane" aria-selected="true">
+                <h5>Months</h5>
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="weeks-tab" data-bs-toggle="tab" data-bs-target="#weeks-tab-pane" type="button" role="tab" aria-controls="weeks-tab-pane" aria-selected="false">
+                <h5>Weeks</h5>
+              </button>
+            </li>
+          </ul>
+          <div class="tab-content" id="periodTabContent">
+            <div class="tab-pane fade show active" id="months-tab-pane" role="tabpanel" aria-labelledby="months-tab" tabindex="0">
+              <div id="months">
+                <div class="container-sm">
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <canvas id="merged-events-months-histogram"></canvas>
+                    </div>
+                    <div class="col-lg-6">
+                      <canvas id="merged-events-months-avg-med"></canvas>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <canvas id="cumulative-months-stats"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="weeks-tab-pane" role="tabpanel" aria-labelledby="weeks-tab" tabindex="0">
+              <div id="weeks">
+                <div class="container-sm">
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <canvas id="merged-events-weeks-histogram"></canvas>
+                    </div>
+                    <div class="col-lg-6">
+                      <canvas id="merged-events-weeks-avg-med"></canvas>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <canvas id="cumulative-weeks-stats"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script type="text/javascript">
+        function initializeHistogramDataSet(mergeEventsFlows) {
+            return [
+                {
+                    label: '# of merged events',
+                    data: mergeEventsFlows,
+                    yAxisID: 'y',
+                    barPercentage: 1.24,
+                }
+            ];
+        }
+        
+        
+        function initializeLinearDataSet(charts) {
+            return charts.map((chart) => (
+                {
+                    label: chart.label,
+                    data: chart.data,
+                    borderWidth: 3,
+                    borderJoinStyle: "round",
+                    tension: 0.2,
+                    yAxisID: 'y',
+                }));
+        }
+        
+        const options = {
+            scales: {
+                y: {
+                    display: true,
+                    position: 'left',
+                    ticks: {
+                        beginAtZero: true,
+                        callback: function (value, index, ticks) {
+                            const duration = moment.duration(parseInt(value), "hours");
+                            return 3 > 0 || 0 > 0 ? Math.round(duration.asDays()) + " day(s)" : Math.round(duration.asHours()) + " hours(s)";
+                        }
+                    }
+                },
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            let label = context.dataset.label || '';
+        
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                const duration = moment.duration(parseInt(context.parsed.y), "hours");
+                                label += 3 > 0 || 0 > 0 ? Math.round(duration.asDays()) + " day(s)" : Math.round(duration.asHours()) + " hours(s)";
+                            }
+                            return label
+                        },
+                    }
+                }
+            }
+        }
+        
+        function renderChart(type, context, labels, datasets, options = {}) {
+            new Chart(context, {
+                type,
+                data: {
+                    labels: labels,
+                    datasets: datasets,
+                },
+                options
+            });
+        }
+      </script>
+      <script type="text/javascript">
+        const monthsMergedEventsHistogramContext = document.getElementById('merged-events-months-histogram');
+        const monthsMergedEventsHistogramDatasets = initializeHistogramDataSet([2]);
+        const monthsMergedEventsAvgAndMedContext = document.getElementById('merged-events-months-avg-med');
+        const monthsMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [75], label: "Average time to merge"}, {data: [75], label: "Median time to merge"}]);
+        const monthsMergedEventsLabels = ["Feb"]
+        
+        const weeksMergedEventsHistogramContext = document.getElementById('merged-events-weeks-histogram');
+        const weeksMergedEventsHistogramDatasets = initializeHistogramDataSet([0,2]);
+        const weeksMergedEventsAvgAndMedContext = document.getElementById('merged-events-weeks-avg-med');
+        const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [0,75], label: "Average time to merge"}, {data: [0,75], label: "Median time to merge"}]);
+        const weeksMergedEventsLabels = ["Week 7","Week 8"]
+        
+        const monthsCumulativeContext = document.getElementById('cumulative-months-stats')
+        const monthsCumulativeDatasets = initializeLinearDataSet([
+            {data: [3], label: "Cumulative opened merged events"},
+            {data: [2], label: "Cumulative closed merged events"},
+            {data: [3], label: "Cumulative trend merged events"},
+        ])
+        const monthsCumulativeLabels = ["Feb"]
+        
+        const weeksCumulativeContext = document.getElementById('cumulative-weeks-stats')
+        const weeksCumulativeDatasets = initializeLinearDataSet([
+            {data: [2,3], label: "Cumulative opened merged events"},
+            {data: [0,2], label: "Cumulative closed merged events"},
+            {data: [2,3], label: "Cumulative trend merged events"},
+        ])
+        const weeksCumulativeLabels = ["Week 7","Week 8"]
+        
+        const aggregatedMergeRequestContext = document.getElementById("aggregated-statistics")
+        const aggregatedMergeRequestChartLabels = ['Merged', 'Opened', 'Closed', 'All']
+        const aggregatedMergeRequestChartDatasets =    [{
+            label: 'Aggregated merge requests',
+            data: [
+                2,
+                1,
+                0,
+                3
+            ],
+            hoverOffset: 4
+        }]
+        
+        renderChart('bar', monthsMergedEventsHistogramContext, monthsMergedEventsLabels, monthsMergedEventsHistogramDatasets, {});
+        renderChart('line', monthsMergedEventsAvgAndMedContext, monthsMergedEventsLabels, monthsMergedEventsAvgAndMedDatasets, options);
+        renderChart('bar', weeksMergedEventsHistogramContext, weeksMergedEventsLabels, weeksMergedEventsHistogramDatasets, {});
+        renderChart('line', weeksMergedEventsAvgAndMedContext, weeksMergedEventsLabels, weeksMergedEventsAvgAndMedDatasets, options);
+        renderChart('line', monthsCumulativeContext, monthsCumulativeLabels, monthsCumulativeDatasets, {});
+        renderChart('line', weeksCumulativeContext, weeksCumulativeLabels, weeksCumulativeDatasets, {});
+        renderChart('doughnut', aggregatedMergeRequestContext, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets, {});
+      </script>
+      <div class="tab-pane fade ps-4" id="issues-events-tab-pane" role="tabpanel" aria-labelledby="issues-events-tab" tabindex="0">
+        <h4>Issues events for period Friday, February 11, 2022 to Thursday, February 17, 2022</h4>
+        <div class="container-sm text-left">
+          <h3>Aggregated Statistics</h3>
+          <div class="row">
+            <div class="col-lg-10 text-secondary">
+              <div class="row">
+                <div class="col-sm-12 mb-3 mb-sm-0">
+                  <div class="card mb-3">
+                    <div class="card-body text-center">
+                      <h5 class="card-title">0 months, 0 days, 0 hours, 0 minutes, 0 seconds</h5>
+                      <p class="card-text"><em>Average time to merge</em></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-4 mb-4 mb-sm-0">
+                  <div class="card mb-4">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-opened">0</h5>
+                      <p class="card-text"><em># Opened</em></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-4 mb-4 mb-sm-0">
+                  <div class="card mb-4">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-closed">0</h5>
+                      <p class="card-text"><em># Closed</em></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-4 mb-4 mb-sm-0">
+                  <div class="card mb-4">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-total">0</h5>
+                      <p class="card-text"><em># Overall</em></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-2">
+              <div class="row">
+                <div>
+                  <canvas id="aggregated-issues-statistics"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>"
+`;
+
+exports[`HTML writer should generate an HTML report file with months period 1`] = `
+"<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Report Saturday, January 1, 2022 to Wednesday, March 2, 2022</title>
+    <link href="style.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+  </head>
+  <body>
+    <ul class="nav nav-underline" id="homeTab" role="tablist">
+      <li class="nav-item" role="presentation"><a class="nav-link active" id="merge-events-tab" data-bs-toggle="tab" data-bs-target="#merge-events-tab-pane" type="button" role="tab" aria-controls="merge-events-tab-pane" aria-selected="true">Merge events</a></li>
+      <li class="nav-item" role="presentation"><a class="nav-link" id="issues-events-tab" data-bs-toggle="tab" data-bs-target="#issues-events-tab-pane" type="button" role="tab" aria-controls="issues-events-tab-pane" aria-selected="false">Issues</a></li>
+    </ul>
+    <div class="tab-content">
+      <div class="tab-pane fade show active ps-4" id="merge-events-tab-pane" role="tabpanel" aria-labelledby="merge-events-tab" tabindex="0">
+        <h4>Merged events for period Saturday, January 1, 2022 to Wednesday, March 2, 2022</h4>
+        <div class="container-sm text-left">
+          <h3>Aggregated Statistics</h3>
+          <div class="row">
+            <div class="col-lg-10 text-secondary">
+              <div class="row">
+                <div class="col-sm-12 mb-3 mb-sm-0">
+                  <div class="card mb-3">
+                    <div class="card-body text-center">
+                      <h5 class="card-title">0 months, 7 days, 18 hours, 14 minutes, 14 seconds</h5>
+                      <p class="card-text"><em>Average time to merge</em></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-3 mb-3 mb-sm-0">
+                  <div class="card mb-3">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-merged">3</h5>
+                      <p class="card-text"><em># Merged</em></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-3 mb-3 mb-sm-0">
+                  <div class="card mb-3">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-opened">0</h5>
+                      <p class="card-text"><em># Opened</em></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-3 mb-3 mb-sm-0">
+                  <div class="card mb-3">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-closed">0</h5>
+                      <p class="card-text"><em># Closed</em></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-3 mb-3 mb-sm-0">
+                  <div class="card mb-3">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-total">3</h5>
+                      <p class="card-text"><em># Overall</em></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-2">
+              <div class="row">
+                <div>
+                  <canvas id="aggregated-statistics"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="container-sm">
+          <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="months-tab" data-bs-toggle="tab" data-bs-target="#months-tab-pane" type="button" role="tab" aria-controls="months-tab-pane" aria-selected="true">
+                <h5>Months</h5>
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="weeks-tab" data-bs-toggle="tab" data-bs-target="#weeks-tab-pane" type="button" role="tab" aria-controls="weeks-tab-pane" aria-selected="false">
+                <h5>Weeks</h5>
+              </button>
+            </li>
+          </ul>
+          <div class="tab-content" id="periodTabContent">
+            <div class="tab-pane fade show active" id="months-tab-pane" role="tabpanel" aria-labelledby="months-tab" tabindex="0">
+              <div id="months">
+                <div class="container-sm">
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <canvas id="merged-events-months-histogram"></canvas>
+                    </div>
+                    <div class="col-lg-6">
+                      <canvas id="merged-events-months-avg-med"></canvas>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <canvas id="cumulative-months-stats"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="weeks-tab-pane" role="tabpanel" aria-labelledby="weeks-tab" tabindex="0">
+              <div id="weeks">
+                <div class="container-sm">
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <canvas id="merged-events-weeks-histogram"></canvas>
+                    </div>
+                    <div class="col-lg-6">
+                      <canvas id="merged-events-weeks-avg-med"></canvas>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-6">
+                      <canvas id="cumulative-weeks-stats"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script type="text/javascript">
+        function initializeHistogramDataSet(mergeEventsFlows) {
+            return [
+                {
+                    label: '# of merged events',
+                    data: mergeEventsFlows,
+                    yAxisID: 'y',
+                    barPercentage: 1.24,
+                }
+            ];
+        }
+        
+        
+        function initializeLinearDataSet(charts) {
+            return charts.map((chart) => (
+                {
+                    label: chart.label,
+                    data: chart.data,
+                    borderWidth: 3,
+                    borderJoinStyle: "round",
+                    tension: 0.2,
+                    yAxisID: 'y',
+                }));
+        }
+        
+        const options = {
+            scales: {
+                y: {
+                    display: true,
+                    position: 'left',
+                    ticks: {
+                        beginAtZero: true,
+                        callback: function (value, index, ticks) {
+                            const duration = moment.duration(parseInt(value), "hours");
+                            return 7 > 0 || 0 > 0 ? Math.round(duration.asDays()) + " day(s)" : Math.round(duration.asHours()) + " hours(s)";
+                        }
+                    }
+                },
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            let label = context.dataset.label || '';
+        
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                const duration = moment.duration(parseInt(context.parsed.y), "hours");
+                                label += 7 > 0 || 0 > 0 ? Math.round(duration.asDays()) + " day(s)" : Math.round(duration.asHours()) + " hours(s)";
+                            }
+                            return label
+                        },
+                    }
+                }
+            }
+        }
+        
+        function renderChart(type, context, labels, datasets, options = {}) {
+            new Chart(context, {
+                type,
+                data: {
+                    labels: labels,
+                    datasets: datasets,
+                },
+                options
+            });
+        }
+      </script>
+      <script type="text/javascript">
+        const monthsMergedEventsHistogramContext = document.getElementById('merged-events-months-histogram');
+        const monthsMergedEventsHistogramDatasets = initializeHistogramDataSet([1,2,0]);
+        const monthsMergedEventsAvgAndMedContext = document.getElementById('merged-events-months-avg-med');
+        const monthsMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [408,75,0], label: "Average time to merge"}, {data: [408,75,0], label: "Median time to merge"}]);
+        const monthsMergedEventsLabels = ["Jan","Feb","Mar"]
+        
+        const weeksMergedEventsHistogramContext = document.getElementById('merged-events-weeks-histogram');
+        const weeksMergedEventsHistogramDatasets = initializeHistogramDataSet([0,0,0,0,1,0,0,2,0,0]);
+        const weeksMergedEventsAvgAndMedContext = document.getElementById('merged-events-weeks-avg-med');
+        const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [0,0,0,0,408,0,0,75,0,0], label: "Average time to merge"}, {data: [0,0,0,0,408,0,0,75,0,0], label: "Median time to merge"}]);
+        const weeksMergedEventsLabels = ["Week 1","Week 2","Week 3","Week 4","Week 5","Week 6","Week 7","Week 8","Week 9","Week 10"]
+        
+        const monthsCumulativeContext = document.getElementById('cumulative-months-stats')
+        const monthsCumulativeDatasets = initializeLinearDataSet([
+            {data: [1,3,3], label: "Cumulative opened merged events"},
+            {data: [1,3,3], label: "Cumulative closed merged events"},
+            {data: [1.3,2.3,3.3], label: "Cumulative trend merged events"},
+        ])
+        const monthsCumulativeLabels = ["Jan","Feb","Mar"]
+        
+        const weeksCumulativeContext = document.getElementById('cumulative-weeks-stats')
+        const weeksCumulativeDatasets = initializeLinearDataSet([
+            {data: [0,0,1,1,1,1,2,3,3,3], label: "Cumulative opened merged events"},
+            {data: [0,0,0,0,1,1,1,3,3,3], label: "Cumulative closed merged events"},
+            {data: [-0.1303030303030303,0.23939393939393938,0.6090909090909091,0.9787878787878788,1.3484848484848484,1.7181818181818183,2.087878787878788,2.4575757575757575,2.827272727272727,3.196969696969697], label: "Cumulative trend merged events"},
+        ])
+        const weeksCumulativeLabels = ["Week 1","Week 2","Week 3","Week 4","Week 5","Week 6","Week 7","Week 8","Week 9","Week 10"]
+        
+        const aggregatedMergeRequestContext = document.getElementById("aggregated-statistics")
+        const aggregatedMergeRequestChartLabels = ['Merged', 'Opened', 'Closed', 'All']
+        const aggregatedMergeRequestChartDatasets =    [{
+            label: 'Aggregated merge requests',
+            data: [
+                3,
+                0,
+                0,
+                3
+            ],
+            hoverOffset: 4
+        }]
+        
+        renderChart('bar', monthsMergedEventsHistogramContext, monthsMergedEventsLabels, monthsMergedEventsHistogramDatasets, {});
+        renderChart('line', monthsMergedEventsAvgAndMedContext, monthsMergedEventsLabels, monthsMergedEventsAvgAndMedDatasets, options);
+        renderChart('bar', weeksMergedEventsHistogramContext, weeksMergedEventsLabels, weeksMergedEventsHistogramDatasets, {});
+        renderChart('line', weeksMergedEventsAvgAndMedContext, weeksMergedEventsLabels, weeksMergedEventsAvgAndMedDatasets, options);
+        renderChart('line', monthsCumulativeContext, monthsCumulativeLabels, monthsCumulativeDatasets, {});
+        renderChart('line', weeksCumulativeContext, weeksCumulativeLabels, weeksCumulativeDatasets, {});
+        renderChart('doughnut', aggregatedMergeRequestContext, aggregatedMergeRequestChartLabels, aggregatedMergeRequestChartDatasets, {});
+      </script>
+      <div class="tab-pane fade ps-4" id="issues-events-tab-pane" role="tabpanel" aria-labelledby="issues-events-tab" tabindex="0">
+        <h4>Issues events for period Saturday, January 1, 2022 to Wednesday, March 2, 2022</h4>
+        <div class="container-sm text-left">
+          <h3>Aggregated Statistics</h3>
+          <div class="row">
+            <div class="col-lg-10 text-secondary">
+              <div class="row">
+                <div class="col-sm-12 mb-3 mb-sm-0">
+                  <div class="card mb-3">
+                    <div class="card-body text-center">
+                      <h5 class="card-title">0 months, 2 days, 23 hours, 15 minutes, 55 seconds</h5>
+                      <p class="card-text"><em>Average time to merge</em></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-4 mb-4 mb-sm-0">
+                  <div class="card mb-4">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-opened">1</h5>
+                      <p class="card-text"><em># Opened</em></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-4 mb-4 mb-sm-0">
+                  <div class="card mb-4">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-closed">1</h5>
+                      <p class="card-text"><em># Closed</em></p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-4 mb-4 mb-sm-0">
+                  <div class="card mb-4">
+                    <div class="card-body text-center">
+                      <h5 class="card-title text-total">2</h5>
+                      <p class="card-text"><em># Overall</em></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-2">
+              <div class="row">
+                <div>
+                  <canvas id="aggregated-issues-statistics"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>"
+`;

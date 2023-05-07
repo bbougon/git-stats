@@ -9,6 +9,7 @@ export type IssueEventGithubDTO = {
   closed_at: string | null;
   created_at: string;
   repository: { name: string };
+  pull_request: object | undefined;
 };
 const fromDTO = (dto: IssueEventGithubDTO): IssueEvent => {
   const stateMap: Map<string, State> = new Map<string, string>([
@@ -18,7 +19,7 @@ const fromDTO = (dto: IssueEventGithubDTO): IssueEvent => {
   return {
     closedAt: dto.closed_at !== null ? parseISO(dto.closed_at) : null,
     id: dto.id,
-    project: dto.repository.name,
+    project: undefined,
     start: parseISO(dto.created_at),
     state: stateMap.get(dto.state),
   };
@@ -27,6 +28,11 @@ const fromDTO = (dto: IssueEventGithubDTO): IssueEvent => {
 export class IssueHTTPGithubRepository extends GithubRepository<IssueEventGithubDTO, IssueEvent> {
   constructor(token: string) {
     super(token);
+  }
+
+  protected eventMapper(): (payload: IssueEventGithubDTO[]) => IssueEvent[] {
+    return (payload: IssueEventGithubDTO[]): IssueEvent[] =>
+      payload.filter((dto) => dto.pull_request === undefined).map((mr) => this.fromDTO(mr));
   }
 
   protected projectInfos(requestParameters: PullRequestsStatsParameter): string {

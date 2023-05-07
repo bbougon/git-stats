@@ -1,40 +1,57 @@
-import { Writer } from "../../../index.js";
-import * as fs from "fs";
-import { intlFormat } from "date-fns";
-import { openBrowser } from "./OpenBrowser.js";
-import * as pug from "pug";
-import * as path from "path";
-import { __dirname } from "./FilePathConstant.js";
-import { StatisticsAggregate, Unit, Year } from "../../statistics/GitStatistics.js";
-import { progressBar } from "../progress-bar/ProgressBar.js";
-import { Title } from "../progress-bar/Title.js";
-import { HUMAN_READABLE_MONTHS } from "./HumanReadableLabels.js";
-import moment from "moment/moment.js";
-import Duration from "../../statistics/Duration.js";
-import { CumulativeStatistic } from "../../statistics/CumulativeStatistics.js";
-import { MergedEventsStatisticFlow } from "../../statistics/MergedEventsStatistics.js";
-import { MergeEventsStatisticsResult } from "../../statistics/merge-events/MergeEventsStatistics.js";
+import { StatisticsAggregate, Unit, Year } from "../../../statistics/GitStatistics.js";
+import { MergeEventsStatisticsResult } from "../../../statistics/merge-events/MergeEventsStatistics.js";
+import { MergedEventsStatisticFlow } from "../../../statistics/MergedEventsStatistics.js";
+import moment from "moment";
+import { HUMAN_READABLE_MONTHS } from "../HumanReadableLabels.js";
+import { CumulativeStatistic } from "../../../statistics/CumulativeStatistics.js";
+import { ContentBuilder } from "./ContentBuilder.js";
 
-class HTMLContentBuilder {
+type MergeEventsContent = {
+  mr: {
+    months: {
+      data: number[];
+      labels: string[];
+      average: number[];
+      median: number[];
+    };
+    weeks: {
+      data: number[];
+      labels: string[];
+      average: number[];
+      median: number[];
+    };
+  };
+  cumulative: {
+    months: {
+      openedData: number[];
+      closedData: number[];
+      trendData: number[];
+      labels: string[];
+    };
+    weeks: {
+      openedData: number[];
+      closedData: number[];
+      trendData: number[];
+      labels: string[];
+    };
+  };
+  average: Duration;
+  total: {
+    merged: number;
+    closed: number;
+    opened: number;
+    all: number;
+  };
+};
+
+class MergeEventsContentBuilder implements ContentBuilder<MergeEventsContent> {
   constructor(private readonly stats: StatisticsAggregate) {}
 
-  build = (): string => {
-    const humanizeDate = (date: Date): string => {
-      return intlFormat(date, {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    };
-    const stringify = (obj: string): string => {
-      return JSON.stringify(obj)
-        .replace(/\u2028/g, "\\u2028")
-        .replace(/\u2029/g, "\\u2029")
-        .replace(/</g, "\\u003C")
-        .replace(/>/g, "\\u003E")
-        .replace(/\//g, "\\u002F");
-    };
+  build(): MergeEventsContent {
+    return this.mergeEvents();
+  }
+
+  private mergeEvents() {
     const {
       mergedEventMonthsLabels,
       mergedEventsMonthsData,
@@ -58,46 +75,38 @@ class HTMLContentBuilder {
     } = this.cumulativeStatistics();
 
     const aggregatedStats = this.stats.mergeEvents.result<MergeEventsStatisticsResult>().results;
-    const start = humanizeDate(this.stats.mergeEvents.period.start);
-    const end = humanizeDate(this.stats.mergeEvents.period.end);
-    const templateFilePath = path.resolve(__dirname, "../../../templates/template.pug");
-    const fn = pug.compileFile(templateFilePath, { pretty: true });
-    return fn({
-      stringify,
-      period: { start, end },
-      stats: {
-        mr: {
-          months: {
-            data: mergedEventsMonthsData,
-            labels: mergedEventMonthsLabels,
-            average: mergedEventsMonthsAverageTimeData,
-            median: mergedEventsMonthsMedianTimeData,
-          },
-          weeks: {
-            data: mergedEventsWeeksData,
-            labels: mergedEventsWeeksLabels,
-            average: mergedEventsWeeksAverageData,
-            median: mergedEventsWeeksMedianData,
-          },
+    return {
+      mr: {
+        months: {
+          data: mergedEventsMonthsData,
+          labels: mergedEventMonthsLabels,
+          average: mergedEventsMonthsAverageTimeData,
+          median: mergedEventsMonthsMedianTimeData,
         },
-        cumulative: {
-          months: {
-            openedData: cumulativeOpenedMonthsData,
-            closedData: cumulativeClosedMonthsData,
-            trendData: cumulativeTrendMonthsData,
-            labels: cumulativeMonthsLabels,
-          },
-          weeks: {
-            openedData: cumulativeOpenedWeeksData,
-            closedData: cumulativeClosedWeeksData,
-            trendData: cumulativeTrendWeeksData,
-            labels: cumulativeWeeksLabels,
-          },
+        weeks: {
+          data: mergedEventsWeeksData,
+          labels: mergedEventsWeeksLabels,
+          average: mergedEventsWeeksAverageData,
+          median: mergedEventsWeeksMedianData,
         },
-        ...aggregatedStats,
       },
-    });
-  };
+      cumulative: {
+        months: {
+          openedData: cumulativeOpenedMonthsData,
+          closedData: cumulativeClosedMonthsData,
+          trendData: cumulativeTrendMonthsData,
+          labels: cumulativeMonthsLabels,
+        },
+        weeks: {
+          openedData: cumulativeOpenedWeeksData,
+          closedData: cumulativeClosedWeeksData,
+          trendData: cumulativeTrendWeeksData,
+          labels: cumulativeWeeksLabels,
+        },
+      },
+      ...aggregatedStats,
+    };
+  }
 
   private mergedEventsStatistics() {
     const mergedEventsStatistics =
@@ -193,26 +202,4 @@ class HTMLContentBuilder {
   }
 }
 
-export class HTMLWriter implements Writer {
-  private readonly _filePath: string;
-
-  constructor(filePath: string) {
-    this._filePath = filePath;
-  }
-
-  @progressBar(Title.Generate_HTML)
-  write(stats: StatisticsAggregate): void {
-    try {
-      const reportFilePath = `${this._filePath}/report`;
-      if (!fs.existsSync(reportFilePath)) {
-        fs.mkdirSync(reportFilePath);
-      }
-      fs.writeFileSync(`${reportFilePath}/index.html`, new HTMLContentBuilder(stats).build());
-      const cssFilePath = path.resolve(__dirname, "../../../style.css");
-      fs.copyFileSync(cssFilePath, `${reportFilePath}/style.css`);
-      openBrowser(`${reportFilePath}/index.html`);
-    } catch (e) {
-      console.log(e);
-    }
-  }
-}
+export { MergeEventsContentBuilder };

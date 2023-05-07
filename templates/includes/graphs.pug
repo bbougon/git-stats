@@ -1,0 +1,70 @@
+script(type='text/javascript').
+
+    function initializeHistogramDataSet(mergeEventsFlows) {
+        return [
+            {
+                label: '# of merged events',
+                data: mergeEventsFlows,
+                yAxisID: 'y',
+                barPercentage: 1.24,
+            }
+        ];
+    }
+
+
+    function initializeLinearDataSet(charts) {
+        return charts.map((chart) => (
+            {
+                label: chart.label,
+                data: chart.data,
+                borderWidth: 3,
+                borderJoinStyle: "round",
+                tension: 0.2,
+                yAxisID: 'y',
+            }));
+    }
+
+    const options = {
+        scales: {
+            y: {
+                display: true,
+                position: 'left',
+                ticks: {
+                    beginAtZero: true,
+                    callback: function (value, index, ticks) {
+                        const duration = moment.duration(parseInt(value), "hours");
+                        return #{stats.merge.average.days} > 0 || #{stats.merge.average.months} > 0 ? Math.round(duration.asDays()) + " day(s)" : Math.round(duration.asHours()) + " hours(s)";
+                    }
+                }
+            },
+        },
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: function (context) {
+                        let label = context.dataset.label || '';
+
+                        if (label) {
+                            label += ': ';
+                        }
+                        if (context.parsed.y !== null) {
+                            const duration = moment.duration(parseInt(context.parsed.y), "hours");
+                            label += #{stats.merge.average.days} > 0 || #{stats.merge.average.months} > 0 ? Math.round(duration.asDays()) + " day(s)" : Math.round(duration.asHours()) + " hours(s)";
+                        }
+                        return label
+                    },
+                }
+            }
+        }
+    }
+
+    function renderChart(type, context, labels, datasets, options = {}) {
+        new Chart(context, {
+            type,
+            data: {
+                labels: labels,
+                datasets: datasets,
+            },
+            options
+        });
+    }
