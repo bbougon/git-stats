@@ -13,6 +13,8 @@ html(lang="en")
             li(class="nav-item" role="presentation")
                 a(class="nav-link" id="issues-events-tab" data-bs-toggle="tab" data-bs-target="#issues-events-tab-pane" type="button" role="tab" aria-controls="issues-events-tab-pane" aria-selected="false") Issues
 
+include includes/graphs.pug
+
         div(class="tab-content")
             include merge-events/merge-events.pug
             include issues-events/issues-events.pug

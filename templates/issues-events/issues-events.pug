@@ -34,3 +34,18 @@ div(class="tab-pane fade ps-4" id="issues-events-tab-pane" role="tabpanel" aria-
                 div.row
                     div
                         canvas#aggregated-issues-statistics
+
+script(type='text/javascript').
+    const aggregatedIssuesContext = document.getElementById("aggregated-issues-statistics")
+    const aggregatedIssuesChartLabels = ['Opened', 'Closed', 'All']
+    const aggregatedIssuesChartDatasets = [{
+        label: 'Aggregated merge requests',
+        data: [
+            #{stats.issues.total.opened},
+            #{stats.issues.total.closed},
+            #{stats.issues.total.all}
+        ],
+        hoverOffset: 4
+    }]
+
+    renderChart('doughnut', aggregatedIssuesContext, aggregatedIssuesChartLabels, aggregatedIssuesChartDatasets, {});
