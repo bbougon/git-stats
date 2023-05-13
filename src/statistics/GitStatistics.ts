@@ -34,8 +34,13 @@ const gitStatistics = (requestParameter: RequestParameters): Promise<StatisticsA
     .getEventsForPeriod(requestParameter)
     .then((issueEvents) => {
       const issueEventStatistics = new IssueEventStatistics(issueEvents, period);
+      const cumulativeIssues = new CumulativeStatistics(issueEvents, period, (event) => ({
+        end: event.closedAt,
+        start: event.start,
+      }));
       return Promise.resolve({
         issues: issueEventStatistics,
+        cumulativeIssues,
       });
     });
   return Promise.all([mergeEvents, issueEvents]).then((values) => {

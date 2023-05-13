@@ -3,10 +3,12 @@ import { MergeEvent } from "./merge-events/MergeEvent.js";
 import {
   CumulativeStatisticBuilder,
   IssueEventBuilder,
+  IssueEventsBuilder,
   MergeEventBuilderForMR,
   MergeEventBuilderForPR,
   MergeEventsBuilderForMR,
   RandomInPeriodMergeEventsBuilder,
+  WeekPeriodIssueEventsBuilder,
   WeekPeriodMergeEventsBuilder,
 } from "../__tests__/builder.js";
 import { gitStatistics, Unit, Year } from "./GitStatistics.js";
@@ -719,17 +721,56 @@ describe("Git Statistics", () => {
           .build();
         repository.persistAll([firstIssue, secondIssue, thirdIssue, fourthIssue, fifthIssue]);
 
-        const gitStatistics1 = await gitStatistics({
-          projectId: 1,
-          fromDate: parseISO("2022-05-01T00:00:00"),
-          toDate: parseISO("2022-05-31T23:59:59"),
-        } as RequestParameters);
-        const statistics = gitStatistics1.issues.result();
+        const statistics = (
+          await gitStatistics({
+            projectId: 1,
+            fromDate: parseISO("2022-05-01T00:00:00"),
+            toDate: parseISO("2022-05-31T23:59:59"),
+          } as RequestParameters)
+        ).issues.result();
 
         expect(statistics.results).toEqual({
           average: { months: 0, days: 0, hours: 4, minutes: 30, seconds: 0 },
           total: { all: 5, closed: 1, opened: 4 },
         });
+      });
+    });
+
+    describe("Cumulative statistics", () => {
+      beforeEach(() => {
+        new GitlabMemoryRepositories();
+      });
+
+      it("should generate cumulative statistics for issues", async () => {
+        const repository = Repositories.issueEvent() as IssueEventsMemoryRepository;
+        const start = parseISO("2021-06-06T00:00:00Z");
+        const end = parseISO("2021-06-26T23:59:59Z");
+        const issueEvents = new IssueEventsBuilder(1)
+          .inWeek(new WeekPeriodIssueEventsBuilder(24, 7, 6))
+          .inWeek(new WeekPeriodIssueEventsBuilder(25, 4, 2))
+          .inWeek(new WeekPeriodIssueEventsBuilder(26, 1, 1))
+          .forPeriod(start, end)
+          .build();
+        repository.persistAll(issueEvents);
+
+        const cumulativeIssues = (
+          await gitStatistics({
+            projectId: 1,
+            fromDate: start,
+            toDate: end,
+          } as RequestParameters)
+        ).cumulativeIssues.result<Map<Unit, CumulativeStatistic[]>>().results;
+
+        const months = cumulativeIssues.get("Month");
+        expect(months[0].opened).toBeGreaterThanOrEqual(12);
+        expect(months[0].closed).toBe(9);
+        const weeks = cumulativeIssues.get("Week");
+        expect(weeks[0].opened).toBeGreaterThanOrEqual(7);
+        expect(weeks[0].closed).toBe(6);
+        expect(weeks[1].opened).toBeGreaterThanOrEqual(11);
+        expect(weeks[1].closed).toBe(8);
+        expect(weeks[2].opened).toBeGreaterThanOrEqual(12);
+        expect(weeks[2].closed).toBe(9);
       });
     });
   });

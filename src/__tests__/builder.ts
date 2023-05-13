@@ -11,6 +11,7 @@ import {
 import { MergeEvent } from "../statistics/merge-events/MergeEvent.js";
 import { CumulativeStatistic } from "../statistics/CumulativeStatistics";
 import { IssueEvent } from "../statistics/issues/Issues";
+import { GitEvent } from "../statistics/Statistics";
 
 export class MergeEventBuilderForMR {
   private projectId: number;
@@ -66,69 +67,108 @@ interface Builder<M> {
   build(): M;
 }
 
-interface MergeEventsBuilder<T> extends Builder<MergeEvent[]> {
-  build(): MergeEvent[];
+type GitEventsBuilderSpecification = {
+  builder: (startDate: Date, endDate: Date | undefined) => GitEvent;
+  startingState: number;
+  closingState: number;
+};
 
-  forPeriod(period: { start: Date; end: Date }): T;
+abstract class WeekGitEventsBuilder<T extends GitEvent, U> implements Builder<T[]> {
+  protected _projectId: number;
+  protected _period: { start: Date; end: Date };
+  protected _weekNumber: number;
 
-  forProject(projectId: number): T;
-}
-
-export class WeekPeriodMergeEventsBuilder implements MergeEventsBuilder<WeekPeriodMergeEventsBuilder> {
-  private _period: { start: Date; end: Date };
-  private _projectId: number;
-
-  constructor(private readonly weekNumber: number, private readonly opened: number, private readonly merged: number) {}
-
-  build(): MergeEvent[] {
-    const events: MergeEvent[] = [];
-    const dates = eachWeekOfInterval(this._period);
-    dates.forEach((week) => {
-      if (getWeek(week) === this.weekNumber) {
-        for (let i = 0; i < this.opened; i++) {
-          const randomDayInWeek = addDays(week, Math.floor(Math.random() * (6 - 1) + 1));
-          events.push(new MergeEventBuilderForMR(this._projectId).createdAt(randomDayInWeek).build());
-        }
-        for (let i = 0; i < this.merged; i++) {
-          const endOfDay = new Date(week.getFullYear(), week.getMonth(), week.getDate(), 23, 59);
-          const randomDayInWeek = addDays(endOfDay, Math.floor(Math.random() * (6 - 2) + 2));
-          const maxRange = differenceInDays(endOfDay, week);
-          events.push(
-            new MergeEventBuilderForMR(this._projectId)
-              .createdAt(
-                maxRange > 2
-                  ? addDays(endOfDay, -Math.floor(Math.random() * (maxRange - 2) + 2))
-                  : addHours(endOfDay, -Math.floor(Math.random() * (8 - 2) + 2))
-              )
-              .mergedAt(randomDayInWeek)
-              .build()
-          );
-        }
-      }
-    });
-    return events;
-  }
-
-  forPeriod(period: { start: Date; end: Date }): WeekPeriodMergeEventsBuilder {
+  forPeriod(period: { start: Date; end: Date }): this {
     this._period = period;
     return this;
   }
 
-  forProject(projectId: number): WeekPeriodMergeEventsBuilder {
+  forProject(projectId: number): this {
     this._projectId = projectId;
     return this;
   }
+
+  build(): T[] {
+    const events: GitEvent[] = [];
+    const dates = eachWeekOfInterval(this._period);
+    const specifications: GitEventsBuilderSpecification = this.specifications();
+    dates.forEach((week) => {
+      if (getWeek(week) === this._weekNumber) {
+        for (let i = 0; i < specifications.startingState; i++) {
+          const randomDayInWeek = addDays(week, Math.floor(Math.random() * (6 - 1) + 1));
+          events.push(specifications.builder(randomDayInWeek, undefined));
+        }
+        for (let i = 0; i < specifications.closingState; i++) {
+          const endOfDay = new Date(week.getFullYear(), week.getMonth(), week.getDate(), 23, 59);
+          const randomDayInWeek = addDays(endOfDay, Math.floor(Math.random() * (6 - 2) + 2));
+          const maxRange = differenceInDays(endOfDay, week);
+          const startingDate =
+            maxRange > 2
+              ? addDays(endOfDay, -Math.floor(Math.random() * (maxRange - 2) + 2))
+              : addHours(endOfDay, -Math.floor(Math.random() * (8 - 2) + 2));
+          events.push(specifications.builder(startingDate, randomDayInWeek));
+        }
+      }
+    });
+    return events as T[];
+  }
+
+  abstract specifications(): GitEventsBuilderSpecification;
 }
 
-export class RandomInPeriodMergeEventsBuilder implements MergeEventsBuilder<RandomInPeriodMergeEventsBuilder> {
-  private _period: { start: Date; end: Date };
-  private _projectId: number;
+export class WeekPeriodMergeEventsBuilder extends WeekGitEventsBuilder<MergeEvent, WeekPeriodMergeEventsBuilder> {
+  constructor(private readonly weekNumber: number, private readonly opened: number, private readonly merged: number) {
+    super();
+    this._weekNumber = weekNumber;
+  }
 
+  specifications(): GitEventsBuilderSpecification {
+    const projectId = this._projectId;
+    return {
+      builder(startDate: Date, endDate: Date | undefined): GitEvent {
+        if (endDate === undefined) {
+          return new MergeEventBuilderForMR(projectId).createdAt(startDate).build();
+        }
+        return new MergeEventBuilderForMR(projectId).createdAt(startDate).mergedAt(endDate).build();
+      },
+      closingState: this.merged,
+      startingState: this.opened,
+    };
+  }
+}
+
+export class WeekPeriodIssueEventsBuilder extends WeekGitEventsBuilder<IssueEvent, WeekPeriodIssueEventsBuilder> {
+  constructor(private readonly weekNumber: number, private readonly opened: number, private readonly closed: number) {
+    super();
+    this._weekNumber = weekNumber;
+  }
+
+  specifications(): GitEventsBuilderSpecification {
+    const projectId = this._projectId;
+    return {
+      builder(startDate: Date, endDate: Date | undefined): GitEvent {
+        if (endDate === undefined) {
+          return new IssueEventBuilder(projectId).createdAt(startDate).build();
+        }
+        return new IssueEventBuilder(projectId).createdAt(startDate).closedAt(endDate).build();
+      },
+      closingState: this.closed,
+      startingState: this.opened,
+    };
+  }
+}
+
+export class RandomInPeriodMergeEventsBuilder extends WeekGitEventsBuilder<
+  MergeEvent,
+  RandomInPeriodMergeEventsBuilder
+> {
   constructor(
     private readonly numberOfMergeRequests: number,
     private readonly emptyPeriodNumber: number = 0,
     private readonly doNotMergeYetRandomly: boolean = false
-  ) {}
+  ) {
+    super();
+  }
 
   build(): MergeEvent[] {
     const requests: MergeEvent[] = [];
@@ -160,24 +200,19 @@ export class RandomInPeriodMergeEventsBuilder implements MergeEventsBuilder<Rand
     return requests;
   }
 
-  forPeriod(period: { start: Date; end: Date }): RandomInPeriodMergeEventsBuilder {
-    this._period = period;
-    return this;
-  }
-
-  forProject(projectId: number): RandomInPeriodMergeEventsBuilder {
-    this._projectId = projectId;
-    return this;
+  specifications(): GitEventsBuilderSpecification {
+    return undefined;
   }
 }
 
 export class MergeEventsBuilderForMR {
-  private _projectId: number;
   private _period: { start: Date; end: Date };
-  private builders: MergeEventsBuilder<WeekPeriodMergeEventsBuilder | RandomInPeriodMergeEventsBuilder>[] = [];
+  private builders: WeekGitEventsBuilder<
+    MergeEvent,
+    WeekPeriodMergeEventsBuilder | RandomInPeriodMergeEventsBuilder
+  >[] = [];
 
-  constructor(projectId: number) {
-    this._projectId = projectId;
+  constructor(private readonly projectId: number) {
     this._period = { start: parseISO("2021-01-01T00:00:00"), end: parseISO("2021-01-08T00:00:00") };
   }
 
@@ -199,10 +234,39 @@ export class MergeEventsBuilderForMR {
     const requests: MergeEvent[] = [];
 
     this.builders.forEach((builder) => {
-      const mergeEvents = builder.forProject(this._projectId).forPeriod(this._period).build();
+      const mergeEvents = builder.forProject(this.projectId).forPeriod(this._period).build();
       requests.push(...mergeEvents);
     });
     return requests;
+  };
+}
+
+export class IssueEventsBuilder {
+  private _period: { start: Date; end: Date };
+  private builders: WeekGitEventsBuilder<IssueEvent, WeekPeriodIssueEventsBuilder>[] = [];
+
+  constructor(private readonly projectId: number) {
+    this._period = { start: parseISO("2021-01-01T00:00:00"), end: parseISO("2021-01-08T00:00:00") };
+  }
+
+  inWeek(builder: WeekPeriodIssueEventsBuilder): IssueEventsBuilder {
+    this.builders.push(builder);
+    return this;
+  }
+
+  forPeriod(start: Date, end: Date): IssueEventsBuilder {
+    this._period = { start, end };
+    return this;
+  }
+
+  build = (): IssueEvent[] => {
+    const issues: IssueEvent[] = [];
+
+    this.builders.forEach((builder) => {
+      const issueEvents = builder.forProject(this.projectId).forPeriod(this._period).build();
+      issues.push(...issueEvents);
+    });
+    return issues;
   };
 }
 
@@ -236,7 +300,6 @@ export class MergeEventBuilderForPR {
 
   closed = (closedAt: Date): MergeEventBuilderForPR => {
     this.closedAt = closedAt;
-    //this._mergedAt = null;
     return this;
   };
 
