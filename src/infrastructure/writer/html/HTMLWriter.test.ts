@@ -59,6 +59,10 @@ describe("HTML writer", () => {
         start: mr.start,
       })),
       issues: new IssueEventStatistics([firstIssueEvent, secondIssueEvent], period),
+      cumulativeIssues: new CumulativeStatistics([firstIssueEvent, secondIssueEvent], period, (event) => ({
+        end: event.closedAt,
+        start: event.start,
+      })),
     });
 
     expect(fs.readFileSync(`${tempDirectory}/report/index.html`, "utf8")).toMatchSnapshot();
@@ -97,6 +101,7 @@ describe("HTML writer", () => {
         start: mr.start,
       })),
       issues: new IssueEventStatistics([], period),
+      cumulativeIssues: new CumulativeStatistics([], period, (event) => ({ end: event.closedAt, start: event.start })),
     });
 
     expect(fs.readFileSync(`${tempDirectory}/report/index.html`, "utf8")).toMatchSnapshot();
@@ -138,6 +143,10 @@ describe("HTML writer", () => {
         start: mr.start,
       })),
       issues: new IssueEventStatistics([firstIssueEvent, secondIssueEvent], period),
+      cumulativeIssues: new CumulativeStatistics([firstIssueEvent, secondIssueEvent], period, (event) => ({
+        end: event.closedAt,
+        start: event.start,
+      })),
     });
 
     expect(fs.readFileSync(`${tempDirectory}/report/index.html`, "utf8")).toMatchSnapshot();

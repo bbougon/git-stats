@@ -34,6 +34,27 @@ div(class="tab-pane fade ps-4" id="issues-events-tab-pane" role="tabpanel" aria-
                 div.row
                     div
                         canvas#aggregated-issues-statistics
+    div.container-sm
+        ul(class="nav nav-tabs" id="issues-period-tab" role="tablist")
+            li(class="nav-item" role="presentation")
+                button(class="nav-link active" id="issues-months-tab" data-bs-toggle="tab" data-bs-target="#issues-months-tab-pane" type="button" role="tab" aria-controls="issues-months-tab-pane" aria-selected="true")
+                    h5 Months
+            li(class="nav-item" role="presentation")
+                button(class="nav-link" id="issues-weeks-tab" data-bs-toggle="tab" data-bs-target="#issues-weeks-tab-pane" type="button" role="tab" aria-controls="issues-weeks-tab-pane" aria-selected="false")
+                    h5 Weeks
+        div(class="tab-content" id="issuesPeriodTabContent")
+            div(class="tab-pane fade show active" id="issues-months-tab-pane" role="tabpanel" aria-labelledby="issues-months-tab" tabindex="0")
+                div#issues-months
+                    div(class='container-sm')
+                        div.row
+                            div(class='col-lg-6')
+                                canvas#issues-cumulative-months-stats
+            div(class="tab-pane fade" id="issues-weeks-tab-pane" role="tabpanel" aria-labelledby="issues-weeks-tab" tabindex="0")
+                div#issues-weeks
+                    div(class='container-sm')
+                        div.row
+                            div(class='col-lg-6')
+                                canvas#issues-cumulative-weeks-stats
 
 script(type='text/javascript').
     const aggregatedIssuesContext = document.getElementById("aggregated-issues-statistics")
@@ -48,4 +69,22 @@ script(type='text/javascript').
         hoverOffset: 4
     }]
 
+    const monthsCumulativeIssuesContext = document.getElementById('issues-cumulative-months-stats')
+    const monthsCumulativeIssuesDatasets = initializeLinearDataSet([
+        {data: [#{stats.issues.cumulative.months.openedData}], label: "Cumulative opened issues"},
+        {data: [#{stats.issues.cumulative.months.closedData}], label: "Cumulative closed issues"},
+        {data: [#{stats.issues.cumulative.months.trendData}], label: "Cumulative trend issues"},
+    ])
+    const monthsCumulativeIssuesLabels = !{stringify(stats.issues.cumulative.months.labels)}
+
+    const weeksCumulativeIssuesContext = document.getElementById('issues-cumulative-weeks-stats')
+    const weeksCumulativeIssuesDatasets = initializeLinearDataSet([
+        {data: [#{stats.issues.cumulative.weeks.openedData}], label: "Cumulative opened issues"},
+        {data: [#{stats.issues.cumulative.weeks.closedData}], label: "Cumulative closed issues"},
+        {data: [#{stats.issues.cumulative.weeks.trendData}], label: "Cumulative trend issues"},
+    ])
+    const weeksCumulativeIssuesLabels = !{stringify(stats.issues.cumulative.weeks.labels)}
+
+    renderChart('line', monthsCumulativeIssuesContext, monthsCumulativeIssuesLabels, monthsCumulativeIssuesDatasets, {});
+    renderChart('line', weeksCumulativeIssuesContext, weeksCumulativeIssuesLabels, weeksCumulativeIssuesDatasets, {});
     renderChart('doughnut', aggregatedIssuesContext, aggregatedIssuesChartLabels, aggregatedIssuesChartDatasets, {});
