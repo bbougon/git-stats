@@ -5,8 +5,10 @@ import moment from "moment";
 import { HUMAN_READABLE_MONTHS } from "../HumanReadableLabels.js";
 import { CumulativeStatistic } from "../../../statistics/CumulativeStatistics.js";
 import { ContentBuilder } from "./ContentBuilder.js";
+import { CumulativeEventsContent } from "./CumulativeEventsContent.js";
+import { CumulativeStatisticsContentBuilder } from "./CumulativeStatisticsContentBuilder.js";
 
-type MergeEventsContent = {
+type MergeEventsContent = CumulativeEventsContent & {
   mr: {
     months: {
       data: number[];
@@ -19,20 +21,6 @@ type MergeEventsContent = {
       labels: string[];
       average: number[];
       median: number[];
-    };
-  };
-  cumulative: {
-    months: {
-      openedData: number[];
-      closedData: number[];
-      trendData: number[];
-      labels: string[];
-    };
-    weeks: {
-      openedData: number[];
-      closedData: number[];
-      trendData: number[];
-      labels: string[];
     };
   };
   average: Duration;
@@ -165,40 +153,9 @@ class MergeEventsContentBuilder implements ContentBuilder<MergeEventsContent> {
   }
 
   private cumulativeStatistics() {
-    const cumulativeMonthsLabels: string[] = [];
-    const cumulativeOpenedMonthsData: number[] = [];
-    const cumulativeClosedMonthsData: number[] = [];
-    const cumulativeTrendMonthsData: number[] = [];
-    const cumulativeWeeksLabels: string[] = [];
-    const cumulativeOpenedWeeksData: number[] = [];
-    const cumulativeClosedWeeksData: number[] = [];
-    const cumulativeTrendWeeksData: number[] = [];
-    const cumulativeStatistics = this.stats.cumulativeStatistics.result<Map<Unit, CumulativeStatistic[]>>().results;
-
-    cumulativeStatistics.get("Month").forEach((cumulativeStatistics) => {
-      cumulativeMonthsLabels.push(HUMAN_READABLE_MONTHS[cumulativeStatistics.index]);
-      cumulativeOpenedMonthsData.push(cumulativeStatistics.opened);
-      cumulativeClosedMonthsData.push(cumulativeStatistics.closed);
-      cumulativeTrendMonthsData.push(cumulativeStatistics.trend);
-    });
-
-    cumulativeStatistics.get("Week").forEach((cumulativeStatistics) => {
-      cumulativeWeeksLabels.push(`Week ${cumulativeStatistics.index}`);
-      cumulativeOpenedWeeksData.push(cumulativeStatistics.opened);
-      cumulativeClosedWeeksData.push(cumulativeStatistics.closed);
-      cumulativeTrendWeeksData.push(cumulativeStatistics.trend);
-    });
-
-    return {
-      cumulativeMonthsLabels,
-      cumulativeOpenedMonthsData,
-      cumulativeClosedMonthsData,
-      cumulativeTrendMonthsData,
-      cumulativeWeeksLabels,
-      cumulativeOpenedWeeksData,
-      cumulativeClosedWeeksData,
-      cumulativeTrendWeeksData,
-    };
+    return new CumulativeStatisticsContentBuilder(
+      this.stats.cumulativeStatistics.result<Map<Unit, CumulativeStatistic[]>>().results
+    ).build();
   }
 }
 
