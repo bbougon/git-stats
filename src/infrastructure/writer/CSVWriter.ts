@@ -7,7 +7,7 @@ import { progressBar } from "../progress-bar/ProgressBar.js";
 import { Title } from "../progress-bar/Title.js";
 
 export class CSVWriter implements Writer {
-  private HEADER = [
+  private static HEADER = [
     { key: "eventType", header: "Event" },
     { key: "project", header: "Project" },
     { key: "id", header: "id" },
@@ -15,6 +15,9 @@ export class CSVWriter implements Writer {
     { key: "mergedAt", header: "Merged At" },
     { key: "closedAt", header: "Closed At" },
   ];
+
+  private static EVENTS_TYPE = ["issues", "mergeEvents"];
+
   constructor(private readonly filePath: string) {}
 
   @progressBar(Title.Generate_CSV)
@@ -25,11 +28,11 @@ export class CSVWriter implements Writer {
         fs.mkdirSync(reportFilePath);
       }
       const input = Object.entries(stats)
-        .filter(([key, _value]) => key === "mergeEvents")
+        .filter(([key, _value]) => CSVWriter.EVENTS_TYPE.includes(key))
         .flatMap(([key, value]) => value.events.map((event) => ({ eventType: key, ...event })));
       const stringifier = stringify(input, {
         header: true,
-        columns: this.HEADER,
+        columns: CSVWriter.HEADER,
         delimiter: ";",
         cast: {
           date: function (value: Date) {

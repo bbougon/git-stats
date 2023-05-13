@@ -352,7 +352,7 @@ export class CumulativeStatisticBuilder {
 export class IssueEventBuilder {
   private _createdAt: Date;
   private _closedAt: Date | null;
-  constructor(private readonly projectId: number | undefined, private readonly id: number = crypto.randomInt(2 ^ 16)) {
+  constructor(private readonly projectId: number | undefined, private id: number = crypto.randomInt(2 ^ 16)) {
     this._closedAt = null;
   }
 
@@ -363,6 +363,11 @@ export class IssueEventBuilder {
 
   closedAt = (closedAt: Date): IssueEventBuilder => {
     this._closedAt = closedAt;
+    return this;
+  };
+
+  withId = (id: number): IssueEventBuilder => {
+    this.id = id;
     return this;
   };
 
