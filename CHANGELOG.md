@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.5](https://github.com/bbougon/git-stats/compare/v0.2.4...v0.2.5) (2023-05-13)
+
+
+### Features
+
+* display aggregated issues doughnut graph ([aabec3b](https://github.com/bbougon/git-stats/commit/aabec3b47fd774efe4da053239f8ee6651ea7579))
+* generate cumulative statistics for issues ([1891402](https://github.com/bbougon/git-stats/commit/18914029091ad46dd5ab78e8d27159a9f8acba31))
+
 ## [0.2.4](https://github.com/bbougon/git-stats/compare/v0.2.3...v0.2.4) (2023-05-07)
 
 
