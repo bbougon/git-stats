@@ -7,6 +7,7 @@ import {
   MergeEventBuilderForMR,
   MergeEventBuilderForPR,
   MergeEventsBuilderForMR,
+  RandomInPeriodIssueEventsBuilder,
   RandomInPeriodMergeEventsBuilder,
   WeekPeriodIssueEventsBuilder,
   WeekPeriodMergeEventsBuilder,
@@ -771,6 +772,40 @@ describe("Git Statistics", () => {
         expect(weeks[1].closed).toBe(8);
         expect(weeks[2].opened).toBeGreaterThanOrEqual(12);
         expect(weeks[2].closed).toBe(9);
+      });
+    });
+
+    describe("Issue Events Statistics", () => {
+      let repository: IssueEventsMemoryRepository;
+
+      beforeEach(() => {
+        new GitlabMemoryRepositories();
+        repository = Repositories.issueEvent() as IssueEventsMemoryRepository;
+      });
+
+      it("generate statistics for issues", async () => {
+        const start = parseISO("2022-02-01T00:00:00");
+        const end = parseISO("2022-02-28T00:00:00");
+        const issues = new IssueEventsBuilder(1)
+          .randomly(new RandomInPeriodIssueEventsBuilder(20, 7))
+          .forPeriod(start, end)
+          .build();
+        (Repositories.issueEvent() as IssueEventsMemoryRepository).persistAll(issues);
+
+        const eventsByPeriod = (
+          await gitStatistics({
+            projectId: 1,
+            fromDate: start,
+            toDate: end,
+          } as GitlabEventParameters)
+        ).issuesStatistics.result<Map<Year, { [key: Unit]: GitEventsStatisticFlow[] }[]>>().results;
+
+        const month = eventsByPeriod.get(2022)[0].Month[0];
+        expect(month.index).toEqual(1);
+        expect(month.events).toHaveLength(issues.length);
+        const weeks = eventsByPeriod.get(2022)[1].Week;
+        expect(weeks.flatMap((week) => week.index)).toStrictEqual([6, 7, 8, 9, 10]);
+        expect(weeks[1].total()).toEqual(0);
       });
     });
   });

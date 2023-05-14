@@ -205,6 +205,46 @@ export class RandomInPeriodMergeEventsBuilder extends WeekGitEventsBuilder<
   }
 }
 
+export class RandomInPeriodIssueEventsBuilder extends WeekGitEventsBuilder<
+  IssueEvent,
+  RandomInPeriodIssueEventsBuilder
+> {
+  constructor(private readonly numberOfIssues: number, private readonly emptyPeriodNumber: number = 0) {
+    super();
+  }
+
+  build(): IssueEvent[] {
+    const issues: IssueEvent[] = [];
+    const daysInPeriod = differenceInCalendarDays(this._period.end, this._period.start);
+    for (let i = 0; i < this.numberOfIssues; i++) {
+      let closedAt: Date;
+      if (i == 0) {
+        closedAt = addDays(this._period.start, 2);
+        if (this.emptyPeriodNumber == undefined || getWeek(closedAt) !== this.emptyPeriodNumber) {
+          issues.push(new IssueEventBuilder(this._projectId).createdAt(this._period.start).closedAt(closedAt).build());
+        }
+      } else {
+        const daysForCreation = Math.floor(Math.random() * (daysInPeriod - 1) + 1);
+        const daysToClose = Math.floor(Math.random() * (daysInPeriod - daysForCreation) + daysForCreation + 1);
+        closedAt = addDays(this._period.start, daysToClose);
+        if (this.emptyPeriodNumber == undefined || getWeek(closedAt) !== this.emptyPeriodNumber) {
+          issues.push(
+            new IssueEventBuilder(this._projectId)
+              .createdAt(addDays(this._period.start, daysForCreation))
+              .closedAt(closedAt)
+              .build()
+          );
+        }
+      }
+    }
+    return issues;
+  }
+
+  specifications(): GitEventsBuilderSpecification {
+    return undefined;
+  }
+}
+
 export class MergeEventsBuilderForMR {
   private _period: { start: Date; end: Date };
   private builders: WeekGitEventsBuilder<
@@ -253,6 +293,11 @@ export class IssueEventsBuilder {
     this.builders.push(builder);
     return this;
   }
+
+  randomly = (builder: RandomInPeriodIssueEventsBuilder): IssueEventsBuilder => {
+    this.builders.push(builder);
+    return this;
+  };
 
   forPeriod(start: Date, end: Date): IssueEventsBuilder {
     this._period = { start, end };
