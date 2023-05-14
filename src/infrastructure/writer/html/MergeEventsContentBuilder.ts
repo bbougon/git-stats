@@ -1,6 +1,6 @@
 import { StatisticsAggregate, Unit, Year } from "../../../statistics/GitStatistics.js";
 import { MergeEventsStatisticsResult } from "../../../statistics/merge-events/MergeEventsStatistics.js";
-import { MergedEventsStatisticFlow } from "../../../statistics/MergedEventsStatistics.js";
+import { GitEventsStatisticFlow } from "../../../statistics/GitEventsStatistics.js";
 import moment from "moment";
 import { HUMAN_READABLE_MONTHS } from "../HumanReadableLabels.js";
 import { CumulativeStatistic } from "../../../statistics/CumulativeStatistics.js";
@@ -98,7 +98,7 @@ class MergeEventsContentBuilder implements ContentBuilder<MergeEventsContent> {
 
   private mergedEventsStatistics() {
     const mergedEventsStatistics =
-      this.stats.mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
+      this.stats.mergedEventsStatistics.result<Map<Year, { [key: Unit]: GitEventsStatisticFlow[] }[]>>().results;
     const mergedEventMonthsLabels: string[] = [];
     const mergedEventsMonthsData: number[] = [];
     const mergedEventsMonthsAverageTimeData: number[] = [];

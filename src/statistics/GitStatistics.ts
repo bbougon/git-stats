@@ -2,7 +2,7 @@ import { MergeEvent } from "./merge-events/MergeEvent.js";
 import { RequestParameters } from "../../index.js";
 import { CumulativeStatistics } from "./CumulativeStatistics.js";
 import { GitStatistics } from "./Statistics.js";
-import { MergedEventsStatistics } from "./MergedEventsStatistics.js";
+import { GitEventsStatistics } from "./GitEventsStatistics.js";
 import { Repositories } from "./Repositories.js";
 import { IssueEventStatistics } from "./issues/Issues.js";
 import { MergeEventStatistics } from "./merge-events/MergeEventsStatistics.js";
@@ -15,7 +15,7 @@ const gitStatistics = (requestParameter: RequestParameters): Promise<StatisticsA
     .getEventsForPeriod(requestParameter)
     .then((mergeEvents) => {
       const mergeEventStatistics = new MergeEventStatistics(mergeEvents, period);
-      const mergeEventsStatisticsByPeriod = new MergedEventsStatistics(mergeEvents, period, (mr: MergeEvent) => ({
+      const mergeEventsStatisticsByPeriod = new GitEventsStatistics(mergeEvents, period, (mr: MergeEvent) => ({
         end: mr.mergedAt,
         start: mr.start,
       }));

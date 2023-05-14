@@ -23,7 +23,7 @@ import {
   MergeRequestMemoryRepository,
   PullRequestMemoryRepository,
 } from "../__tests__/MemoryRepositories";
-import { MergedEventsStatisticFlow } from "./MergedEventsStatistics";
+import { GitEventsStatisticFlow } from "./GitEventsStatistics";
 import { RequestParameters } from "../../index";
 import { Repositories } from "./Repositories";
 import { EventRepository } from "./EventRepository";
@@ -181,7 +181,7 @@ describe("Git Statistics", () => {
             fromDate: start,
             toDate: end,
           } as GitlabEventParameters)
-        ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
+        ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: GitEventsStatisticFlow[] }[]>>().results;
 
         const month = eventsByPeriod.get(2022)[0].Month[0];
         expect(month.index).toEqual(1);
@@ -206,7 +206,7 @@ describe("Git Statistics", () => {
             fromDate: start,
             toDate: end,
           } as GitlabEventParameters)
-        ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
+        ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: GitEventsStatisticFlow[] }[]>>().results;
 
         const months = eventsByPeriod.get(2023)[0].Month;
         expect(months.flatMap((month) => month.index)).toStrictEqual([0, 1]);
@@ -229,7 +229,7 @@ describe("Git Statistics", () => {
             fromDate: start,
             toDate: end,
           } as GitlabEventParameters)
-        ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
+        ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: GitEventsStatisticFlow[] }[]>>().results;
 
         const monthsIn2022 = eventsByPeriod.get(2022)[0].Month;
         expect(monthsIn2022.flatMap((month) => month.index)).toStrictEqual([9, 10, 11]);
@@ -268,7 +268,7 @@ describe("Git Statistics", () => {
             fromDate: start,
             toDate: end,
           } as GitlabEventParameters)
-        ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
+        ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: GitEventsStatisticFlow[] }[]>>().results;
 
         const monthsIn2020 = eventsByPeriod.get(2020)[0].Month;
         expect(monthsIn2020.flatMap((month) => month.index)).toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
@@ -300,7 +300,7 @@ describe("Git Statistics", () => {
             fromDate: start,
             toDate: end,
           } as PullRequestsStatsParameter)
-        ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
+        ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: GitEventsStatisticFlow[] }[]>>().results;
 
         const months = eventsByPeriod.get(2021)[0].Month;
         expect(months.flatMap((month) => month.index)).toStrictEqual([7]);
@@ -334,7 +334,7 @@ describe("Git Statistics", () => {
             fromDate: start,
             toDate: end,
           } as PullRequestsStatsParameter)
-        ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
+        ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: GitEventsStatisticFlow[] }[]>>().results;
 
         const monthsIn2021 = eventsByPeriod.get(2021)[0].Month;
         expect(monthsIn2021.flatMap((month) => month.index)).toStrictEqual([2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
@@ -381,7 +381,7 @@ describe("Git Statistics", () => {
               fromDate: start,
               toDate: end,
             } as GitlabEventParameters)
-          ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
+          ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: GitEventsStatisticFlow[] }[]>>().results;
 
           const months = eventsByPeriod.get(2021)[0].Month;
           const expectedMonthAverageDuration: Duration = {
@@ -431,7 +431,7 @@ describe("Git Statistics", () => {
               fromDate: start,
               toDate: end,
             } as GitlabEventParameters)
-          ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
+          ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: GitEventsStatisticFlow[] }[]>>().results;
 
           const months = eventsByPeriod.get(2021)[0].Month;
           const expectedMonthAverageDuration: Duration = {
@@ -492,7 +492,7 @@ describe("Git Statistics", () => {
               fromDate: start,
               toDate: end,
             } as GitlabEventParameters)
-          ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
+          ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: GitEventsStatisticFlow[] }[]>>().results;
 
           const months = eventsByPeriod.get(2021)[0].Month;
           const expectedMonthMedianDuration: Duration = {
@@ -542,7 +542,7 @@ describe("Git Statistics", () => {
               fromDate: start,
               toDate: end,
             } as GitlabEventParameters)
-          ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: MergedEventsStatisticFlow[] }[]>>().results;
+          ).mergedEventsStatistics.result<Map<Year, { [key: Unit]: GitEventsStatisticFlow[] }[]>>().results;
 
           const months = eventsByPeriod.get(2021)[0].Month;
           const expectedMonthAverageDuration: Duration = {
