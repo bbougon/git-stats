@@ -117,7 +117,7 @@ describe("Progress Bar decorator", () => {
       callProgressBarAndExecuteDescriptor(Title.Paginate, customProgressBar, descriptor(), null);
       await new Promise((f) => setTimeout(f, 1));
 
-      expect(customProgressBar.bars.size).toEqual(0);
+      expect(customProgressBar.bars.size).toEqual(1);
     });
   });
 });

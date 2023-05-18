@@ -25,8 +25,12 @@ interface ProgressBarUpdateStrategy {
 class PaginationProgressBarUpdateStrategy implements ProgressBarUpdateStrategy {
   apply(bar: CustomGenericBar, parameters: { title: string | Title; args: any[] }): void {
     const links: Links = parameters.args[0];
-    const currentPageNumber = getLinkHeaderPageValue(links, "next");
-    const totalPages = getLinkHeaderPageValue(links, "last");
+    let currentPageNumber = 1;
+    let totalPages = 1;
+    if (links !== null) {
+      currentPageNumber = getLinkHeaderPageValue(links, "next");
+      totalPages = getLinkHeaderPageValue(links, "last");
+    }
     bar.update(currentPageNumber, {
       title: parameters.title,
       value: currentPageNumber,
@@ -61,6 +65,16 @@ class PaginationProgressBarCreateStrategy implements ProgressBarCreateStrategy {
           title: param.title,
           value: 0,
           total: totalPages,
+        }
+      );
+    } else if (links === null) {
+      progressBar.add(
+        param.title,
+        { total: 1, startValue: 0 },
+        {
+          title: param.title,
+          value: 1,
+          total: 1,
         }
       );
     }
