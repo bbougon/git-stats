@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.6](https://github.com/bbougon/git-stats/compare/v0.2.5...v0.2.6) (2023-05-18)
+
+
+### Features
+
+* display issues statistics in HTML report ([a979476](https://github.com/bbougon/git-stats/commit/a979476e9f8a3c95186436e16bd92465c73e828a))
+
 ## [0.2.5](https://github.com/bbougon/git-stats/compare/v0.2.4...v0.2.5) (2023-05-13)
 
 
