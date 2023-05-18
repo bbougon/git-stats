@@ -73,10 +73,9 @@ type GitEventsBuilderSpecification = {
   closingState: number;
 };
 
-abstract class WeekGitEventsBuilder<T extends GitEvent, U> implements Builder<T[]> {
+abstract class GitEventsBuilder<T extends GitEvent, U> implements Builder<T[]> {
   protected _projectId: number;
   protected _period: { start: Date; end: Date };
-  protected _weekNumber: number;
 
   forPeriod(period: { start: Date; end: Date }): this {
     this._period = period;
@@ -87,6 +86,12 @@ abstract class WeekGitEventsBuilder<T extends GitEvent, U> implements Builder<T[
     this._projectId = projectId;
     return this;
   }
+
+  abstract build(): T[];
+}
+
+abstract class WeekGitEventsBuilder<T extends GitEvent, U> extends GitEventsBuilder<T, U> {
+  protected _weekNumber: number;
 
   build(): T[] {
     const events: GitEvent[] = [];
@@ -158,99 +163,93 @@ export class WeekPeriodIssueEventsBuilder extends WeekGitEventsBuilder<IssueEven
   }
 }
 
-export class RandomInPeriodMergeEventsBuilder extends WeekGitEventsBuilder<
+abstract class RandomInPeriodGitEventsBuilder<T extends GitEvent, U> extends GitEventsBuilder<T, U> {
+  protected constructor(protected readonly numberOfEvents: number, protected readonly emptyPeriodNumber: number = 0) {
+    super();
+  }
+
+  build(): T[] {
+    const events: GitEvent[] = [];
+    const daysInPeriod = differenceInCalendarDays(this._period.end, this._period.start);
+    const specifications: GitEventsBuilderSpecification = this.specifications();
+    for (let i = 0; i < this.numberOfEvents; i++) {
+      let endsAt: Date;
+      if (i == 0) {
+        endsAt = addDays(this._period.start, 2);
+        if (this.emptyPeriodNumber == undefined || getWeek(endsAt) !== this.emptyPeriodNumber) {
+          const builder = specifications.builder(this._period.start, this._period.end);
+          events.push(builder);
+        }
+      } else {
+        const daysToStart = Math.floor(Math.random() * (daysInPeriod - 1) + 1);
+        const daysToEnd = Math.floor(Math.random() * (daysInPeriod - daysToStart) + daysToStart + 1);
+        endsAt = addDays(this._period.start, daysToEnd);
+        if (this.emptyPeriodNumber == undefined || getWeek(endsAt) !== this.emptyPeriodNumber) {
+          const startAt = addDays(this._period.start, daysToStart);
+          const builder = specifications.builder(startAt, endsAt);
+          events.push(builder);
+        }
+      }
+    }
+    return events as T[];
+  }
+
+  abstract specifications(): GitEventsBuilderSpecification;
+}
+
+export class RandomInPeriodMergeEventsBuilder extends RandomInPeriodGitEventsBuilder<
   MergeEvent,
   RandomInPeriodMergeEventsBuilder
 > {
   constructor(
-    private readonly numberOfMergeRequests: number,
-    private readonly emptyPeriodNumber: number = 0,
+    numberOfMergeRequests: number,
+    emptyPeriodNumber = 0,
     private readonly doNotMergeYetRandomly: boolean = false
   ) {
-    super();
-  }
-
-  build(): MergeEvent[] {
-    const requests: MergeEvent[] = [];
-    const daysInPeriod = differenceInCalendarDays(this._period.end, this._period.start);
-    for (let i = 0; i < this.numberOfMergeRequests; i++) {
-      let mergedAt: Date;
-      if (i == 0) {
-        mergedAt = addDays(this._period.start, 2);
-        if (this.emptyPeriodNumber == undefined || getWeek(mergedAt) !== this.emptyPeriodNumber) {
-          requests.push(
-            new MergeEventBuilderForMR(this._projectId).createdAt(this._period.start).mergedAt(mergedAt).build()
-          );
-        }
-      } else {
-        const daysForCreation = Math.floor(Math.random() * (daysInPeriod - 1) + 1);
-        const daysToMerge = Math.floor(Math.random() * (daysInPeriod - daysForCreation) + daysForCreation + 1);
-        mergedAt = addDays(this._period.start, daysToMerge);
-        if (this.emptyPeriodNumber == undefined || getWeek(mergedAt) !== this.emptyPeriodNumber) {
-          let mergeRequestBuilder = new MergeEventBuilderForMR(this._projectId)
-            .createdAt(addDays(this._period.start, daysForCreation))
-            .mergedAt(mergedAt);
-          if (this.doNotMergeYetRandomly && Math.random() > 0.8) {
-            mergeRequestBuilder = mergeRequestBuilder.notYetMerged();
-          }
-          requests.push(mergeRequestBuilder.build());
-        }
-      }
-    }
-    return requests;
+    super(numberOfMergeRequests, emptyPeriodNumber);
   }
 
   specifications(): GitEventsBuilderSpecification {
-    return undefined;
+    const projectId = this._projectId;
+    const doNotMergeYet = this.doNotMergeYetRandomly;
+    return {
+      builder(startDate: Date, endDate: Date | undefined): GitEvent {
+        let mergeRequestBuilder = new MergeEventBuilderForMR(projectId).createdAt(startDate).mergedAt(endDate);
+        if (doNotMergeYet && Math.random() > 0.8) {
+          mergeRequestBuilder = mergeRequestBuilder.notYetMerged();
+        }
+        return mergeRequestBuilder.build();
+      },
+      closingState: 0,
+      startingState: 0,
+    };
   }
 }
 
-export class RandomInPeriodIssueEventsBuilder extends WeekGitEventsBuilder<
+export class RandomInPeriodIssueEventsBuilder extends RandomInPeriodGitEventsBuilder<
   IssueEvent,
   RandomInPeriodIssueEventsBuilder
 > {
-  constructor(private readonly numberOfIssues: number, private readonly emptyPeriodNumber: number = 0) {
-    super();
-  }
-
-  build(): IssueEvent[] {
-    const issues: IssueEvent[] = [];
-    const daysInPeriod = differenceInCalendarDays(this._period.end, this._period.start);
-    for (let i = 0; i < this.numberOfIssues; i++) {
-      let closedAt: Date;
-      if (i == 0) {
-        closedAt = addDays(this._period.start, 2);
-        if (this.emptyPeriodNumber == undefined || getWeek(closedAt) !== this.emptyPeriodNumber) {
-          issues.push(new IssueEventBuilder(this._projectId).createdAt(this._period.start).closedAt(closedAt).build());
-        }
-      } else {
-        const daysForCreation = Math.floor(Math.random() * (daysInPeriod - 1) + 1);
-        const daysToClose = Math.floor(Math.random() * (daysInPeriod - daysForCreation) + daysForCreation + 1);
-        closedAt = addDays(this._period.start, daysToClose);
-        if (this.emptyPeriodNumber == undefined || getWeek(closedAt) !== this.emptyPeriodNumber) {
-          issues.push(
-            new IssueEventBuilder(this._projectId)
-              .createdAt(addDays(this._period.start, daysForCreation))
-              .closedAt(closedAt)
-              .build()
-          );
-        }
-      }
-    }
-    return issues;
+  constructor(numberOfIssues: number, emptyPeriodNumber = 0) {
+    super(numberOfIssues, emptyPeriodNumber);
   }
 
   specifications(): GitEventsBuilderSpecification {
-    return undefined;
+    const projectId = this._projectId;
+    return {
+      builder(startDate: Date, endDate: Date | undefined): GitEvent {
+        return new IssueEventBuilder(projectId).createdAt(startDate).closedAt(endDate).build();
+      },
+      closingState: 0,
+      startingState: 0,
+    };
   }
 }
 
 export class MergeEventsBuilderForMR {
   private _period: { start: Date; end: Date };
-  private builders: WeekGitEventsBuilder<
-    MergeEvent,
-    WeekPeriodMergeEventsBuilder | RandomInPeriodMergeEventsBuilder
-  >[] = [];
+  private builders: GitEventsBuilder<MergeEvent, WeekPeriodMergeEventsBuilder | RandomInPeriodMergeEventsBuilder>[] =
+    [];
 
   constructor(private readonly projectId: number) {
     this._period = { start: parseISO("2021-01-01T00:00:00"), end: parseISO("2021-01-08T00:00:00") };
@@ -283,7 +282,8 @@ export class MergeEventsBuilderForMR {
 
 export class IssueEventsBuilder {
   private _period: { start: Date; end: Date };
-  private builders: WeekGitEventsBuilder<IssueEvent, WeekPeriodIssueEventsBuilder>[] = [];
+  private builders: GitEventsBuilder<IssueEvent, WeekPeriodIssueEventsBuilder | RandomInPeriodIssueEventsBuilder>[] =
+    [];
 
   constructor(private readonly projectId: number) {
     this._period = { start: parseISO("2021-01-01T00:00:00"), end: parseISO("2021-01-08T00:00:00") };
