@@ -1,36 +1,23 @@
 import { StatisticsAggregate, Unit, Year } from "../../../statistics/GitStatistics.js";
 import { MergeEventsStatisticsResult } from "../../../statistics/merge-events/MergeEventsStatistics.js";
 import { GitEventsStatisticFlow } from "../../../statistics/GitEventsStatistics.js";
-import moment from "moment";
-import { HUMAN_READABLE_MONTHS } from "../HumanReadableLabels.js";
 import { CumulativeStatistic } from "../../../statistics/CumulativeStatistics.js";
 import { ContentBuilder } from "./ContentBuilder.js";
 import { CumulativeEventsContent } from "./CumulativeEventsContent.js";
 import { CumulativeStatisticsContentBuilder } from "./CumulativeStatisticsContentBuilder.js";
+import { StatisticsEventsContent } from "./StatisticsEventsContent.js";
+import { GitEventsStatisticsContentBuilder } from "./GitEventsStatisticsContentBuilder.js";
 
-type MergeEventsContent = CumulativeEventsContent & {
-  mr: {
-    months: {
-      data: number[];
-      labels: string[];
-      average: number[];
-      median: number[];
-    };
-    weeks: {
-      data: number[];
-      labels: string[];
-      average: number[];
-      median: number[];
+type MergeEventsContent = CumulativeEventsContent &
+  StatisticsEventsContent & {
+    average: Duration;
+    total: {
+      merged: number;
+      closed: number;
+      opened: number;
+      all: number;
     };
   };
-  average: Duration;
-  total: {
-    merged: number;
-    closed: number;
-    opened: number;
-    all: number;
-  };
-};
 
 class MergeEventsContentBuilder implements ContentBuilder<MergeEventsContent> {
   constructor(private readonly stats: StatisticsAggregate) {}
@@ -41,14 +28,14 @@ class MergeEventsContentBuilder implements ContentBuilder<MergeEventsContent> {
 
   private mergeEvents() {
     const {
-      mergedEventMonthsLabels,
-      mergedEventsMonthsData,
-      mergedEventsMonthsAverageTimeData,
-      mergedEventsMonthsMedianTimeData,
-      mergedEventsWeeksLabels,
-      mergedEventsWeeksData,
-      mergedEventsWeeksAverageData,
-      mergedEventsWeeksMedianData,
+      statisticsMonthsLabels,
+      statisticsMonthsData,
+      statisticsMonthsAverageTimeData,
+      statisticsMonthsMedianTimeData,
+      statisticsWeeksLabels,
+      statisticsWeeksData,
+      statisticsWeeksAverageTimeData,
+      statisticsWeeksMedianTimeData,
     } = this.mergedEventsStatistics();
 
     const {
@@ -64,18 +51,18 @@ class MergeEventsContentBuilder implements ContentBuilder<MergeEventsContent> {
 
     const aggregatedStats = this.stats.mergeEvents.result<MergeEventsStatisticsResult>().results;
     return {
-      mr: {
+      events: {
         months: {
-          data: mergedEventsMonthsData,
-          labels: mergedEventMonthsLabels,
-          average: mergedEventsMonthsAverageTimeData,
-          median: mergedEventsMonthsMedianTimeData,
+          data: statisticsMonthsData,
+          labels: statisticsMonthsLabels,
+          average: statisticsMonthsAverageTimeData,
+          median: statisticsMonthsMedianTimeData,
         },
         weeks: {
-          data: mergedEventsWeeksData,
-          labels: mergedEventsWeeksLabels,
-          average: mergedEventsWeeksAverageData,
-          median: mergedEventsWeeksMedianData,
+          data: statisticsWeeksData,
+          labels: statisticsWeeksLabels,
+          average: statisticsWeeksAverageTimeData,
+          median: statisticsWeeksMedianTimeData,
         },
       },
       cumulative: {
@@ -97,59 +84,9 @@ class MergeEventsContentBuilder implements ContentBuilder<MergeEventsContent> {
   }
 
   private mergedEventsStatistics() {
-    const mergedEventsStatistics =
-      this.stats.mergedEventsStatistics.result<Map<Year, { [key: Unit]: GitEventsStatisticFlow[] }[]>>().results;
-    const mergedEventMonthsLabels: string[] = [];
-    const mergedEventsMonthsData: number[] = [];
-    const mergedEventsMonthsAverageTimeData: number[] = [];
-    const mergedEventsMonthsMedianTimeData: number[] = [];
-    const mergedEventsWeeksLabels: string[] = [];
-    const mergedEventsWeeksData: number[] = [];
-    const mergedEventsWeeksAverageData: number[] = [];
-    const mergedEventsWeeksMedianData: number[] = [];
-
-    function durationAsHours(duration: Duration) {
-      return moment
-        .duration(duration.months, "months")
-        .add(duration.days, "days")
-        .add(duration.hours, "hours")
-        .add(duration.minutes, "minutes")
-        .add(duration.seconds, "seconds")
-        .asHours();
-    }
-
-    mergedEventsStatistics.forEach((stat) => {
-      stat.forEach((period) => {
-        Object.entries(period).forEach(([unit, flows]) => {
-          if (unit === "Month") {
-            flows.forEach((flow) => {
-              mergedEventMonthsLabels.push(HUMAN_READABLE_MONTHS[flow.index]);
-              mergedEventsMonthsData.push(flow.total());
-              mergedEventsMonthsAverageTimeData.push(durationAsHours(flow.average()));
-              mergedEventsMonthsMedianTimeData.push(durationAsHours(flow.median()));
-            });
-          }
-          if (unit === "Week") {
-            flows.forEach((flow) => {
-              mergedEventsWeeksLabels.push(`Week ${flow.index}`);
-              mergedEventsWeeksData.push(flow.total());
-              mergedEventsWeeksAverageData.push(durationAsHours(flow.average()));
-              mergedEventsWeeksMedianData.push(durationAsHours(flow.median()));
-            });
-          }
-        });
-      });
-    });
-    return {
-      mergedEventMonthsLabels,
-      mergedEventsMonthsData,
-      mergedEventsMonthsAverageTimeData,
-      mergedEventsMonthsMedianTimeData,
-      mergedEventsWeeksLabels,
-      mergedEventsWeeksData,
-      mergedEventsWeeksAverageData,
-      mergedEventsWeeksMedianData,
-    };
+    return new GitEventsStatisticsContentBuilder(
+      this.stats.mergedEventsStatistics.result<Map<Year, { [key: Unit]: GitEventsStatisticFlow[] }[]>>().results
+    ).build();
   }
 
   private cumulativeStatistics() {

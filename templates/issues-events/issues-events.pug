@@ -48,10 +48,20 @@ div(class="tab-pane fade ps-4" id="issues-events-tab-pane" role="tabpanel" aria-
                     div(class='container-sm')
                         div.row
                             div(class='col-lg-6')
+                                canvas#issue-events-months-histogram
+                            div(class='col-lg-6')
+                                canvas#issue-events-months-avg-med
+                        div.row
+                            div(class='col-lg-6')
                                 canvas#issues-cumulative-months-stats
             div(class="tab-pane fade" id="issues-weeks-tab-pane" role="tabpanel" aria-labelledby="issues-weeks-tab" tabindex="0")
                 div#issues-weeks
                     div(class='container-sm')
+                        div.row
+                            div(class='col-lg-6')
+                                canvas#issue-events-weeks-histogram
+                            div(class='col-lg-6')
+                                canvas#issue-events-weeks-avg-med
                         div.row
                             div(class='col-lg-6')
                                 canvas#issues-cumulative-weeks-stats
@@ -85,6 +95,22 @@ script(type='text/javascript').
     ])
     const weeksCumulativeIssuesLabels = !{stringify(stats.issues.cumulative.weeks.labels)}
 
+    const monthsIssueEventsHistogramContext = document.getElementById('issue-events-months-histogram');
+    const monthsIssueEventsLabels = !{stringify(stats.issues.events.months.labels)};
+    const monthsIssueEventsHistogramDatasets = initializeHistogramDataSet({data: [#{stats.issues.events.months.data}], label: '# of issues'});
+    const monthsIssueEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [#{stats.issues.events.months.average}], label: "Average time to resolve issues"}, {data: [#{stats.issues.events.months.median}], label: "Median time to resolve issues"}]);
+    const monthsIssueEventsAvgAndMedContext = document.getElementById('issue-events-months-avg-med');
+
+    const weeksIssueEventsHistogramContext = document.getElementById('issue-events-weeks-histogram');
+    const weeksIssueEventsLabels = !{stringify(stats.issues.events.weeks.labels)};;
+    const weeksIssueEventsHistogramDatasets = initializeHistogramDataSet({data: [#{stats.issues.events.weeks.data}], label: '# of issues'});;
+    const weeksIssueEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [#{stats.issues.events.weeks.average}], label: "Average time to resolve issues"}, {data: [#{stats.issues.events.weeks.median}], label: "Median time to resolve issues"}]);
+    const weeksIssueEventsAvgAndMedContext = document.getElementById('issue-events-weeks-avg-med');
+
+    renderChart('bar', monthsIssueEventsHistogramContext, monthsIssueEventsLabels, monthsIssueEventsHistogramDatasets, {});
+    renderChart('line', monthsIssueEventsAvgAndMedContext, monthsIssueEventsLabels, monthsIssueEventsAvgAndMedDatasets, options);
+    renderChart('bar', weeksIssueEventsHistogramContext, weeksIssueEventsLabels, weeksIssueEventsHistogramDatasets, {});
+    renderChart('line', weeksIssueEventsAvgAndMedContext, weeksIssueEventsLabels, weeksIssueEventsAvgAndMedDatasets, options);
     renderChart('line', monthsCumulativeIssuesContext, monthsCumulativeIssuesLabels, monthsCumulativeIssuesDatasets, {});
     renderChart('line', weeksCumulativeIssuesContext, weeksCumulativeIssuesLabels, weeksCumulativeIssuesDatasets, {});
     renderChart('doughnut', aggregatedIssuesContext, aggregatedIssuesChartLabels, aggregatedIssuesChartDatasets, {});

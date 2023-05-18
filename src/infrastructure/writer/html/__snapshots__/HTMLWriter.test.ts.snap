@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`HTML writer should generate an HTML report file for merged requests 1`] = `
+exports[`HTML writer should generate an HTML report file for all events 1`] = `
 "<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -18,11 +18,11 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
   </body>
 </html>
 <script type="text/javascript">
-  function initializeHistogramDataSet(mergeEventsFlows) {
+  function initializeHistogramDataSet(eventsFlows) {
       return [
           {
-              label: '# of merged events',
-              data: mergeEventsFlows,
+              label: eventsFlows.label,
+              data: eventsFlows.data,
               yAxisID: 'y',
               barPercentage: 1.24,
           }
@@ -38,7 +38,7 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
               borderWidth: 3,
               borderJoinStyle: "round",
               tension: 0.2,
-              yAxisID: 'y',
+              yAxisID: 'y'
           }));
   }
   
@@ -205,13 +205,13 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
   </div>
   <script type="text/javascript">
     const monthsMergedEventsHistogramContext = document.getElementById('merged-events-months-histogram');
-    const monthsMergedEventsHistogramDatasets = initializeHistogramDataSet([3]);
+    const monthsMergedEventsHistogramDatasets = initializeHistogramDataSet({data: [3], label: '# of merged events'});
     const monthsMergedEventsAvgAndMedContext = document.getElementById('merged-events-months-avg-med');
     const monthsMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [51.333333333333336], label: "Average time to merge"}, {data: [71], label: "Median time to merge"}]);
     const monthsMergedEventsLabels = ["Feb"]
     
     const weeksMergedEventsHistogramContext = document.getElementById('merged-events-weeks-histogram');
-    const weeksMergedEventsHistogramDatasets = initializeHistogramDataSet([1,2]);
+    const weeksMergedEventsHistogramDatasets = initializeHistogramDataSet({data: [1,2], label: '# of merged events'});
     const weeksMergedEventsAvgAndMedContext = document.getElementById('merged-events-weeks-avg-med');
     const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [4,75], label: "Average time to merge"}, {data: [4,75], label: "Median time to merge"}]);
     const weeksMergedEventsLabels = ["Week 7","Week 8"]
@@ -324,6 +324,14 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
             <div class="container-sm">
               <div class="row">
                 <div class="col-lg-6">
+                  <canvas id="issue-events-months-histogram"></canvas>
+                </div>
+                <div class="col-lg-6">
+                  <canvas id="issue-events-months-avg-med"></canvas>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-6">
                   <canvas id="issues-cumulative-months-stats"></canvas>
                 </div>
               </div>
@@ -333,6 +341,14 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
         <div class="tab-pane fade" id="issues-weeks-tab-pane" role="tabpanel" aria-labelledby="issues-weeks-tab" tabindex="0">
           <div id="issues-weeks">
             <div class="container-sm">
+              <div class="row">
+                <div class="col-lg-6">
+                  <canvas id="issue-events-weeks-histogram"></canvas>
+                </div>
+                <div class="col-lg-6">
+                  <canvas id="issue-events-weeks-avg-med"></canvas>
+                </div>
+              </div>
               <div class="row">
                 <div class="col-lg-6">
                   <canvas id="issues-cumulative-weeks-stats"></canvas>
@@ -373,6 +389,22 @@ exports[`HTML writer should generate an HTML report file for merged requests 1`]
     ])
     const weeksCumulativeIssuesLabels = ["Week 7","Week 8"]
     
+    const monthsIssueEventsHistogramContext = document.getElementById('issue-events-months-histogram');
+    const monthsIssueEventsLabels = ["Feb"];
+    const monthsIssueEventsHistogramDatasets = initializeHistogramDataSet({data: [1], label: '# of issues'});
+    const monthsIssueEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [71], label: "Average time to resolve issues"}, {data: [71], label: "Median time to resolve issues"}]);
+    const monthsIssueEventsAvgAndMedContext = document.getElementById('issue-events-months-avg-med');
+    
+    const weeksIssueEventsHistogramContext = document.getElementById('issue-events-weeks-histogram');
+    const weeksIssueEventsLabels = ["Week 7","Week 8"];;
+    const weeksIssueEventsHistogramDatasets = initializeHistogramDataSet({data: [0,1], label: '# of issues'});;
+    const weeksIssueEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [0,71], label: "Average time to resolve issues"}, {data: [0,71], label: "Median time to resolve issues"}]);
+    const weeksIssueEventsAvgAndMedContext = document.getElementById('issue-events-weeks-avg-med');
+    
+    renderChart('bar', monthsIssueEventsHistogramContext, monthsIssueEventsLabels, monthsIssueEventsHistogramDatasets, {});
+    renderChart('line', monthsIssueEventsAvgAndMedContext, monthsIssueEventsLabels, monthsIssueEventsAvgAndMedDatasets, options);
+    renderChart('bar', weeksIssueEventsHistogramContext, weeksIssueEventsLabels, weeksIssueEventsHistogramDatasets, {});
+    renderChart('line', weeksIssueEventsAvgAndMedContext, weeksIssueEventsLabels, weeksIssueEventsAvgAndMedDatasets, options);
     renderChart('line', monthsCumulativeIssuesContext, monthsCumulativeIssuesLabels, monthsCumulativeIssuesDatasets, {});
     renderChart('line', weeksCumulativeIssuesContext, weeksCumulativeIssuesLabels, weeksCumulativeIssuesDatasets, {});
     renderChart('doughnut', aggregatedIssuesContext, aggregatedIssuesChartLabels, aggregatedIssuesChartDatasets, {});
@@ -398,11 +430,11 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
   </body>
 </html>
 <script type="text/javascript">
-  function initializeHistogramDataSet(mergeEventsFlows) {
+  function initializeHistogramDataSet(eventsFlows) {
       return [
           {
-              label: '# of merged events',
-              data: mergeEventsFlows,
+              label: eventsFlows.label,
+              data: eventsFlows.data,
               yAxisID: 'y',
               barPercentage: 1.24,
           }
@@ -418,7 +450,7 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
               borderWidth: 3,
               borderJoinStyle: "round",
               tension: 0.2,
-              yAxisID: 'y',
+              yAxisID: 'y'
           }));
   }
   
@@ -585,13 +617,13 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
   </div>
   <script type="text/javascript">
     const monthsMergedEventsHistogramContext = document.getElementById('merged-events-months-histogram');
-    const monthsMergedEventsHistogramDatasets = initializeHistogramDataSet([2]);
+    const monthsMergedEventsHistogramDatasets = initializeHistogramDataSet({data: [2], label: '# of merged events'});
     const monthsMergedEventsAvgAndMedContext = document.getElementById('merged-events-months-avg-med');
     const monthsMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [75], label: "Average time to merge"}, {data: [75], label: "Median time to merge"}]);
     const monthsMergedEventsLabels = ["Feb"]
     
     const weeksMergedEventsHistogramContext = document.getElementById('merged-events-weeks-histogram');
-    const weeksMergedEventsHistogramDatasets = initializeHistogramDataSet([0,2]);
+    const weeksMergedEventsHistogramDatasets = initializeHistogramDataSet({data: [0,2], label: '# of merged events'});
     const weeksMergedEventsAvgAndMedContext = document.getElementById('merged-events-weeks-avg-med');
     const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [0,75], label: "Average time to merge"}, {data: [0,75], label: "Median time to merge"}]);
     const weeksMergedEventsLabels = ["Week 7","Week 8"]
@@ -704,6 +736,14 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
             <div class="container-sm">
               <div class="row">
                 <div class="col-lg-6">
+                  <canvas id="issue-events-months-histogram"></canvas>
+                </div>
+                <div class="col-lg-6">
+                  <canvas id="issue-events-months-avg-med"></canvas>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-6">
                   <canvas id="issues-cumulative-months-stats"></canvas>
                 </div>
               </div>
@@ -713,6 +753,14 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
         <div class="tab-pane fade" id="issues-weeks-tab-pane" role="tabpanel" aria-labelledby="issues-weeks-tab" tabindex="0">
           <div id="issues-weeks">
             <div class="container-sm">
+              <div class="row">
+                <div class="col-lg-6">
+                  <canvas id="issue-events-weeks-histogram"></canvas>
+                </div>
+                <div class="col-lg-6">
+                  <canvas id="issue-events-weeks-avg-med"></canvas>
+                </div>
+              </div>
               <div class="row">
                 <div class="col-lg-6">
                   <canvas id="issues-cumulative-weeks-stats"></canvas>
@@ -753,6 +801,22 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
     ])
     const weeksCumulativeIssuesLabels = ["Week 7","Week 8"]
     
+    const monthsIssueEventsHistogramContext = document.getElementById('issue-events-months-histogram');
+    const monthsIssueEventsLabels = [];
+    const monthsIssueEventsHistogramDatasets = initializeHistogramDataSet({data: [], label: '# of issues'});
+    const monthsIssueEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [], label: "Average time to resolve issues"}, {data: [], label: "Median time to resolve issues"}]);
+    const monthsIssueEventsAvgAndMedContext = document.getElementById('issue-events-months-avg-med');
+    
+    const weeksIssueEventsHistogramContext = document.getElementById('issue-events-weeks-histogram');
+    const weeksIssueEventsLabels = [];;
+    const weeksIssueEventsHistogramDatasets = initializeHistogramDataSet({data: [], label: '# of issues'});;
+    const weeksIssueEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [], label: "Average time to resolve issues"}, {data: [], label: "Median time to resolve issues"}]);
+    const weeksIssueEventsAvgAndMedContext = document.getElementById('issue-events-weeks-avg-med');
+    
+    renderChart('bar', monthsIssueEventsHistogramContext, monthsIssueEventsLabels, monthsIssueEventsHistogramDatasets, {});
+    renderChart('line', monthsIssueEventsAvgAndMedContext, monthsIssueEventsLabels, monthsIssueEventsAvgAndMedDatasets, options);
+    renderChart('bar', weeksIssueEventsHistogramContext, weeksIssueEventsLabels, weeksIssueEventsHistogramDatasets, {});
+    renderChart('line', weeksIssueEventsAvgAndMedContext, weeksIssueEventsLabels, weeksIssueEventsAvgAndMedDatasets, options);
     renderChart('line', monthsCumulativeIssuesContext, monthsCumulativeIssuesLabels, monthsCumulativeIssuesDatasets, {});
     renderChart('line', weeksCumulativeIssuesContext, weeksCumulativeIssuesLabels, weeksCumulativeIssuesDatasets, {});
     renderChart('doughnut', aggregatedIssuesContext, aggregatedIssuesChartLabels, aggregatedIssuesChartDatasets, {});
@@ -778,11 +842,11 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
   </body>
 </html>
 <script type="text/javascript">
-  function initializeHistogramDataSet(mergeEventsFlows) {
+  function initializeHistogramDataSet(eventsFlows) {
       return [
           {
-              label: '# of merged events',
-              data: mergeEventsFlows,
+              label: eventsFlows.label,
+              data: eventsFlows.data,
               yAxisID: 'y',
               barPercentage: 1.24,
           }
@@ -798,7 +862,7 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
               borderWidth: 3,
               borderJoinStyle: "round",
               tension: 0.2,
-              yAxisID: 'y',
+              yAxisID: 'y'
           }));
   }
   
@@ -965,13 +1029,13 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
   </div>
   <script type="text/javascript">
     const monthsMergedEventsHistogramContext = document.getElementById('merged-events-months-histogram');
-    const monthsMergedEventsHistogramDatasets = initializeHistogramDataSet([1,2,0]);
+    const monthsMergedEventsHistogramDatasets = initializeHistogramDataSet({data: [1,2,0], label: '# of merged events'});
     const monthsMergedEventsAvgAndMedContext = document.getElementById('merged-events-months-avg-med');
     const monthsMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [408,75,0], label: "Average time to merge"}, {data: [408,75,0], label: "Median time to merge"}]);
     const monthsMergedEventsLabels = ["Jan","Feb","Mar"]
     
     const weeksMergedEventsHistogramContext = document.getElementById('merged-events-weeks-histogram');
-    const weeksMergedEventsHistogramDatasets = initializeHistogramDataSet([0,0,0,0,1,0,0,2,0,0]);
+    const weeksMergedEventsHistogramDatasets = initializeHistogramDataSet({data: [0,0,0,0,1,0,0,2,0,0], label: '# of merged events'});
     const weeksMergedEventsAvgAndMedContext = document.getElementById('merged-events-weeks-avg-med');
     const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [0,0,0,0,408,0,0,75,0,0], label: "Average time to merge"}, {data: [0,0,0,0,408,0,0,75,0,0], label: "Median time to merge"}]);
     const weeksMergedEventsLabels = ["Week 1","Week 2","Week 3","Week 4","Week 5","Week 6","Week 7","Week 8","Week 9","Week 10"]
@@ -1084,6 +1148,14 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
             <div class="container-sm">
               <div class="row">
                 <div class="col-lg-6">
+                  <canvas id="issue-events-months-histogram"></canvas>
+                </div>
+                <div class="col-lg-6">
+                  <canvas id="issue-events-months-avg-med"></canvas>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-6">
                   <canvas id="issues-cumulative-months-stats"></canvas>
                 </div>
               </div>
@@ -1093,6 +1165,14 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
         <div class="tab-pane fade" id="issues-weeks-tab-pane" role="tabpanel" aria-labelledby="issues-weeks-tab" tabindex="0">
           <div id="issues-weeks">
             <div class="container-sm">
+              <div class="row">
+                <div class="col-lg-6">
+                  <canvas id="issue-events-weeks-histogram"></canvas>
+                </div>
+                <div class="col-lg-6">
+                  <canvas id="issue-events-weeks-avg-med"></canvas>
+                </div>
+              </div>
               <div class="row">
                 <div class="col-lg-6">
                   <canvas id="issues-cumulative-weeks-stats"></canvas>
@@ -1133,6 +1213,22 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
     ])
     const weeksCumulativeIssuesLabels = ["Week 1","Week 2","Week 3","Week 4","Week 5","Week 6","Week 7","Week 8","Week 9","Week 10"]
     
+    const monthsIssueEventsHistogramContext = document.getElementById('issue-events-months-histogram');
+    const monthsIssueEventsLabels = ["Jan","Feb","Mar"];
+    const monthsIssueEventsHistogramDatasets = initializeHistogramDataSet({data: [0,1,0], label: '# of issues'});
+    const monthsIssueEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [0,71,0], label: "Average time to resolve issues"}, {data: [0,71,0], label: "Median time to resolve issues"}]);
+    const monthsIssueEventsAvgAndMedContext = document.getElementById('issue-events-months-avg-med');
+    
+    const weeksIssueEventsHistogramContext = document.getElementById('issue-events-weeks-histogram');
+    const weeksIssueEventsLabels = ["Week 1","Week 2","Week 3","Week 4","Week 5","Week 6","Week 7","Week 8","Week 9","Week 10"];;
+    const weeksIssueEventsHistogramDatasets = initializeHistogramDataSet({data: [0,0,0,0,0,0,0,1,0,0], label: '# of issues'});;
+    const weeksIssueEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [0,0,0,0,0,0,0,71,0,0], label: "Average time to resolve issues"}, {data: [0,0,0,0,0,0,0,71,0,0], label: "Median time to resolve issues"}]);
+    const weeksIssueEventsAvgAndMedContext = document.getElementById('issue-events-weeks-avg-med');
+    
+    renderChart('bar', monthsIssueEventsHistogramContext, monthsIssueEventsLabels, monthsIssueEventsHistogramDatasets, {});
+    renderChart('line', monthsIssueEventsAvgAndMedContext, monthsIssueEventsLabels, monthsIssueEventsAvgAndMedDatasets, options);
+    renderChart('bar', weeksIssueEventsHistogramContext, weeksIssueEventsLabels, weeksIssueEventsHistogramDatasets, {});
+    renderChart('line', weeksIssueEventsAvgAndMedContext, weeksIssueEventsLabels, weeksIssueEventsAvgAndMedDatasets, options);
     renderChart('line', monthsCumulativeIssuesContext, monthsCumulativeIssuesLabels, monthsCumulativeIssuesDatasets, {});
     renderChart('line', weeksCumulativeIssuesContext, weeksCumulativeIssuesLabels, weeksCumulativeIssuesDatasets, {});
     renderChart('doughnut', aggregatedIssuesContext, aggregatedIssuesChartLabels, aggregatedIssuesChartDatasets, {});

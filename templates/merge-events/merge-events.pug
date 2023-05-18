@@ -76,16 +76,16 @@ div(class="tab-pane fade show active ps-4" id="merge-events-tab-pane" role="tabp
 script(type='text/javascript').
 
     const monthsMergedEventsHistogramContext = document.getElementById('merged-events-months-histogram');
-    const monthsMergedEventsHistogramDatasets = initializeHistogramDataSet([#{stats.merge.mr.months.data}]);
+    const monthsMergedEventsHistogramDatasets = initializeHistogramDataSet({data: [#{stats.merge.events.months.data}], label: '# of merged events'});
     const monthsMergedEventsAvgAndMedContext = document.getElementById('merged-events-months-avg-med');
-    const monthsMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [#{stats.merge.mr.months.average}], label: "Average time to merge"}, {data: [#{stats.merge.mr.months.median}], label: "Median time to merge"}]);
-    const monthsMergedEventsLabels = !{stringify(stats.merge.mr.months.labels)}
+    const monthsMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [#{stats.merge.events.months.average}], label: "Average time to merge"}, {data: [#{stats.merge.events.months.median}], label: "Median time to merge"}]);
+    const monthsMergedEventsLabels = !{stringify(stats.merge.events.months.labels)}
 
     const weeksMergedEventsHistogramContext = document.getElementById('merged-events-weeks-histogram');
-    const weeksMergedEventsHistogramDatasets = initializeHistogramDataSet([#{stats.merge.mr.weeks.data}]);
+    const weeksMergedEventsHistogramDatasets = initializeHistogramDataSet({data: [#{stats.merge.events.weeks.data}], label: '# of merged events'});
     const weeksMergedEventsAvgAndMedContext = document.getElementById('merged-events-weeks-avg-med');
-    const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [#{stats.merge.mr.weeks.average}], label: "Average time to merge"}, {data: [#{stats.merge.mr.weeks.median}], label: "Median time to merge"}]);
-    const weeksMergedEventsLabels = !{stringify(stats.merge.mr.weeks.labels)}
+    const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [#{stats.merge.events.weeks.average}], label: "Average time to merge"}, {data: [#{stats.merge.events.weeks.median}], label: "Median time to merge"}]);
+    const weeksMergedEventsLabels = !{stringify(stats.merge.events.weeks.labels)}
 
     const monthsCumulativeContext = document.getElementById('cumulative-months-stats')
     const monthsCumulativeDatasets = initializeLinearDataSet([

@@ -21,7 +21,7 @@ jest.mock("../OpenBrowser", () => ({
 }));
 
 describe("HTML writer", () => {
-  test("should generate an HTML report file for merged requests", async () => {
+  test("should generate an HTML report file for all events", async () => {
     const firstMergeRequest = new MergeEventBuilderForMR(1)
       .createdAt(parseISO("2022-02-11T12:37:22"))
       .mergedAt(parseISO("2022-02-14T11:53:17"))
@@ -34,15 +34,16 @@ describe("HTML writer", () => {
       .createdAt(parseISO("2022-02-13T09:17:34"))
       .mergedAt(parseISO("2022-02-16T16:44:22"))
       .build();
+    const mergeEvents = [firstMergeRequest, secondMergeRequest, thirdMergeRequest];
     const firstIssueEvent = new IssueEventBuilder(1).createdAt(parseISO("2022-02-11T12:37:22")).build();
     const secondIssueEvent = new IssueEventBuilder(1)
       .createdAt(parseISO("2022-02-11T12:37:22"))
       .closedAt(parseISO("2022-02-14T11:53:17"))
       .build();
+    const issueEvents = [firstIssueEvent, secondIssueEvent];
     const tempDirectory = await mkdtemp(path.join(os.tmpdir(), "report-"));
     const fromDate = parseISO("2022-02-11T00:00:00");
     const toDate = parseISO("2022-02-17T00:00:00");
-    const mergeEvents = [firstMergeRequest, secondMergeRequest, thirdMergeRequest];
     const period = {
       end: toDate,
       start: fromDate,
@@ -58,10 +59,14 @@ describe("HTML writer", () => {
         end: mr.mergedAt,
         start: mr.start,
       })),
-      issues: new IssueEventStatistics([firstIssueEvent, secondIssueEvent], period),
-      cumulativeIssues: new CumulativeStatistics([firstIssueEvent, secondIssueEvent], period, (event) => ({
+      issues: new IssueEventStatistics(issueEvents, period),
+      cumulativeIssues: new CumulativeStatistics(issueEvents, period, (event) => ({
         end: event.closedAt,
         start: event.start,
+      })),
+      issuesStatistics: new GitEventsStatistics(issueEvents, period, (event) => ({
+        start: event.start,
+        end: event.closedAt,
       })),
     });
 
@@ -102,6 +107,7 @@ describe("HTML writer", () => {
       })),
       issues: new IssueEventStatistics([], period),
       cumulativeIssues: new CumulativeStatistics([], period, (event) => ({ end: event.closedAt, start: event.start })),
+      issuesStatistics: new GitEventsStatistics([], period, (event) => ({ end: event.closedAt, start: event.start })),
     });
 
     expect(fs.readFileSync(`${tempDirectory}/report/index.html`, "utf8")).toMatchSnapshot();
@@ -120,13 +126,14 @@ describe("HTML writer", () => {
       .createdAt(parseISO("2022-02-13T09:17:34"))
       .mergedAt(parseISO("2022-02-16T16:44:22"))
       .build();
+    const mergeEvents = [firstMergeRequest, secondMergeRequest, thirdMergeRequest];
     const firstIssueEvent = new IssueEventBuilder(1).createdAt(parseISO("2022-02-11T12:37:22")).build();
     const secondIssueEvent = new IssueEventBuilder(1)
       .createdAt(parseISO("2022-02-11T12:37:22"))
       .closedAt(parseISO("2022-02-14T11:53:17"))
       .build();
+    const issueEvents = [firstIssueEvent, secondIssueEvent];
     const tempDirectory = await mkdtemp(path.join(os.tmpdir(), "report-"));
-    const mergeEvents = [firstMergeRequest, secondMergeRequest, thirdMergeRequest];
     const period = {
       end: parseISO("2022-03-02T00:00:00"),
       start: parseISO("2022-01-01T00:00:00"),
@@ -142,8 +149,12 @@ describe("HTML writer", () => {
         end: mr.mergedAt,
         start: mr.start,
       })),
-      issues: new IssueEventStatistics([firstIssueEvent, secondIssueEvent], period),
-      cumulativeIssues: new CumulativeStatistics([firstIssueEvent, secondIssueEvent], period, (event) => ({
+      issues: new IssueEventStatistics(issueEvents, period),
+      cumulativeIssues: new CumulativeStatistics(issueEvents, period, (event) => ({
+        end: event.closedAt,
+        start: event.start,
+      })),
+      issuesStatistics: new GitEventsStatistics(issueEvents, period, (event) => ({
         end: event.closedAt,
         start: event.start,
       })),

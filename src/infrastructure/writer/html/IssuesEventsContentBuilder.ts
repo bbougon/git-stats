@@ -1,18 +1,22 @@
-import { StatisticsAggregate, Unit } from "../../../statistics/GitStatistics.js";
+import { StatisticsAggregate, Unit, Year } from "../../../statistics/GitStatistics.js";
 import { ContentBuilder } from "./ContentBuilder.js";
 import { GitEventStatisticsResult } from "../../../statistics/aggregate/Aggregate.js";
 import { CumulativeStatistic } from "../../../statistics/CumulativeStatistics.js";
 import { CumulativeEventsContent } from "./CumulativeEventsContent.js";
 import { CumulativeStatisticsContentBuilder } from "./CumulativeStatisticsContentBuilder.js";
+import { GitEventsStatisticsContentBuilder } from "./GitEventsStatisticsContentBuilder.js";
+import { GitEventsStatisticFlow } from "../../../statistics/GitEventsStatistics.js";
+import { StatisticsEventsContent } from "./StatisticsEventsContent.js";
 
-type IssuesEventsContent = CumulativeEventsContent & {
-  average: Duration;
-  total: {
-    closed: number;
-    opened: number;
-    all: number;
+type IssuesEventsContent = CumulativeEventsContent &
+  StatisticsEventsContent & {
+    average: Duration;
+    total: {
+      closed: number;
+      opened: number;
+      all: number;
+    };
   };
-};
 
 class IssuesEventsContentBuilder implements ContentBuilder<IssuesEventsContent> {
   constructor(private readonly stats: StatisticsAggregate) {}
@@ -31,7 +35,34 @@ class IssuesEventsContentBuilder implements ContentBuilder<IssuesEventsContent> 
       cumulativeTrendWeeksData,
     } = this.cumulativeStatistics();
 
+    const {
+      statisticsMonthsLabels,
+      statisticsMonthsData,
+      statisticsMonthsAverageTimeData,
+      statisticsMonthsMedianTimeData,
+      statisticsWeeksLabels,
+      statisticsWeeksData,
+      statisticsWeeksAverageTimeData,
+      statisticsWeeksMedianTimeData,
+    } = new GitEventsStatisticsContentBuilder(
+      this.stats.issuesStatistics.result<Map<Year, { [key: Unit]: GitEventsStatisticFlow[] }[]>>().results
+    ).build();
+
     return {
+      events: {
+        months: {
+          average: statisticsMonthsAverageTimeData,
+          data: statisticsMonthsData,
+          labels: statisticsMonthsLabels,
+          median: statisticsMonthsMedianTimeData,
+        },
+        weeks: {
+          average: statisticsWeeksAverageTimeData,
+          data: statisticsWeeksData,
+          labels: statisticsWeeksLabels,
+          median: statisticsWeeksMedianTimeData,
+        },
+      },
       cumulative: {
         months: {
           openedData: cumulativeOpenedMonthsData,
