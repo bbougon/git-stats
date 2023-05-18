@@ -68,7 +68,7 @@ function progressBar(title: string | Title, progressBar: ProgressBar = ProgressB
         .then((bar) => {
           ProgressBarUpdateStrategies.for(title).apply(bar, { title, args });
         })
-        .catch((reason) => {
+        .catch((_reason) => {
           return;
         });
       return call;

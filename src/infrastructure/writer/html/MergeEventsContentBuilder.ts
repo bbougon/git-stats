@@ -2,11 +2,11 @@ import { StatisticsAggregate, Unit, Year } from "../../../statistics/GitStatisti
 import { MergeEventsStatisticsResult } from "../../../statistics/merge-events/MergeEventsStatistics.js";
 import { GitEventsStatisticFlow } from "../../../statistics/GitEventsStatistics.js";
 import { CumulativeStatistic } from "../../../statistics/CumulativeStatistics.js";
-import { ContentBuilder } from "./ContentBuilder.js";
 import { CumulativeEventsContent } from "./CumulativeEventsContent.js";
 import { CumulativeStatisticsContentBuilder } from "./CumulativeStatisticsContentBuilder.js";
 import { StatisticsEventsContent } from "./StatisticsEventsContent.js";
 import { GitEventsStatisticsContentBuilder } from "./GitEventsStatisticsContentBuilder.js";
+import { ContentBuilder } from "../ContentBuilder.js";
 
 type MergeEventsContent = CumulativeEventsContent &
   StatisticsEventsContent & {

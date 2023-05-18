@@ -4,6 +4,7 @@ import { GitStatistics } from "../../statistics/Statistics.js";
 import { GitEventsStatisticFlow } from "../../statistics/GitEventsStatistics.js";
 import { CumulativeStatistic } from "../../statistics/CumulativeStatistics.js";
 import { MergeEventsStatisticsResult } from "../../statistics/merge-events/MergeEventsStatistics.js";
+import { ContentBuilder } from "./ContentBuilder.js";
 
 export interface GitFlowsConsole {
   log(message?: any, ...optionalParams: any[]): void;
@@ -14,18 +15,15 @@ export class TerminalConsole implements GitFlowsConsole {
     console.log(JSON.stringify(message, null, 2), optionalParams);
   }
 }
-
-interface StatisticBuilder<T> {
-  build(statistics: GitStatistics): T;
-}
-
 type UnitRecord = Record<string, number>;
 type PeriodUnitRecord = Record<string, UnitRecord[]>;
 type PeriodRecord = Record<string, PeriodUnitRecord[]>;
 
-class MergedEventsStatisticByPeriodBuilder implements StatisticBuilder<{ mergedEventsStatistics: PeriodRecord[] }> {
-  build(statistics: GitStatistics): { mergedEventsStatistics: PeriodRecord[] } {
-    const events = statistics.result<Map<Year, { [key: Unit]: GitEventsStatisticFlow[] }[]>>().results;
+class MergedEventsStatisticByPeriodBuilder implements ContentBuilder<{ mergedEventsStatistics: PeriodRecord[] }> {
+  constructor(private readonly statistics: GitStatistics) {}
+
+  build(): { mergedEventsStatistics: PeriodRecord[] } {
+    const events = this.statistics.result<Map<Year, { [key: Unit]: GitEventsStatisticFlow[] }[]>>().results;
     const data: PeriodRecord[] = [];
     events.forEach((period, year) => {
       const periodRecord: PeriodRecord = {};
@@ -65,9 +63,12 @@ type AggregateStatistics = {
     opened: number;
   };
 };
-class MergeEventsStatisticBuilder implements StatisticBuilder<{ mergedEvents: AggregateStatistics }> {
-  build(statistics: GitStatistics): { mergedEvents: AggregateStatistics } {
-    const result: AggregateStatistics = statistics.result<MergeEventsStatisticsResult>().results as AggregateStatistics;
+class MergeEventsStatisticBuilder implements ContentBuilder<{ mergedEvents: AggregateStatistics }> {
+  constructor(private readonly statistics: GitStatistics) {}
+
+  build(): { mergedEvents: AggregateStatistics } {
+    const result: AggregateStatistics = this.statistics.result<MergeEventsStatisticsResult>()
+      .results as AggregateStatistics;
     return { mergedEvents: result };
   }
 }
@@ -75,10 +76,12 @@ class MergeEventsStatisticBuilder implements StatisticBuilder<{ mergedEvents: Ag
 type CumulativeRecord = Record<string, { opened: number; closed: number; trend: number }>;
 type CumulativeStatisticRecord = Record<string, CumulativeRecord[]>;
 
-class CumulativeStatisticBuilder implements StatisticBuilder<{ cumulativeStatistics: CumulativeStatisticRecord[] }> {
-  build(statistics: GitStatistics): { cumulativeStatistics: CumulativeStatisticRecord[] } {
+class CumulativeStatisticBuilder implements ContentBuilder<{ cumulativeStatistics: CumulativeStatisticRecord[] }> {
+  constructor(private readonly statistics: GitStatistics) {}
+
+  build(): { cumulativeStatistics: CumulativeStatisticRecord[] } {
     const result: CumulativeStatisticRecord[] = [];
-    statistics.result<Map<Unit, CumulativeStatistic[]>>().results.forEach((value, key) => {
+    this.statistics.result<Map<Unit, CumulativeStatistic[]>>().results.forEach((value, key) => {
       result.push({
         [key]: value.map((statistic) => ({
           [statistic.index]: { opened: statistic.opened, closed: statistic.closed, trend: statistic.trend },
@@ -89,17 +92,23 @@ class CumulativeStatisticBuilder implements StatisticBuilder<{ cumulativeStatist
   }
 }
 
+type AnyStatisticsBuilder =
+  | { mergedEventsStatistics: PeriodRecord[] }
+  | { mergedEvents: AggregateStatistics }
+  | { cumulativeStatistics: CumulativeStatisticRecord[] };
+
 class ConsoleContentBuilder {
-  private static statisticsBuilder: Map<string, StatisticBuilder<any>> = new Map<string, StatisticBuilder<any>>([
-    ["mergedEventsStatistics", new MergedEventsStatisticByPeriodBuilder()],
-    ["mergeEvents", new MergeEventsStatisticBuilder()],
-    ["cumulativeStatistics", new CumulativeStatisticBuilder()],
-  ]);
+  private static statisticsBuilder: Map<string, (statistics: GitStatistics) => ContentBuilder<AnyStatisticsBuilder>> =
+    new Map<string, (statistics: GitStatistics) => ContentBuilder<AnyStatisticsBuilder>>([
+      ["mergedEventsStatistics", (statistics) => new MergedEventsStatisticByPeriodBuilder(statistics)],
+      ["mergeEvents", (statistics) => new MergeEventsStatisticBuilder(statistics)],
+      ["cumulativeStatistics", (statistics) => new CumulativeStatisticBuilder(statistics)],
+    ]);
 
   constructor(private readonly key: string, private readonly statistics: GitStatistics) {}
 
   build(): object {
-    return ConsoleContentBuilder.statisticsBuilder.get(this.key).build(this.statistics);
+    return ConsoleContentBuilder.statisticsBuilder.get(this.key)(this.statistics).build();
   }
 }
 

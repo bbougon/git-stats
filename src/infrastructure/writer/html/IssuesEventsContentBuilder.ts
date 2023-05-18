@@ -1,5 +1,4 @@
 import { StatisticsAggregate, Unit, Year } from "../../../statistics/GitStatistics.js";
-import { ContentBuilder } from "./ContentBuilder.js";
 import { GitEventStatisticsResult } from "../../../statistics/aggregate/Aggregate.js";
 import { CumulativeStatistic } from "../../../statistics/CumulativeStatistics.js";
 import { CumulativeEventsContent } from "./CumulativeEventsContent.js";
@@ -7,6 +6,7 @@ import { CumulativeStatisticsContentBuilder } from "./CumulativeStatisticsConten
 import { GitEventsStatisticsContentBuilder } from "./GitEventsStatisticsContentBuilder.js";
 import { GitEventsStatisticFlow } from "../../../statistics/GitEventsStatistics.js";
 import { StatisticsEventsContent } from "./StatisticsEventsContent.js";
+import { ContentBuilder } from "../ContentBuilder.js";
 
 type IssuesEventsContent = CumulativeEventsContent &
   StatisticsEventsContent & {
