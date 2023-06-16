@@ -20,10 +20,13 @@ type UnitRecord = Record<string, number>;
 type PeriodUnitRecord = Record<string, UnitRecord[]>;
 type PeriodRecord = Record<string, PeriodUnitRecord[]>;
 
-class MergedEventsStatisticByPeriodBuilder implements ContentBuilder<{ mergedEventsStatistics: PeriodRecord[] }> {
-  constructor(private readonly statistics: GitStatistics) {}
+class GitEventsStatisticByPeriodBuilder implements ContentBuilder<{ [k: string]: PeriodRecord[] }> {
+  constructor(
+    private readonly statistics: GitStatistics,
+    private readonly statisticsKey: string = "mergedEventsStatistics"
+  ) {}
 
-  build(): { mergedEventsStatistics: PeriodRecord[] } {
+  build(): { [k: string]: PeriodRecord[] } {
     const events = this.statistics.result<Map<Year, { [key: Unit]: GitEventsStatisticFlow[] }[]>>().results;
     const data: PeriodRecord[] = [];
     events.forEach((period, year) => {
@@ -45,7 +48,7 @@ class MergedEventsStatisticByPeriodBuilder implements ContentBuilder<{ mergedEve
       periodRecord[String(year)] = records;
       data.push(periodRecord);
     });
-    return { mergedEventsStatistics: data };
+    return { [this.statisticsKey]: data };
   }
 }
 
@@ -106,7 +109,7 @@ class CumulativeStatisticBuilder implements ContentBuilder<{ [k: string]: Cumula
 }
 
 type AnyStatisticsBuilder =
-  | { mergedEventsStatistics: PeriodRecord[] }
+  | { [k: string]: PeriodRecord[] }
   | { mergedEvents: AggregateStatistics }
   | { [k: string]: CumulativeStatisticRecord[] }
   | { issues: AggregateStatistics };
@@ -114,11 +117,12 @@ type AnyStatisticsBuilder =
 class ConsoleContentBuilder {
   private static statisticsBuilder: Map<string, (statistics: GitStatistics) => ContentBuilder<AnyStatisticsBuilder>> =
     new Map<string, (statistics: GitStatistics) => ContentBuilder<AnyStatisticsBuilder>>([
-      ["mergedEventsStatistics", (statistics) => new MergedEventsStatisticByPeriodBuilder(statistics)],
+      ["mergedEventsStatistics", (statistics) => new GitEventsStatisticByPeriodBuilder(statistics)],
       ["mergeEvents", (statistics) => new MergeEventsStatisticBuilder(statistics)],
       ["cumulativeStatistics", (statistics) => new CumulativeStatisticBuilder(statistics)],
       ["issues", (statistics) => new IssueEventsStatisticBuilder(statistics)],
       ["cumulativeIssues", (statistics) => new CumulativeStatisticBuilder(statistics, "cumulativeIssues")],
+      ["issuesStatistics", (statistics) => new GitEventsStatisticByPeriodBuilder(statistics, "issuesStatistics")],
     ]);
 
   constructor(private readonly key: string, private readonly statistics: GitStatistics) {}

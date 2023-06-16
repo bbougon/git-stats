@@ -60,6 +60,10 @@ describe("Console writer", () => {
         end: event.closedAt,
         start: event.start,
       })),
+      issuesStatistics: new GitEventsStatistics(issueEvents, period, (event) => ({
+        end: event.closedAt,
+        start: event.start,
+      })),
     });
 
     expect(console.message).toEqual([
@@ -159,6 +163,31 @@ describe("Console writer", () => {
                   opened: 2,
                   trend: 2,
                 },
+              },
+            ],
+          },
+        ],
+      },
+      {
+        issuesStatistics: [
+          {
+            "2022": [
+              {
+                Month: [
+                  {
+                    "1": 1,
+                  },
+                ],
+              },
+              {
+                Week: [
+                  {
+                    "7": 0,
+                  },
+                  {
+                    "8": 1,
+                  },
+                ],
               },
             ],
           },
