@@ -5,6 +5,7 @@ import { GitEventsStatisticFlow } from "../../statistics/GitEventsStatistics.js"
 import { CumulativeStatistic } from "../../statistics/CumulativeStatistics.js";
 import { MergeEventsStatisticsResult } from "../../statistics/merge-events/MergeEventsStatistics.js";
 import { ContentBuilder } from "./ContentBuilder.js";
+import { GitEventStatisticsResult } from "../../statistics/aggregate/Aggregate.js";
 
 export interface GitFlowsConsole {
   log(message?: any, ...optionalParams: any[]): void;
@@ -72,6 +73,15 @@ class MergeEventsStatisticBuilder implements ContentBuilder<{ mergedEvents: Aggr
     return { mergedEvents: result };
   }
 }
+class IssueEventsStatisticBuilder implements ContentBuilder<{ issues: AggregateStatistics }> {
+  constructor(private readonly statistics: GitStatistics) {}
+
+  build(): { issues: AggregateStatistics } {
+    const result: AggregateStatistics = this.statistics.result<GitEventStatisticsResult>()
+      .results as AggregateStatistics;
+    return { issues: result };
+  }
+}
 
 type CumulativeRecord = Record<string, { opened: number; closed: number; trend: number }>;
 type CumulativeStatisticRecord = Record<string, CumulativeRecord[]>;
@@ -95,7 +105,8 @@ class CumulativeStatisticBuilder implements ContentBuilder<{ cumulativeStatistic
 type AnyStatisticsBuilder =
   | { mergedEventsStatistics: PeriodRecord[] }
   | { mergedEvents: AggregateStatistics }
-  | { cumulativeStatistics: CumulativeStatisticRecord[] };
+  | { cumulativeStatistics: CumulativeStatisticRecord[] }
+  | { issues: AggregateStatistics };
 
 class ConsoleContentBuilder {
   private static statisticsBuilder: Map<string, (statistics: GitStatistics) => ContentBuilder<AnyStatisticsBuilder>> =
@@ -103,6 +114,7 @@ class ConsoleContentBuilder {
       ["mergedEventsStatistics", (statistics) => new MergedEventsStatisticByPeriodBuilder(statistics)],
       ["mergeEvents", (statistics) => new MergeEventsStatisticBuilder(statistics)],
       ["cumulativeStatistics", (statistics) => new CumulativeStatisticBuilder(statistics)],
+      ["issues", (statistics) => new IssueEventsStatisticBuilder(statistics)],
     ]);
 
   constructor(private readonly key: string, private readonly statistics: GitStatistics) {}

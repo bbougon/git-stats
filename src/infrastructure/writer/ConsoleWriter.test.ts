@@ -1,10 +1,11 @@
 import { ConsoleWriter, GitFlowsConsole } from "./ConsoleWriter";
 import { MergeEvent } from "../../statistics/merge-events/MergeEvent";
-import { MergeEventBuilderForMR } from "../../__tests__/builder";
+import { IssueEventBuilder, MergeEventBuilderForMR } from "../../__tests__/builder";
 import { parseISO } from "date-fns";
 import { GitEventsStatistics } from "../../statistics/GitEventsStatistics";
 import { CumulativeStatistics } from "../../statistics/CumulativeStatistics";
 import { MergeEventStatistics } from "../../statistics/merge-events/MergeEventsStatistics";
+import { IssueEventStatistics } from "../../statistics/issues/Issues";
 
 class TestConsole implements GitFlowsConsole {
   message = {};
@@ -29,6 +30,12 @@ describe("Console writer", () => {
       .mergedAt(parseISO("2022-02-16T16:44:22"))
       .build();
     const mergeEvents = [firstMergeRequest, secondMergeRequest, thirdMergeRequest];
+    const firstIssueEvent = new IssueEventBuilder(1).createdAt(parseISO("2022-02-11T12:37:22")).build();
+    const secondIssueEvent = new IssueEventBuilder(1)
+      .createdAt(parseISO("2022-02-11T12:37:22"))
+      .closedAt(parseISO("2022-02-14T11:53:17"))
+      .build();
+    const issueEvents = [firstIssueEvent, secondIssueEvent];
     const fromDate = parseISO("2022-02-11T00:00:00");
     const toDate = parseISO("2022-02-17T00:00:00");
     const console = new TestConsole();
@@ -48,6 +55,7 @@ describe("Console writer", () => {
         end: mr.mergedAt || mr.closedAt,
         start: mr.start,
       })),
+      issues: new IssueEventStatistics(issueEvents, period),
     });
 
     expect(console.message).toEqual([
@@ -102,6 +110,22 @@ describe("Console writer", () => {
             Month: [{ "1": { opened: 3, closed: 2, trend: 3 } }],
           },
         ],
+      },
+      {
+        issues: {
+          average: {
+            days: 2,
+            hours: 23,
+            minutes: 15,
+            months: 0,
+            seconds: 55,
+          },
+          total: {
+            all: 2,
+            closed: 1,
+            opened: 1,
+          },
+        },
       },
     ]);
   });
