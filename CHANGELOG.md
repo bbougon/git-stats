@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.7](https://github.com/bbougon/git-stats/compare/v0.2.6...v0.2.7) (2023-06-16)
+
+
+### Bug Fixes
+
+* Add missing cumulative issues statistics that made the display in console failing ([f7c50e6](https://github.com/bbougon/git-stats/commit/f7c50e6ebb172e58255d23bcac4666e1ee90eb57))
+* Add missing issues statistics that made the display in console failing ([a800708](https://github.com/bbougon/git-stats/commit/a800708e9252d5b490b1cf1a62b803505ac635b5))
+* Add missing period issues statistics that made the display in console failing ([cb4e319](https://github.com/bbougon/git-stats/commit/cb4e3194b2a380383e61f934a62e844f64d4a027))
+* display progress bar for github when no pagination available ([406f6e5](https://github.com/bbougon/git-stats/commit/406f6e5710cd1d06be91ac3d2ab7dcdf17cd6bfe))
+
 ## [0.2.6](https://github.com/bbougon/git-stats/compare/v0.2.5...v0.2.6) (2023-05-18)
 
 
