@@ -56,6 +56,10 @@ describe("Console writer", () => {
         start: mr.start,
       })),
       issues: new IssueEventStatistics(issueEvents, period),
+      cumulativeIssues: new CumulativeStatistics(issueEvents, period, (event) => ({
+        end: event.closedAt,
+        start: event.start,
+      })),
     });
 
     expect(console.message).toEqual([
@@ -126,6 +130,39 @@ describe("Console writer", () => {
             opened: 1,
           },
         },
+      },
+      {
+        cumulativeIssues: [
+          {
+            Week: [
+              {
+                "7": {
+                  closed: 0,
+                  opened: 2,
+                  trend: 2,
+                },
+              },
+              {
+                "8": {
+                  closed: 1,
+                  opened: 2,
+                  trend: 2,
+                },
+              },
+            ],
+          },
+          {
+            Month: [
+              {
+                "1": {
+                  closed: 1,
+                  opened: 2,
+                  trend: 2,
+                },
+              },
+            ],
+          },
+        ],
       },
     ]);
   });

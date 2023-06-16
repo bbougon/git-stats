@@ -86,10 +86,13 @@ class IssueEventsStatisticBuilder implements ContentBuilder<{ issues: AggregateS
 type CumulativeRecord = Record<string, { opened: number; closed: number; trend: number }>;
 type CumulativeStatisticRecord = Record<string, CumulativeRecord[]>;
 
-class CumulativeStatisticBuilder implements ContentBuilder<{ cumulativeStatistics: CumulativeStatisticRecord[] }> {
-  constructor(private readonly statistics: GitStatistics) {}
+class CumulativeStatisticBuilder implements ContentBuilder<{ [k: string]: CumulativeStatisticRecord[] }> {
+  constructor(
+    private readonly statistics: GitStatistics,
+    private readonly cumulativeKey: string = "cumulativeStatistics"
+  ) {}
 
-  build(): { cumulativeStatistics: CumulativeStatisticRecord[] } {
+  build(): { [k: string]: CumulativeStatisticRecord[] } {
     const result: CumulativeStatisticRecord[] = [];
     this.statistics.result<Map<Unit, CumulativeStatistic[]>>().results.forEach((value, key) => {
       result.push({
@@ -98,14 +101,14 @@ class CumulativeStatisticBuilder implements ContentBuilder<{ cumulativeStatistic
         })),
       });
     });
-    return { cumulativeStatistics: result };
+    return { [this.cumulativeKey]: result };
   }
 }
 
 type AnyStatisticsBuilder =
   | { mergedEventsStatistics: PeriodRecord[] }
   | { mergedEvents: AggregateStatistics }
-  | { cumulativeStatistics: CumulativeStatisticRecord[] }
+  | { [k: string]: CumulativeStatisticRecord[] }
   | { issues: AggregateStatistics };
 
 class ConsoleContentBuilder {
@@ -115,6 +118,7 @@ class ConsoleContentBuilder {
       ["mergeEvents", (statistics) => new MergeEventsStatisticBuilder(statistics)],
       ["cumulativeStatistics", (statistics) => new CumulativeStatisticBuilder(statistics)],
       ["issues", (statistics) => new IssueEventsStatisticBuilder(statistics)],
+      ["cumulativeIssues", (statistics) => new CumulativeStatisticBuilder(statistics, "cumulativeIssues")],
     ]);
 
   constructor(private readonly key: string, private readonly statistics: GitStatistics) {}
