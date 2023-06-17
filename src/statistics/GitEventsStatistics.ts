@@ -56,9 +56,9 @@ export class GitEventsStatisticFlow implements StatisticFlow {
     if (hoursSeries.length > 0) {
       hoursSeries.sort((current, next) => (current.hours > next.hours ? 1 : -1));
       const seriesIndex = (hoursSeries.length + 1) / 2 - 1;
-      const isHourSeriesEvent = (hoursSeries.length + 1) % 2 === 0;
+      const isHourSeriesEven = (hoursSeries.length + 1) % 2 === 0;
       let duration = {} as moment.Duration;
-      if (isHourSeriesEvent) {
+      if (isHourSeriesEven) {
         duration = moment.duration(hoursSeries[seriesIndex].hours, "hours");
       } else {
         const hours = (hoursSeries[Math.floor(seriesIndex)].hours + hoursSeries[Math.ceil(seriesIndex)].hours) / 2;

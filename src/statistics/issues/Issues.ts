@@ -1,5 +1,6 @@
 import { GitEvent, Period } from "../Statistics.js";
 import { AbstractGitEventStatistics } from "../aggregate/Aggregate.js";
+import { isBefore } from "date-fns";
 
 type State = string | "opened" | "closed";
 
@@ -15,11 +16,13 @@ class IssueEventStatistics extends AbstractGitEventStatistics {
   }
 
   protected get closedEvents(): GitEvent[] {
-    return this.events.filter((issue) => issue.closedAt !== null);
+    return this.events.filter((issue) => issue.closedAt !== null && isBefore(issue.closedAt, this.period.end));
   }
 
   protected get openedEvents(): GitEvent[] {
-    return this.events.filter((issue) => issue.start !== null && issue.closedAt === null);
+    return this.events.filter(
+      (issue) => issue.start !== null && (issue.closedAt === null || isBefore(this.period.end, issue.closedAt))
+    );
   }
 
   protected timeSpent(difference: (dateLeft: Date, dateRight: Date) => number): { duration: number; length: number } {
