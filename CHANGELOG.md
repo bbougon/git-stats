@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.8](https://github.com/bbougon/git-stats/compare/v0.2.7...v0.2.8) (2023-06-18)
+
+
+### Bug Fixes
+
+* when a period end is given, the end date is set at the end of the day at 23:59:59 ([3f66b64](https://github.com/bbougon/git-stats/commit/3f66b64b1f63998fca41c6902d3fe07684d7d250))
+* when statistics are generated for a given period (i.e with a given end date), issues that are closed after the end date are accounted as opened during this period ([521e5ad](https://github.com/bbougon/git-stats/commit/521e5ad3d93b5091e221c5a93082fc583319880e))
+* when statistics are generated for a given period (i.e with a given end date), merge events that are closed after the end date are accounted as opened during this period ([f3e8430](https://github.com/bbougon/git-stats/commit/f3e84303b1cebe7bfaf569b6ef968b33aab68d49))
+* when statistics are generated for a given period (i.e with a given end date), merged events that are merged after the end date are accounted as opened during this period ([2babb62](https://github.com/bbougon/git-stats/commit/2babb62cf1abb52272e4eb711e0384849dea00c5))
+
 ## [0.2.7](https://github.com/bbougon/git-stats/compare/v0.2.6...v0.2.7) (2023-06-16)
 
 
