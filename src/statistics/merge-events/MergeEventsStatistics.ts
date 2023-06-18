@@ -1,6 +1,7 @@
 import { AbstractGitEventStatistics, GitEventStatisticsResult } from "../aggregate/Aggregate.js";
 import { MergeEvent } from "./MergeEvent.js";
 import { GitEvent, GitEventsStatisticsResult, Period } from "../Statistics.js";
+import { isAfter, isBefore } from "date-fns";
 
 type MergeEventsStatisticsResult = {
   average: Duration;
@@ -28,15 +29,19 @@ class MergeEventStatistics extends AbstractGitEventStatistics {
   }
 
   private get mergedMergeRequests() {
-    return this.events.filter((mr) => mr.mergedAt !== null);
+    return this.events.filter((mr) => mr.mergedAt !== null && isBefore(mr.mergedAt, this.period.end));
   }
 
   protected get closedEvents(): GitEvent[] {
-    return this.events.filter((mr) => mr.closedAt !== null);
+    return this.events.filter((mr) => mr.closedAt !== null && isBefore(mr.closedAt, this.period.end));
   }
 
   protected get openedEvents(): GitEvent[] {
-    return this.events.filter((mr) => mr.mergedAt === null && mr.closedAt == null);
+    return this.events.filter((mr) => {
+      const isMergeOrCloseDateAfterPeriodEnds =
+        isAfter(mr.mergedAt, this.period.end) || isAfter(mr.closedAt, this.period.end);
+      return (mr.mergedAt === null && mr.closedAt === null) || isMergeOrCloseDateAfterPeriodEnds;
+    });
   }
 
   protected timeSpent(difference: (dateLeft: Date, dateRight: Date) => number): { duration: number; length: number } {

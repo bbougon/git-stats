@@ -20,7 +20,7 @@ export class MergeEventBuilderForMR {
   private _mergedAt: Date | null = null;
   private _closedAt: Date | null = null;
 
-  constructor(projectId: number) {
+  constructor(projectId: number | undefined = undefined) {
     this.projectId = projectId;
     this._id = crypto.randomInt(2 ^ 16);
   }
@@ -319,10 +319,10 @@ export class MergeEventBuilderForPR {
   private project: string | undefined;
   private id: number;
   private _createdAt: Date;
-  private _mergedAt: Date;
+  private _mergedAt: Date | null = null;
   private closedAt: Date | null = null;
 
-  constructor(project: string, id: number = crypto.randomInt(2 ^ 16)) {
+  constructor(project: string | undefined = undefined, id: number = crypto.randomInt(2 ^ 16)) {
     this.project = project;
     this.id = id;
   }
@@ -334,6 +334,7 @@ export class MergeEventBuilderForPR {
 
   mergedAt = (mergedAt: Date): MergeEventBuilderForPR => {
     this._mergedAt = mergedAt;
+    this.closedAt = mergedAt;
     return this;
   };
 
