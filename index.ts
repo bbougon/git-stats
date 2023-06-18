@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Command, program } from "commander";
-import { parseISO } from "date-fns";
+import { add, parseISO } from "date-fns";
 import { ConsoleWriter } from "./src/infrastructure/writer/ConsoleWriter.js";
 import { CSVWriter } from "./src/infrastructure/writer/CSVWriter.js";
 import { gitStatistics, StatisticsAggregate } from "./src/statistics/GitStatistics.js";
@@ -32,7 +32,7 @@ const commaSeparatedList = (list: string): Period => {
       start: parseISO(period[0]),
     };
   }
-  return { end: parseISO(period[1]), start: parseISO(period[0]) };
+  return { end: add(parseISO(period[1]), { hours: 23, minutes: 59, seconds: 59 }), start: parseISO(period[0]) };
 };
 
 const writer = (format: string): Writer => {
