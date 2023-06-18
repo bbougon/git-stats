@@ -1,6 +1,6 @@
 import { GitEvent, GitEventsStatisticsResult, GitStatistics, Period, StatisticFlow } from "./Statistics.js";
 import { Unit, Year } from "./GitStatistics.js";
-import { differenceInHours, getMonth, getWeek } from "date-fns";
+import { differenceInHours, getMonth, getWeek, isBefore } from "date-fns";
 import Duration from "./Duration.js";
 import moment from "moment/moment.js";
 
@@ -88,7 +88,10 @@ class GitEventsStatistics implements GitStatistics {
       { [key: Unit]: GitEventsStatisticFlow[] }[]
     >();
     this.events
-      .filter((event) => this.eventDate(event).end !== null)
+      .filter((event) => {
+        const eventEndDate = this.eventDate(event).end;
+        return eventEndDate !== null && isBefore(eventEndDate, this.period.end);
+      })
       .forEach((event) => {
         const period = this.eventDate(event);
         const year = period.end.getFullYear();

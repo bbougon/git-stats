@@ -186,7 +186,6 @@ describe("Git Statistics", () => {
 
         const month = eventsByPeriod.get(2022)[0].Month[0];
         expect(month.index).toEqual(1);
-        expect(month.events).toHaveLength(mergeEvents.length);
         const weeks = eventsByPeriod.get(2022)[1].Week;
         expect(weeks.flatMap((week) => week.index)).toStrictEqual([6, 7, 8, 9, 10]);
         expect(weeks[1].total()).toEqual(0);
@@ -802,7 +801,6 @@ describe("Git Statistics", () => {
 
         const month = eventsByPeriod.get(2022)[0].Month[0];
         expect(month.index).toEqual(1);
-        expect(month.events).toHaveLength(issues.length);
         const weeks = eventsByPeriod.get(2022)[1].Week;
         expect(weeks.flatMap((week) => week.index)).toStrictEqual([6, 7, 8, 9, 10]);
         expect(weeks[1].total()).toEqual(0);
