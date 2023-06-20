@@ -1,12 +1,12 @@
 import { ProgressBar } from "../infrastructure/progress-bar/ProgressBar.js";
 import { CustomGenericBar, CustomMultiBar } from "../infrastructure/progress-bar/CustomMultiBar.js";
-import { Title } from "../infrastructure/progress-bar/Title.js";
+import { Type } from "../infrastructure/progress-bar/Type";
 
 export class CustomMultiBarForTests implements CustomMultiBar {
   create(
     total: number,
     startValue: number,
-    payload: { title: string | Title; value: number; total: number | string }
+    payload: { title: string | Type; value: number; total: number | string }
   ): CustomGenericBar {
     const bar = new (class implements CustomGenericBar {
       public stopCalled = false;
@@ -25,7 +25,7 @@ export class CustomMultiBarForTests implements CustomMultiBar {
         this.stopCalled = true;
       }
 
-      update(value: number, payload?: { total: number; title: string | Title; value: number }): void {
+      update(value: number, payload?: { total: number; title: string | Type; value: number }): void {
         this.progress = value / this.total;
       }
     })();

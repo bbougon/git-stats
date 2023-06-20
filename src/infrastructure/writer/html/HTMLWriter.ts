@@ -6,7 +6,7 @@ import * as path from "path";
 import { StatisticsAggregate } from "../../../statistics/GitStatistics.js";
 import { Writer } from "../../../../index.js";
 import { progressBar } from "../../progress-bar/ProgressBar.js";
-import { Title } from "../../progress-bar/Title.js";
+import { Type } from "../../progress-bar/Type.js";
 import { openBrowser } from "../OpenBrowser.js";
 import { MergeEventsContentBuilder } from "./MergeEventsContentBuilder.js";
 import { IssuesEventsContentBuilder } from "./IssuesEventsContentBuilder.js";
@@ -55,7 +55,7 @@ export class HTMLWriter implements Writer {
     this._filePath = filePath;
   }
 
-  @progressBar(Title.Generate_HTML)
+  @progressBar(Type.Generate_HTML)
   write(stats: StatisticsAggregate): void {
     try {
       const reportFilePath = `${this._filePath}/report`;

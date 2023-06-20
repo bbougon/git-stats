@@ -1,7 +1,7 @@
 import { progressBar } from "./ProgressBar.js";
 import { CustomProgressBar } from "../../__tests__/CustomProgressBar.js";
 import parseLinkHeader from "parse-link-header";
-import { Title } from "./Title.js";
+import { Type } from "./Type";
 import { CustomGenericBar } from "./CustomMultiBar.js";
 
 describe("Progress Bar decorator", () => {
@@ -15,11 +15,11 @@ describe("Progress Bar decorator", () => {
     title: string,
     customProgressBar: CustomProgressBar,
     propertyDescriptor: PropertyDescriptor,
-    args: any = "any arg"
+    args: any[] = ["any arg"]
   ) => {
     const aProgressBar = progressBar(title, customProgressBar);
     aProgressBar({}, "key", propertyDescriptor);
-    propertyDescriptor.value(args);
+    propertyDescriptor.value(...args);
   };
 
   it("should register a progress bar", async () => {
@@ -58,18 +58,18 @@ describe("Progress Bar decorator", () => {
       const firstPagination = parseLinkHeader(
         '<http://gitlab/merge_requests?order_by=created_at&page=2>; rel="next", <http://gitlab/merge_requests?order_by=created_at&page=1>; rel="first", <http://gitlab/merge_requests?order_by=created_at&page=5>; rel="last"'
       );
-      callProgressBarAndExecuteDescriptor(Title.Paginate, customProgressBar, descriptor(), firstPagination);
+      callProgressBarAndExecuteDescriptor(Type.Paginate, customProgressBar, descriptor(), [firstPagination]);
       await new Promise((f) => setTimeout(f, 1));
       const secondPagination = parseLinkHeader(
         '<http://gitlab/merge_requests?order_by=created_at&page=3>; rel="next", <http://gitlab/merge_requests?order_by=created_at&page=1>; rel="first", <http://gitlab/merge_requests?order_by=created_at&page=5>; rel="last"'
       );
-      callProgressBarAndExecuteDescriptor(Title.Paginate, customProgressBar, descriptor(), secondPagination);
+      callProgressBarAndExecuteDescriptor(Type.Paginate, customProgressBar, descriptor(), [secondPagination]);
       await new Promise((f) => setTimeout(f, 1));
       const thirdPagination = parseLinkHeader(
         '<http://gitlab/merge_requests?order_by=created_at&page=4>; rel="next", <http://gitlab/merge_requests?order_by=created_at&page=1>; rel="first", <http://gitlab/merge_requests?order_by=created_at&page=5>; rel="last"'
       );
 
-      callProgressBarAndExecuteDescriptor(Title.Paginate, customProgressBar, descriptor(), thirdPagination);
+      callProgressBarAndExecuteDescriptor(Type.Paginate, customProgressBar, descriptor(), [thirdPagination]);
       await new Promise((f) => setTimeout(f, 1));
 
       expect(customProgressBar.bars.size).toEqual(1);
@@ -83,13 +83,13 @@ describe("Progress Bar decorator", () => {
       const firstPagination = parseLinkHeader(
         '<http://gitlab/merge_requests?order_by=created_at&page=2>; rel="next", <http://gitlab/merge_requests?order_by=created_at&page=1>; rel="first", <http://gitlab/merge_requests?order_by=created_at&page=3>; rel="last"'
       );
-      callProgressBarAndExecuteDescriptor(Title.Paginate, customProgressBar, descriptor(), firstPagination);
+      callProgressBarAndExecuteDescriptor(Type.Paginate, customProgressBar, descriptor(), [firstPagination]);
       await new Promise((f) => setTimeout(f, 1));
       const secondPagination = parseLinkHeader(
         '<http://gitlab/merge_requests?order_by=created_at&page=3>; rel="next", <http://gitlab/merge_requests?order_by=created_at&page=1>; rel="first", <http://gitlab/merge_requests?order_by=created_at&page=3>; rel="last"'
       );
 
-      callProgressBarAndExecuteDescriptor(Title.Paginate, customProgressBar, descriptor(), secondPagination);
+      callProgressBarAndExecuteDescriptor(Type.Paginate, customProgressBar, descriptor(), [secondPagination]);
       await new Promise((f) => setTimeout(f, 1));
 
       expect(customProgressBar.bars.size).toEqual(1);
@@ -105,7 +105,7 @@ describe("Progress Bar decorator", () => {
         '<http://gitlab/merge_requests?order_by=created_at&page=1>; rel="first", <http://gitlab/merge_requests?order_by=created_at&page=3>; rel="last"'
       );
 
-      callProgressBarAndExecuteDescriptor(Title.Paginate, customProgressBar, descriptor(), firstPagination);
+      callProgressBarAndExecuteDescriptor(Type.Paginate, customProgressBar, descriptor(), [firstPagination]);
       await new Promise((f) => setTimeout(f, 1));
 
       expect(customProgressBar.bars.size).toEqual(0);
@@ -114,10 +114,36 @@ describe("Progress Bar decorator", () => {
     it("should not display progress if no links in pagination", async () => {
       const customProgressBar = new CustomProgressBar();
 
-      callProgressBarAndExecuteDescriptor(Title.Paginate, customProgressBar, descriptor(), null);
+      callProgressBarAndExecuteDescriptor(Type.Paginate, customProgressBar, descriptor(), [null]);
       await new Promise((f) => setTimeout(f, 1));
 
       expect(customProgressBar.bars.size).toEqual(1);
+    });
+
+    it("should forge progress bar name if origin is given", async () => {
+      const firstProgressBar = new CustomProgressBar();
+
+      callProgressBarAndExecuteDescriptor(Type.Paginate, firstProgressBar, descriptor(), [
+        null,
+        "",
+        "",
+        "",
+        { eventType: "first" },
+      ]);
+      callProgressBarAndExecuteDescriptor(Type.Paginate, firstProgressBar, descriptor(), [
+        null,
+        "",
+        "",
+        "",
+        { eventType: "second" },
+      ]);
+      await new Promise((f) => setTimeout(f, 1));
+
+      expect(firstProgressBar.bars.size).toBe(2);
+      expect(Array.from(firstProgressBar.bars.values()).map((key) => key.title)).toStrictEqual([
+        "Paginate - first",
+        "Paginate - second",
+      ]);
     });
   });
 });

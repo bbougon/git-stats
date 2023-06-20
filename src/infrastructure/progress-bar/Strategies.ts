@@ -1,6 +1,6 @@
 import { Links } from "parse-link-header";
-import { ProgressBar } from "./ProgressBar.js";
-import { Title } from "./Title.js";
+import { getBarNameFrom, ProgressBar } from "./ProgressBar.js";
+import { Type } from "./Type.js";
 import { CustomGenericBar } from "./CustomMultiBar.js";
 
 type PageNumber = number;
@@ -19,11 +19,11 @@ const getLinkHeaderPageValue = (links: Links, rel: string): PageNumber => {
 };
 
 interface ProgressBarUpdateStrategy {
-  apply(bar: CustomGenericBar, parameters?: { title: string | Title; args: any[] }): void;
+  apply(bar: CustomGenericBar, parameters?: { title: string | Type; args: any[] }): void;
 }
 
 class PaginationProgressBarUpdateStrategy implements ProgressBarUpdateStrategy {
-  apply(bar: CustomGenericBar, parameters: { title: string | Title; args: any[] }): void {
+  apply(bar: CustomGenericBar, parameters: { title: string | Type; args: any[] }): void {
     const links: Links = parameters.args[0];
     let currentPageNumber = 1;
     let totalPages = 1;
@@ -32,7 +32,7 @@ class PaginationProgressBarUpdateStrategy implements ProgressBarUpdateStrategy {
       totalPages = getLinkHeaderPageValue(links, "last");
     }
     bar.update(currentPageNumber, {
-      title: parameters.title,
+      title: getBarNameFrom(parameters.args, parameters.title),
       value: currentPageNumber,
       total: totalPages,
     });
@@ -49,30 +49,31 @@ class DefaultProgressBarUpdateStrategy implements ProgressBarUpdateStrategy {
 }
 
 interface ProgressBarCreateStrategy {
-  apply(progressBar: ProgressBar, param: { args?: any[]; title: string | Title }): void;
+  apply(progressBar: ProgressBar, param: { args?: any[]; title: string | Type }): void;
 }
 
 class PaginationProgressBarCreateStrategy implements ProgressBarCreateStrategy {
-  apply(progressBar: ProgressBar, param: { args?: any[]; title: string | Title }): void {
+  apply(progressBar: ProgressBar, param: { args?: any[]; title: string | Type }): void {
     const links: Links = param.args[0];
+    const title = getBarNameFrom(param.args, param.title);
     if (links !== null && links["next"] !== undefined) {
       getLinkHeaderPageValue(links, "next");
       const totalPages = getLinkHeaderPageValue(links, "last");
       progressBar.add(
-        param.title,
+        title,
         { total: totalPages, startValue: 0 },
         {
-          title: param.title,
+          title,
           value: 0,
           total: totalPages,
         }
       );
     } else if (links === null) {
       progressBar.add(
-        param.title,
+        title,
         { total: 1, startValue: 0 },
         {
-          title: param.title,
+          title,
           value: 1,
           total: 1,
         }
@@ -82,27 +83,27 @@ class PaginationProgressBarCreateStrategy implements ProgressBarCreateStrategy {
 }
 
 class DefaultProgressBarCreateStrategy implements ProgressBarCreateStrategy {
-  apply(progressBar: ProgressBar, param: { args?: any[]; title: string | Title }): void {
+  apply(progressBar: ProgressBar, param: { args?: any[]; title: string | Type }): void {
     progressBar.add(param.title);
   }
 }
 
 class GenerateReportProgressBarCreateStrategy implements ProgressBarCreateStrategy {
-  constructor(private readonly title: Title) {}
+  constructor(private readonly title: Type) {}
 
-  apply(progressBar: ProgressBar, param: { args?: any[]; title: string | Title }): void {
+  apply(progressBar: ProgressBar, param: { args?: any[]; title: string | Type }): void {
     progressBar.add(this.title, { total: 1, startValue: 0 }, { title: this.title, total: 1, value: 0 });
   }
 }
 
 class ProgressBarCreateStrategies {
   protected static strategies: Map<string, ProgressBarCreateStrategy> = new Map([
-    [Title.Paginate, new PaginationProgressBarCreateStrategy()],
-    [Title.Generate_CSV, new GenerateReportProgressBarCreateStrategy(Title.Generate_CSV)],
-    [Title.Generate_HTML, new GenerateReportProgressBarCreateStrategy(Title.Generate_HTML)],
+    [Type.Paginate, new PaginationProgressBarCreateStrategy()],
+    [Type.Generate_CSV, new GenerateReportProgressBarCreateStrategy(Type.Generate_CSV)],
+    [Type.Generate_HTML, new GenerateReportProgressBarCreateStrategy(Type.Generate_HTML)],
   ]);
 
-  static for(title: string | Title): ProgressBarCreateStrategy {
+  static for(title: string | Type): ProgressBarCreateStrategy {
     const progressBarStrategy = this.strategies.get(title);
     if (progressBarStrategy) {
       return progressBarStrategy;
@@ -112,19 +113,19 @@ class ProgressBarCreateStrategies {
 }
 
 class GenerateReportProgressBarUpdateStrategy implements ProgressBarUpdateStrategy {
-  apply(bar: CustomGenericBar, parameters?: { title: string | Title; args: any[] }): void {
+  apply(bar: CustomGenericBar, parameters?: { title: string | Type; args: any[] }): void {
     bar.update(1);
   }
 }
 
 class ProgressBarUpdateStrategies {
   protected static strategies: Map<string, ProgressBarUpdateStrategy> = new Map([
-    [Title.Paginate, new PaginationProgressBarUpdateStrategy()],
-    [Title.Generate_CSV, new GenerateReportProgressBarUpdateStrategy()],
-    [Title.Generate_HTML, new GenerateReportProgressBarUpdateStrategy()],
+    [Type.Paginate, new PaginationProgressBarUpdateStrategy()],
+    [Type.Generate_CSV, new GenerateReportProgressBarUpdateStrategy()],
+    [Type.Generate_HTML, new GenerateReportProgressBarUpdateStrategy()],
   ]);
 
-  static for(title: string | Title): ProgressBarUpdateStrategy {
+  static for(title: string | Type): ProgressBarUpdateStrategy {
     const progressBarStrategy = this.strategies.get(title);
     if (progressBarStrategy) {
       return progressBarStrategy;

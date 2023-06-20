@@ -50,7 +50,7 @@ export abstract class EventHTTPRepository<T, U extends GitEvent>
     return axiosInstance.get(init.url, init.config).then((response: AxiosResponse<T[]>) => {
       const links = parseLinkHeader(response.headers["link"]);
       const requests = events(response.data);
-      return this.paginate(links, requests, init.config, events).then((evts) =>
+      return this.paginate(links, requests, init.config, events, { eventType: this.eventType() }).then((evts) =>
         evts.filter((event) => this.isEventInExpectedPeriod(event, fromDate, toDate))
       );
     });
@@ -65,6 +65,9 @@ export abstract class EventHTTPRepository<T, U extends GitEvent>
   protected abstract fromDTO(dto: T): U;
 
   protected abstract projectInfos(requestParameters: RequestParameters): string;
+
+  protected abstract eventType(): EventType;
 }
 
+export type EventType = "issues" | "events";
 export type MergeEventDTO = object;

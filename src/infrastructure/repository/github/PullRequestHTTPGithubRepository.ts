@@ -1,5 +1,5 @@
 import { parseISO } from "date-fns";
-import { MergeEventDTO } from "../EventHTTPRepository.js";
+import { EventType, MergeEventDTO } from "../EventHTTPRepository.js";
 import { MergeEvent } from "../../../statistics/merge-events/MergeEvent.js";
 import { PullRequestsStatsParameter } from "../../../statistics/Github.js";
 import { GithubRepository } from "./GithubRepository.js";
@@ -39,5 +39,9 @@ export class PullRequestHTTPGithubRepository extends GithubRepository<PullReques
 
   protected get path(): string {
     return "pulls";
+  }
+
+  protected eventType(): EventType {
+    return "events";
   }
 }

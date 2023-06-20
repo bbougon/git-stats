@@ -1,5 +1,5 @@
 import { parseISO } from "date-fns";
-import { MergeEventDTO } from "../EventHTTPRepository.js";
+import { EventType, MergeEventDTO } from "../EventHTTPRepository.js";
 import { MergeEvent } from "../../../statistics/merge-events/MergeEvent.js";
 import { GitlabEventParameters } from "../../../statistics/Gitlab.js";
 import { GitlabRepository } from "./GitlabRepository.js";
@@ -40,5 +40,9 @@ export class MergedRequestHTTPGitlabRepository extends GitlabRepository<GitlabMe
 
   protected get path(): string {
     return "merge_requests";
+  }
+
+  protected eventType(): EventType {
+    return "events";
   }
 }

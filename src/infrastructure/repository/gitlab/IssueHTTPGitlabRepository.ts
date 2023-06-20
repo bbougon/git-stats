@@ -2,6 +2,7 @@ import { IssueEvent } from "../../../statistics/issues/Issues.js";
 import { parseISO } from "date-fns";
 import { GitlabEventParameters } from "../../../statistics/Gitlab.js";
 import { GitlabRepository } from "./GitlabRepository.js";
+import { EventType } from "../EventHTTPRepository.js";
 
 export type IssueEventDTO = {
   id: number;
@@ -35,6 +36,10 @@ export class IssueHTTPGitlabRepository extends GitlabRepository<IssueEventDTO, I
   }
 
   protected get path(): string {
+    return "issues";
+  }
+
+  protected eventType(): EventType {
     return "issues";
   }
 }

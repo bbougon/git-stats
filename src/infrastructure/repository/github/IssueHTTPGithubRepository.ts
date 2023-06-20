@@ -2,6 +2,7 @@ import { IssueEvent, State } from "../../../statistics/issues/Issues.js";
 import { PullRequestsStatsParameter } from "../../../statistics/Github.js";
 import { parseISO } from "date-fns";
 import { GithubRepository } from "./GithubRepository.js";
+import { EventType } from "../EventHTTPRepository.js";
 
 export type IssueEventGithubDTO = {
   id: number;
@@ -44,6 +45,10 @@ export class IssueHTTPGithubRepository extends GithubRepository<IssueEventGithub
   }
 
   protected get path(): string {
+    return "issues";
+  }
+
+  protected eventType(): EventType {
     return "issues";
   }
 }

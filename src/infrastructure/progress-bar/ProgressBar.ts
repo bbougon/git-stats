@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { ProgressBarCreateStrategies, ProgressBarUpdateStrategies } from "./Strategies.js";
-import { Title } from "./Title.js";
+import { Type } from "./Type.js";
 import { CliProgressMultiBar, CustomGenericBar, CustomMultiBar } from "./CustomMultiBar.js";
 
 class ProgressBar {
@@ -20,9 +20,9 @@ class ProgressBar {
   }
 
   add(
-    title: string | Title,
+    title: string | Type,
     initialParameter: { total: number; startValue: number } = { total: 100, startValue: 0 },
-    payload: { title: string | Title; value: number; total: number | string } = {
+    payload: { title: string | Type; value: number; total: number | string } = {
       title,
       value: 0,
       total: "N/A",
@@ -37,7 +37,7 @@ class ProgressBar {
     this._bars.clear();
   }
 
-  hasBar(title: string | Title): Promise<CustomGenericBar> {
+  hasBar(title: string | Type): Promise<CustomGenericBar> {
     for (const bar of this._bars) {
       if (bar.title === title) {
         return Promise.resolve(bar.bar);
@@ -49,24 +49,33 @@ class ProgressBar {
 
 export { ProgressBar };
 
-function progressBar(title: string | Title, progressBar: ProgressBar = ProgressBar.progressBar()) {
+function getBarNameFrom(args: any[], type: string | Type): string {
+  let origin = "";
+  if (args[4]) {
+    origin = " - " + args[4].eventType;
+  }
+  return type + origin;
+}
+
+function progressBar(type: string | Type, progressBar: ProgressBar = ProgressBar.progressBar()) {
   return function (target: any, propertyKey: string | symbol, descriptor?: PropertyDescriptor) {
     const original = descriptor.value;
     descriptor.value = async function (...args: any[]) {
+      const barName = getBarNameFrom(args, type);
       progressBar
-        .hasBar(title)
+        .hasBar(barName)
         .then((bar) => {
-          ProgressBarUpdateStrategies.for(title).apply(bar, { title, args });
+          ProgressBarUpdateStrategies.for(type).apply(bar, { title: type, args });
         })
         .catch(() => {
-          ProgressBarCreateStrategies.for(title).apply(progressBar, { title, args });
+          ProgressBarCreateStrategies.for(type).apply(progressBar, { title: type, args });
         });
       const call = original.call(this, ...args);
       await new Promise((f) => setTimeout(f, 1));
       progressBar
-        .hasBar(title)
+        .hasBar(barName)
         .then((bar) => {
-          ProgressBarUpdateStrategies.for(title).apply(bar, { title, args });
+          ProgressBarUpdateStrategies.for(type).apply(bar, { title: type, args });
         })
         .catch((_reason) => {
           return;
@@ -76,4 +85,4 @@ function progressBar(title: string | Title, progressBar: ProgressBar = ProgressB
   };
 }
 
-export { progressBar };
+export { progressBar, getBarNameFrom };
