@@ -27,7 +27,7 @@ export class CliProgressMultiBar implements CustomMultiBar {
   constructor() {
     const bar = new chalk.chalk.Chalk().cyan;
     this.multiBar = new MultiBar({
-      format: "{title} | " + bar("{bar}") + " | {value}/{total}",
+      format: "{title} | " + bar("{bar}") + " | estimated time: {eta}s | duration: {duration} | {value}/{total}",
       barCompleteChar: "\u2588",
       barIncompleteChar: "\u2591",
       hideCursor: true,

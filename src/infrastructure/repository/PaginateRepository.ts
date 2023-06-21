@@ -16,7 +16,7 @@ export abstract class PaginateRepository<T, U> {
       return axiosInstance.get(links["next"].url, config).then((response: AxiosResponse<T[]>) => {
         const links = parseLinkHeader(response.headers["link"]);
         result.push(...mergeRequests(response.data));
-        return this.paginate(links, result, config, mergeRequests, origin).then((mrs) => mrs);
+        return this.paginate(links, result, config, mergeRequests, origin);
       });
     }
     return Promise.resolve(result);
