@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0](https://github.com/bbougon/git-stats/compare/v0.2.8...v0.3.0) (2023-06-21)
+
+
+### Features
+
+* add estimated time and duration in front of each bar ([6f2cc34](https://github.com/bbougon/git-stats/commit/6f2cc341f51dfc135b1a19cab4954049d52e30f5))
+* display 2 different progress bars for issues and events pagination ([a547c3c](https://github.com/bbougon/git-stats/commit/a547c3cfdbd91695cdaa05367816e0b8a56cba6b))
+
 ## [0.2.8](https://github.com/bbougon/git-stats/compare/v0.2.7...v0.2.8) (2023-06-18)
 
 
