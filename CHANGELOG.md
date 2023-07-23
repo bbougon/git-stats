@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/bbougon/git-stats/compare/v0.3.0...v0.3.1) (2023-07-23)
+
+
+### Bug Fixes
+
+* Display dates instead of week numbers ([b978422](https://github.com/bbougon/git-stats/commit/b9784227c066e64840ce68f06323acd5b150458e))
+
 ## [0.3.0](https://github.com/bbougon/git-stats/compare/v0.2.8...v0.3.0) (2023-06-21)
 
 
