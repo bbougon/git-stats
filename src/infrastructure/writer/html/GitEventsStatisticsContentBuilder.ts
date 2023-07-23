@@ -2,6 +2,7 @@ import { Unit, Year } from "../../../statistics/GitStatistics.js";
 import { GitEventsStatisticFlow } from "../../../statistics/GitEventsStatistics.js";
 import moment from "moment/moment.js";
 import { HUMAN_READABLE_MONTHS } from "../HumanReadableLabels.js";
+import { format, setWeek, startOfWeek } from "date-fns";
 
 type GitEventsStatisticsContent = {
   statisticsMonthsLabels: string[];
@@ -38,7 +39,17 @@ export class GitEventsStatisticsContentBuilder {
         .asHours();
     }
 
-    statistics.forEach((stat) => {
+    function firstDayOfCurrentWeek(year: number, weekNumber: number) {
+      return startOfWeek(
+        setWeek(new Date(year, 0, 4), weekNumber, {
+          firstWeekContainsDate: 4,
+          weekStartsOn: 1,
+        }),
+        { weekStartsOn: 1 }
+      );
+    }
+
+    statistics.forEach((stat, year) => {
       stat.forEach((period) => {
         Object.entries(period).forEach(([unit, flows]) => {
           if (unit === "Month") {
@@ -51,7 +62,7 @@ export class GitEventsStatisticsContentBuilder {
           }
           if (unit === "Week") {
             flows.forEach((flow) => {
-              statisticsWeeksLabels.push(`Week ${flow.index}`);
+              statisticsWeeksLabels.push(format(firstDayOfCurrentWeek(year, flow.index), "MM-dd"));
               statisticsWeeksData.push(flow.total());
               statisticsWeeksAverageTimeData.push(durationAsHours(flow.average()));
               statisticsWeeksMedianTimeData.push(durationAsHours(flow.median()));

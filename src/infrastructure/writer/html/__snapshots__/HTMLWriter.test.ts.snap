@@ -214,7 +214,7 @@ exports[`HTML writer should generate an HTML report file for all events 1`] = `
     const weeksMergedEventsHistogramDatasets = initializeHistogramDataSet({data: [1,2], label: '# of merged events'});
     const weeksMergedEventsAvgAndMedContext = document.getElementById('merged-events-weeks-avg-med');
     const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [4,75], label: "Average time to merge"}, {data: [4,75], label: "Median time to merge"}]);
-    const weeksMergedEventsLabels = ["Week 7","Week 8"]
+    const weeksMergedEventsLabels = ["02-14","02-21"]
     
     const monthsCumulativeContext = document.getElementById('cumulative-months-stats')
     const monthsCumulativeDatasets = initializeLinearDataSet([
@@ -396,7 +396,7 @@ exports[`HTML writer should generate an HTML report file for all events 1`] = `
     const monthsIssueEventsAvgAndMedContext = document.getElementById('issue-events-months-avg-med');
     
     const weeksIssueEventsHistogramContext = document.getElementById('issue-events-weeks-histogram');
-    const weeksIssueEventsLabels = ["Week 7","Week 8"];;
+    const weeksIssueEventsLabels = ["02-14","02-21"];;
     const weeksIssueEventsHistogramDatasets = initializeHistogramDataSet({data: [0,1], label: '# of issues'});;
     const weeksIssueEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [0,71], label: "Average time to resolve issues"}, {data: [0,71], label: "Median time to resolve issues"}]);
     const weeksIssueEventsAvgAndMedContext = document.getElementById('issue-events-weeks-avg-med');
@@ -626,7 +626,7 @@ exports[`HTML writer should generate an HTML report file for merged requests whe
     const weeksMergedEventsHistogramDatasets = initializeHistogramDataSet({data: [0,2], label: '# of merged events'});
     const weeksMergedEventsAvgAndMedContext = document.getElementById('merged-events-weeks-avg-med');
     const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [0,75], label: "Average time to merge"}, {data: [0,75], label: "Median time to merge"}]);
-    const weeksMergedEventsLabels = ["Week 7","Week 8"]
+    const weeksMergedEventsLabels = ["02-14","02-21"]
     
     const monthsCumulativeContext = document.getElementById('cumulative-months-stats')
     const monthsCumulativeDatasets = initializeLinearDataSet([
@@ -1038,7 +1038,7 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
     const weeksMergedEventsHistogramDatasets = initializeHistogramDataSet({data: [0,0,0,0,1,0,0,2,0,0], label: '# of merged events'});
     const weeksMergedEventsAvgAndMedContext = document.getElementById('merged-events-weeks-avg-med');
     const weeksMergedEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [0,0,0,0,408,0,0,75,0,0], label: "Average time to merge"}, {data: [0,0,0,0,408,0,0,75,0,0], label: "Median time to merge"}]);
-    const weeksMergedEventsLabels = ["Week 1","Week 2","Week 3","Week 4","Week 5","Week 6","Week 7","Week 8","Week 9","Week 10"]
+    const weeksMergedEventsLabels = ["01-03","01-10","01-17","01-24","01-31","02-07","02-14","02-21","02-28","03-07"]
     
     const monthsCumulativeContext = document.getElementById('cumulative-months-stats')
     const monthsCumulativeDatasets = initializeLinearDataSet([
@@ -1220,7 +1220,7 @@ exports[`HTML writer should generate an HTML report file with months period 1`] 
     const monthsIssueEventsAvgAndMedContext = document.getElementById('issue-events-months-avg-med');
     
     const weeksIssueEventsHistogramContext = document.getElementById('issue-events-weeks-histogram');
-    const weeksIssueEventsLabels = ["Week 1","Week 2","Week 3","Week 4","Week 5","Week 6","Week 7","Week 8","Week 9","Week 10"];;
+    const weeksIssueEventsLabels = ["01-03","01-10","01-17","01-24","01-31","02-07","02-14","02-21","02-28","03-07"];;
     const weeksIssueEventsHistogramDatasets = initializeHistogramDataSet({data: [0,0,0,0,0,0,0,1,0,0], label: '# of issues'});;
     const weeksIssueEventsAvgAndMedDatasets = initializeLinearDataSet([{data: [0,0,0,0,0,0,0,71,0,0], label: "Average time to resolve issues"}, {data: [0,0,0,0,0,0,0,71,0,0], label: "Median time to resolve issues"}]);
     const weeksIssueEventsAvgAndMedContext = document.getElementById('issue-events-weeks-avg-med');
